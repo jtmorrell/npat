@@ -325,7 +325,7 @@ class PeakFit(object):
 			idx = float(self.cb.map_idx(g[0]))
 			sig = float(self.cb.res(idx))
 			p0 += [self.A0[n]*self.cb.eff(g[0])*g[1]/sig, idx, sig]
-			bounds[0] += [0.1*B_f*self.A0[n]*self.cb.eff(g[0])*g[1]/sig, idx-B_f*idx/sig, sig-sig/B_f]
+			bounds[0] += [0.0, idx-B_f*idx/sig, sig-sig/B_f] ### bounds[0][0] = 0.1*B_f*self.A0[n]*self.cb.eff(g[0])*g[1]/sig
 			bounds[1] += [p0[-3]+10.0*B_f*self.A0[n]*self.cb.eff(g[0])*g[1]/sig, idx+B_f*idx/sig, sig+0.5*sig*B_f]
 			if self.fit_config['skew_fit']:
 				p0 += [R, alpha]
@@ -517,15 +517,34 @@ class Spectrum(object):
 	gamma ray data from High-Purity Germanium (HPGe)
 	detectors.
 
-	Attributes:
-		fits: List of peaks (PeakFit class) found in spectrum fit.
-		meta: Metadata about spectrum. 
-		hist: 1D histogram of pulse amplitudes (energy).
+	...
 
-	Methods:
-		plot: Plots the spectrum. Various options for plotting.
-		save: Functionality depends on filetype.
-		summarize: Prints and/or saves summary of peaks/isotopes.
+	Parameters
+	----------
+	filename : str
+		Path to .Spe file.
+	db : str, optional
+		Path to sqlite database
+
+	Attributes
+	----------
+	fits : list
+		List of peaks (PeakFit class) found in spectrum fit.
+	meta : dict
+		Metadata about spectrum. 
+	hist : np.ndarray
+		1D histogram of pulse amplitudes (energy).
+
+	Methods
+	-------
+	plot(show=True, fit=True, saveas=None, zoom=None, logscale=True, 
+			grayscale=False, labels=False, square_fig=False)
+		Plots the spectrum. Various options for plotting.
+	save(*saveas)
+		Functionality depends on filetype.
+	summarize(printout=True, saveas=None)
+		Prints and/or saves summary of peaks/isotopes.
+
 	"""
 
 	def __init__(self, filename=None, db=None):

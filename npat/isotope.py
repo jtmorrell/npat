@@ -86,7 +86,7 @@ class Isotope(object):
 	def half_life(self, units='s', unc=False):
 		if self.stable:
 			return (np.inf,0.0) if unc else np.inf
-		half_conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557600.0}[units]
+		half_conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557.6E3,'ky':31557.6E6}[units]
 		if unc:
 			return self.meta['t_half']/half_conv,self.meta['unc_t_half']/half_conv
 		return self.meta['t_half']/half_conv

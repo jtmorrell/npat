@@ -4,36 +4,46 @@ import matplotlib.pyplot as plt
 
 if __name__=='__main__':
 
+	######### Spectroscopy Tests #########
+
+	# sp = Spectrum('eu_calib_7cm.Spe')
+	# sp.meta = {'istp':['152EU'], 'A0':3.7E4, 'ref_date':None}
+	# sp.fit_config = {'xrays':True, 'E_min':20.0}
+	# # cb = Calibration()
+	# # cb.calibrate([sp], auto_calibrate=True)
+	# # cb.plot()
+	# sp.auto_calibrate()
+	# sp.cb.plot()
+	# sp.summarize()
+	# sp.plot()
+
+	# 
+	# sp = Spectrum('La01.Spe')
+	# sp.meta = {'istp': ['135CE','134CE','134LA','137CE','137CEm','139CE','133BA','133BAm','132CS','135LA','22NA','24NA']}
+	sp = Spectrum('/home/jmorrell/Documents/Radium_Bernstein_Oct2018/data/count_room_data/experiment/225Ac_separated_20cm_000.Spe')
+	sp.meta = {'istp':['221FR','221RN','213BI','209TL','226RA','214PB','214BI','228AC','210TL','210BI','212PB','212BI','212PO','208TL','40K']}
+	# sp.fit_config = {'skew_fit':True}
+	# sp.auto_calibrate()
+	# sp = Spectrum('iridium_7cm.Spe')
+	# sp.meta = {'istp':['192IR','194IR','193IRm']}
+	sp.summarize()
+	sp.plot()
+
+
+
 	########## Decay Chain Tests ##########
 
-	ch = DecayChain('135CE', units='h')
-
-	# ch = DecayChain(['225RA'],units='d')
-	# t_i = np.arange(0,6,0.1)
-	# t_d = np.arange(0,50,0.1)
-	# A_r = ch.production_activity('225RA',t_i)
-	# A_a = ch.production_activity('225AC',t_i)
-	# A_r0 = A_r[-1]
-	# A_a0 = A_a[-1]
-	# A_rd = ch.decay_activity('225RA',t_d,A_r0)
-	# A_ad = ch.decay_activity('225AC',t_d,A_r0)+A_a0*np.exp(-np.log(2.0)*t_d/10.0)
-	# plt.plot((t_i-t_i[-1]).tolist()+t_d.tolist(),A_r.tolist()+A_rd.tolist(),label=r'$^{225}$Ra Activity')
-	# plt.plot((t_i-t_i[-1]).tolist()+t_d.tolist(),A_a.tolist()+A_ad.tolist(),label=r'$^{225}$Ac Activity')
-	# # Peak at 15.2 days for 5 day irradiation, 0.1003
-	# # Peak at 14.7 days for 6 day irradiation, 0.1216
-	# # Peak at 14.3 days for 7 day irradiation, 0.1413
-	# # Peak at 13.8 days for 8 day irradiation, 0.1615
-	# plt.xlabel('Time Since EOB (d)')
-	# plt.ylabel('Activity (rel.)')
-	# plt.legend(loc=0)
-	# plt.show()
-
-	# ch.plot('production_activity', logscale=False, **{'t':np.arange(0,700,0.1)})
-	# ch.plot('decay_activity',logscale=False,**{'t':np.arange(0,50,0.01)})
+	# dc = DecayChain('225RA','d',R={'225RA':9.0,'225AC':1.0},time=10.0/24.0)
+	# dc.append(DecayChain('225RA','d',R={'225RA':2.0,'225AC':1.0},time=33.0/24.0))
+	# dc.append(DecayChain('225RA','d',R={'225RA':5.0,'225AC':1.0},time=113.0/24.0))
+	# dc.append(DecayChain('225RA','d',time=21))
+	# dc.counts = {'225AC':[[5.0, 6.0, 6.0, 0.2],[6.0, 7.0, 6.2, 0.3]],'221FR':[5.5, 6.5, 6.0, 0.2]}
+	# dc.fit_R()
+	# dc.plot(N_plot=10, logscale=False)
 
 	######## Ziegler Tests #############
 
-	# zg = Ziegler(stack=[{'compound':'Ni','name':'Ni01','thickness':0.025},{'compound':'Ti','name':'Ti01','thickness':0.025},{'compound':'U','name':'U01','thickness':1.0}], beam={'istp':'2H', 'N':1E5})
+	# zg = Ziegler(stack=[{'compound':'Ni','name':'Ni01','thickness':0.025},{'compound':'Ti','name':'Ti01','thickness':0.025},{'compound':'U','name':'U01','thickness':1.0,'density':20.0}], beam={'istp':'2H', 'N':1E5})
 	# zg.plot(['U','Ni','Ti'])
 	# zg.summarize(saveas='test.csv')
 

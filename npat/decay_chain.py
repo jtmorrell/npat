@@ -4,174 +4,165 @@ from __future__ import print_function
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 
-from npat import Isotope
-from npat import colors
+from .isotope import Isotope
+from .plotter import colors
 
-
-
-# class DecayChain(object):
-# 	def __init__(self,parents,dc_threshold=0.0,units='s'):
-# 		self.parents = [Isotope(p) if type(p)==str else p for p in ([parents] if type(parents)==str else parents)]
-# 		self.units,self.stems,self.children = units,[[] for p in self.parents],[{} for p in self.parents]
-# 		for n,parent in enumerate(self.parents):
-# 			if not parent.stable:
-# 				par_prods = parent.decay_products(closest_SFY=True)
-# 				self.children[n] = {istp:Isotope(istp) for istp in par_prods}
-# 				stems = [[{'ip':parent.name,'dc':0.0,'br':1.0}]+[{'ip':i,'dc':parent.decay_const(units=units),'br':par_prods[i]}] for i in par_prods]
-# 				while len(stems)>0:
-# 					new_stems = []
-# 					for stem in stems:
-# 						if stem[-1]['ip'] not in self.children:
-# 							self.children[n][stem[-1]['ip']] = Isotope(stem[-1]['ip'])
-# 						if self.children[n][stem[-1]['ip']].stable:
-# 							self.stems[n].append(stem)
-# 						elif self.children[n][stem[-1]['ip']].decay_const(units=units)<=dc_threshold:
-# 							self.stems[n].append(stem)
-# 						else:
-# 							ch_dp = self.children[n][stem[-1]['ip']].decay_products()
-# 							if not ch_dp:
-# 								self.stems[n].append(stem)
-# 							for istp in ch_dp:
-# 								dx = self.children[n][stem[-1]['ip']].decay_const(units=units)
-# 								new_stems.append(stem+[{'ip':istp,'dc':(dx if dx!=stem[-1]['dc'] else 1.0001*dx),'br':ch_dp[istp]}])
-# 					stems = list(new_stems)
-# 			mult = {ip:sum([1.0 for stem in self.stems[n] for s in stem if s['ip']==ip]) for ip in self.children[n]}
-# 			mult[parent.name] = float(len(self.stems[n]))
-# 			self.stems[n] = [decay_stem([s['ip'] for s in stem],np.array([s['dc'] for s in stem[1:]]+[0.0]),np.array([s['br']/mult[s['ip']] for s in stem])) for stem in self.stems[n]]
-
-# 	def filter_name(self, istp):
-# 		if istp[-1] in '0123456789g':
-# 			return istp
-# 		if istp.endswith('m'):
-# 			return istp+'1'
-# 		return istp+'g'
-
-# 	def to_list(self, val):
-# 		return [val for i in self.stems] if type(val) in [int, float, np.float64] or val is None else val
-
-# 	def production_activity(self, istp, t, R=1.0):
-# 		istp, R = self.filter_name(istp), self.to_list(R)
-# 		return np.sum([stem.production_activity(istp,t,R[n]) for n,stems in enumerate(self.stems) for stem in stems if istp in stem.isotopes],axis=0)
-
-# 	def decay_activity(self, istp, t, A0=1.0):
-# 		istp, A0 = self.filter_name(istp),self.to_list(A0)
-# 		return np.sum([stem.decay_activity(istp,t,A0[n]) for n,stems in enumerate(self.stems) for stem in stems if istp in stem.isotopes],axis=0)
-
-# 	def production_population(self, istp, t, R=1.0):
-# 		istp,R = self.filter_name(istp),self.to_list(R)
-# 		return np.sum([stem.production_population(istp,t,R[n]) for n,stems in enumerate(self.stems) for stem in stems if istp in stem.isotopes],axis=0)
-
-# 	def decay_population(self, istp, t, N0=1.0):
-# 		istp,N0 = self.filter_name(istp),self.to_list(N0)
-# 		return np.sum([stem.decay_population(istp,t,N0[n]) for n,stems in enumerate(self.stems) for stem in stems if istp in stem.isotopes],axis=0)
-
-# 	def decay_emissions(self, istp, t_start=0.0, t_stop=None, A0=1.0, N0=None):
-# 		istp, A0, N0 = self.filter_name(istp), self.to_list(A0), self.to_list(N0)
-# 		return np.sum([stem.decay_emissions(istp,t_start,t_stop,A0[n],N0[n]) for n,stems in enumerate(self.stems) for stem in stems if istp in stem.isotopes],axis=0)
-
-# 	def plot(self, kind, activity_units='Bq', logscale=False, saveas=None, **kwargs):
-# 		clr = colors()
-# 		f,ax = plt.subplots()
-# 		func = {'production_activity':self.production_activity,'decay_activity':self.decay_activity,'production_population':self.production_population,'decay_population':self.decay_population,'decay_emissions':self.decay_emissions}[kind]
-# 		time = np.array(kwargs['t_stop']) if kind=='decay_emissions' else np.array(kwargs['t'])
-# 		clrs,lss,min_plot = [clr[i] for i in clr],['-','--','-.',':'],(1E-20 if logscale else 0.0)
-# 		all_itps = list(set([p.name for p in self.parents]+[c for children in self.children for c in children if not (children[c].stable and kind.endswith('activity'))]))
-# 		TeX = {itp.name:itp.TeX for itp in self.parents+[children[c] for children in self.children for c in children]}
-# 		ydat = [func(i,**kwargs) for i in all_itps]
-# 		labels = [i[1] for i in sorted([(max(y),n) for n,y in enumerate(ydat)],key=lambda k:k[0],reverse=True)]
-
-# 		for m,n in enumerate(labels):
-# 			ax.plot(time[np.where(ydat[n]>=min_plot)],ydat[n][np.where(ydat[n]>=min_plot)],color=clrs[m%len(clrs)],ls=lss[n%4],label=(TeX[all_itps[n]] if n in labels[:12] else None))
-
-# 		ax.set_xlabel('Time ('+self.units+')')
-# 		ax.set_ylabel('Isotope '+kind.split('_')[1].title()+(' ('+activity_units+')' if kind.endswith('activity') else ''))
-		
-# 		if logscale:
-# 			ax.set_yscale('log')
-
-# 		f.tight_layout()
-# 		ax.legend(loc=0)
-
-# 		if saveas is None:
-# 			plt.show()
-# 		else:
-# 			f.savefig(saveas)
-# 			plt.close()
-
-
-# class decay_stem(object):
-# 	def __init__(self, isotopes, decay_consts, branch_ratios):
-# 		self.isotopes, self.decay_consts, self.branch_ratios = isotopes, decay_consts, branch_ratios
-# 		self.lm_threshold = 1E-8
-
-# 	def filter_name(self,istp):
-# 		if istp[-1] in '0123456789g':
-# 			return istp
-# 		if istp.endswith('m'):
-# 			return istp+'1'
-# 		return istp+'g'
-
-# 	def production_activity(self, istp, t, R=1.0):
-# 		idx = self.isotopes.index(self.filter_name(istp))
-# 		return self.decay_consts[idx]*self.production_population(istp,t,R)
-
-# 	def decay_activity(self, istp, t, A0=1.0):
-# 		idx = self.isotopes.index(self.filter_name(istp))
-# 		r = 1.0/self.decay_consts[0] if self.decay_consts[0]>0 else 1.0
-# 		return self.decay_consts[idx]*self.decay_population(istp,t,A0*r)
-
-# 	def production_population(self, istp, t, R=1.0):
-# 		idx = self.isotopes.index(self.filter_name(istp))
-# 		ridx = range(idx+1)
-# 		mult = R*(self.branch_ratios[0] if idx==0 else 1.0)*np.prod((self.branch_ratios[1:idx+1],self.decay_consts[:idx]))
-# 		denom = np.array([l if l>self.lm_threshold else 1.0 for l in self.decay_consts[ridx]])*np.array([np.prod(self.decay_consts[ridx[:j]]-self.decay_consts[j])*np.prod(self.decay_consts[ridx[j+1:]]-self.decay_consts[j]) for j in ridx])
-# 		return mult*np.sum([((1.0-np.exp(-self.decay_consts[j]*t)) if self.decay_consts[j]>self.lm_threshold else t)/denom[j] for j in ridx],axis=0)
-
-# 	def decay_population(self, istp, t, N0=1.0):
-# 		idx = self.isotopes.index(self.filter_name(istp))
-# 		ridx = range(idx+1)
-# 		mult = N0*(self.branch_ratios[0] if idx==0 else 1.0)*np.prod((self.branch_ratios[1:idx+1],self.decay_consts[:idx]))
-# 		denom = np.array([np.prod(self.decay_consts[ridx[:j]]-self.decay_consts[j])*np.prod(self.decay_consts[ridx[j+1:]]-self.decay_consts[j]) for j in ridx])
-# 		return mult*np.sum([np.exp(-self.decay_consts[j]*t)/denom[j] for j in ridx],axis=0)
-
-# 	def decay_emissions(self, istp, t_start=0.0, t_stop=None, A0=1.0, N0=None):
-# 		idx = self.isotopes.index(self.filter_name(istp))
-# 		if any(self.decay_consts[:idx+1]<self.lm_threshold):
-# 			return 0.0*t_stop
-# 		ridx = range(idx+1)
-# 		mult = (A0*self.decay_consts[idx]/self.decay_consts[0] if N0 is None else N0*decay_consts[idx])*np.prod((self.branch_ratios[1:idx+1],self.decay_consts[:idx])) 
-# 		denom = np.array([self.decay_consts[j]*np.prod(self.decay_consts[ridx[:j]]-self.decay_consts[j])*np.prod(self.decay_consts[ridx[j+1:]]-self.decay_consts[j]) for j in ridx])
-# 		return mult*np.sum([(np.exp(-self.decay_consts[j]*t_start)-np.exp(-self.decay_consts[j]*t_stop))/denom[j] for j in ridx],axis=0)
 
 class DecayChain(object):
-	def __init__(self, parent, units='s', t_i=None, R=None, A0=None):
-		self.parent = Isotope(parent)
+	def __init__(self, parent, units='s', R=None, A0=None, time=None):
 		self.units = units
-		self.isotopes = [self.parent]
-		self.chain = [[self.parent.name, self.parent.decay_const(units), 1.0, -1]]
-		stable_chain = [True]
-		for prod,br in self.parent.decay_products():
-			I = Isotope(prod)
-			self.isotopes.append(I)
-			self.chain.append([I.name, I.decay_const(units), br, 0])
-			stable_chain.append(self.chain[-1][1]<1E-12)
+
+		istps = [Isotope(parent)]
+		self.isotopes = [istps[0].name]
+		self.chain = [[istps[0].decay_const(units), [], []]]
+		stable_chain = [False]
+
 		while not all(stable_chain):
 			for n in [n for n,ch in enumerate(stable_chain) if not ch]:
 				stable_chain[n] = True
-				print(self.chain[n][0], self.isotopes[n].meta['decay_mode'])
-				for prod,br in self.isotopes[n].decay_products():
+				for prod,br in istps[n].decay_products():
 					I = Isotope(prod)
-					self.isotopes.append(I)
-					self.chain.append([I.name, I.decay_const(units), br, n])
-					stable_chain.append(self.chain[-1][1]<1E-12)
-		print([i[0] for i in self.chain])
+					if I.name in self.isotopes:
+						self.chain[self.isotopes.index(I.name)][1].append(br)
+						self.chain[self.isotopes.index(I.name)][2].append(n)
+					else:
+						istps.append(I)
+						self.isotopes.append(I.name)
+						self.chain.append([I.decay_const(units), [br], [n]])
+						stable_chain.append(self.chain[-1][0]<1E-12)
+		self.chain = np.array(self.chain, dtype=object)
 
-	def activity(self, t):
-		pass
+		self.set_R(R)
+		self.A0 = np.zeros(len(self.chain))
+		self.update_A0(A0)
 
-	def decays(self, t_start, t_stop):
-		pass
+		self.time = time
+
+		self._counts = [[] for i in self.chain]
+		self._others = []
+		self._prev = []
+		self._R_fit = None
+		self._A0_fit = None
+
+	def filter_name(self, istp):
+		if istp[-1] in 'g0123456789':
+			return istp
+		return istp+('1' if istp.endswith('m') else 'g')
+
+	def index(self, istp):
+		return self.isotopes.index(self.filter_name(istp))
+
+	def _get_branches(self, istp):
+		if self.filter_name(istp) not in self.isotopes:
+			return [], []
+		m = self.index(istp)
+		BR = [[0.0]]+[[r] for r in self.chain[m,1]]
+		CH = [[m]]+[[n] for n in self.chain[m,2]]
+		while not all([c[-1]==0 for c in CH]):
+			BR = [BR[n]+[i] for n,c in enumerate(CH) for i in self.chain[c[-1],1]]
+			CH = [c+[i] for c in CH for i in self.chain[c[-1],2]]
+		BR = [np.array(r)[::-1] for n,r in enumerate(BR)]
+		CH = [np.array(c)[::-1] for n,c in enumerate(CH)]
+		return BR, CH
+
+	def activity(self, istp, t=None, units=None, _R=None, _A0=None):
+		t = t if t is not None else self.time
+		if t is None:
+			raise ValueError('Time must be specified.')
+		t = np.asarray(t)
+		A = np.zeros(len(t)) if t.shape else 0.0
+		R_lm = 1.0
+		if units is not None:
+			conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557.6E3,'ky':31557.6E6}
+			R_lm = conv[units]/conv[self.units]
+
+		for m,(BR, chain) in enumerate(zip(*self._get_branches(istp))):
+			lm = R_lm*self.chain[chain,0]
+			A0 = self.A0[chain] if _A0 is None else _A0[chain]
+			R = self.R[chain] if _R is None else _R[chain]
+			n = len(chain)
+			for i in range(n):
+				if i==n-1 and m>0:
+					continue
+
+				A_i = lm[-1]*(A0[i]/lm[i])
+				B_i = np.prod(lm[i:-1]*BR[i:-1])
+
+				for j in range(i, n):
+					K = np.arange(i, n)
+					C_j = np.prod(lm[K[K!=j]]-lm[j])
+					if np.any((lm[K[K!=j]]-lm[j])==0):
+						C_j = np.where((lm[K[K!=j]]-lm[j])!=0,lm[K[K!=j]]-lm[j],1E-12)
+						C_j = np.prod(C_j)
+					A += A_i*B_i*np.exp(-lm[j]*t)/C_j
+					if lm[j]>1E-12:
+						A += R[i]*lm[-1]*B_i*(1.0-np.exp(-lm[j]*t))/(lm[j]*C_j)
+					else:
+						A += R[i]*lm[-1]*B_i*t/C_j
+
+		for ot in self._others:
+			if self.filter_name(istp) in ot.isotopes:
+				A += ot.activity(istp, t, units=self.units)
+		return A
+
+
+	def decays(self, istp, t_start, t_stop, units=None, _A0=None):
+		if np.any(self.R > 0):
+			print('WARNING: decays during production not implemented.')
+		t_start, t_stop = np.asarray(t_start), np.asarray(t_stop)
+		D = np.zeros(len(t_start)) if t_start.shape else (np.zeros(len(t_stop)) if t_stop.shape else 0.0)
+		R_lm = 1.0
+		if units is not None:
+			conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557600.0}
+			R_lm = conv[units]/conv[self.units]
+
+		for m,(BR, chain) in enumerate(zip(*self._get_branches(istp))):
+			lm = R_lm*self.chain[chain,0]
+			A0 = self.A0[chain] if _A0 is None else _A0[chain]
+			n = len(chain)
+			for i in range(n):
+				if i==n-1 and m>0:
+					continue
+
+				A_i = lm[-1]*(A0[i]/lm[i])
+				B_i = np.prod(lm[i:-1]*BR[i:-1])
+
+				for j in range(i, len(chain)):
+					K = np.arange(i, len(chain))
+					C_j = np.prod(lm[K[K!=j]]-lm[j])
+					if np.any((lm[K[K!=j]]-lm[j])==0):
+						C_j = np.where((lm[K[K!=j]]-lm[j])!=0,lm[K[K!=j]]-lm[j],1E-12)
+						C_j = np.prod(C_j)
+					if lm[j]>1E-12:
+						D += A_i*B_i*(np.exp(-lm[j]*t_start)-np.exp(-lm[j]*t_stop))/(lm[j]*C_j)
+					else:
+						D += A_i*B_i*(t_stop-t_start)/C_j
+
+		for ot in self._others:
+			if self.filter_name(istp) in ot.isotopes:
+				D += ot.decays(istp, t_start, t_stop, units=self.units)
+		return D
+
+	def set_R(self, R):
+		self.R = np.zeros(len(self.isotopes))
+		if R is not None:
+			if type(R)==dict:
+				for istp in R:
+					if self.filter_name(istp) in self.isotopes:
+						self.R[self.index(istp)] += R[istp]
+			else:
+				self.R[0] += float(R)
+
+	def update_A0(self, A0):
+		if A0 is not None:
+			if type(A0)==dict:
+				for istp in A0:
+					if self.filter_name(istp) in self.isotopes:
+						self.A0[self.index(istp)] += A0[istp]
+			else:
+				self.A0[0] += float(A0)
 
 	@property
 	def counts(self):
@@ -179,18 +170,261 @@ class DecayChain(object):
 
 	@counts.setter
 	def counts(self, N_c):
-		self._counts = N_c
+		if N_c is not None:
+			if type(N_c)!=dict:
+				N_c = {self.isotopes[0]:N_c}
+			for istp in N_c:
+				if self.filter_name(istp) in self.isotopes:
+					x = np.array(N_c[istp])
+					i = self.index(istp)
+					if x.shape:
+						if len(x.shape)==1:
+							x = np.array([x])
+						if len(self._counts[i]):
+							self._counts[i] = np.append(self._counts[i], x, axis=0)
+						else:
+							self._counts[i] = x
 
 	@property
-	def R_average(self):
-		return self._R_average
+	def time(self):
+		return self._time
+
+	@time.setter
+	def time(self, time):
+		self._time = None
+		if time is not None:
+			t = np.asarray(time)
+			if t.shape:
+				self._time = t
+			else:
+				self._time = np.linspace(0.0, float(t), 1000)
+
+	@property
+	def A_meas(self):
+		A_meas = []
+		for n,ct in enumerate(self.counts):
+			itp = self.isotopes[n]
+			if len(ct):
+				meas = np.array([self.calc_M(itp, itp, c[0], c[1])*c[2] for c in ct])
+				if len(ct[0])==4:
+					A_meas.append(np.column_stack((ct[:,0], meas, ct[:,3]*meas/ct[:,2])))
+				else:
+					A_meas.append(np.column_stack((ct[:,0], meas)))
+			else:
+				A_meas.append([])
+		return A_meas
+	
+	def calc_L(self, i, t_m):
+		a_0 = self.activity(i, 0.0)
+		a_m = self.activity(i, t_m)
+		if a_m>0:
+			return a_0/a_m
+		return 0.0
+
+	def calc_M(self, i, j, t_start, t_stop):
+		a_n = self.activity(i, t_start)
+		conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557.6E3,'ky':31557.6E6}[self.units]
+		d_m = self.decays(j, t_start, t_stop)*conv
+		if d_m>0:
+			return a_n/d_m
+		return 0.0
+
+	def calc_P(self, i):
+		a_0 = self.activity(i, 0.0)
+		R_norm = self.R_norm[self.index(i)]
+		if a_0>0:
+			return R_norm/a_0
+		return 0.0
+
+	def calc_Q(self, i, t_m):
+		a_m = self.activity(i, t_m)
+		R_norm = self.R_norm[self.index(i)]
+		if a_m>0:
+			return R_norm/a_m
+		return 0.0
+
+	@property
+	def R_norm(self):
+		R_p,t = [p.R for p in self._prev if p.R.any()],[p.time[-1] for p in self._prev if p.R.any()]
+		return np.dot(np.array(R_p).T,np.array(t))/np.sum(t)
+
+	def fit_R(self, istp=None, _update=True):
+		if self._R_fit is not None:
+			if istp is None:
+				return self._R_fit
+			return self._R_fit[self.index(istp)]
+
+		R_norm = self.R_norm
+		nz = np.where(R_norm>0)[0]
+		Y = []
+		dY = []
+		X = []
+		time = []
+		itp = []
+		conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557.6E3,'ky':31557.6E6}[self.units]
+		for n,ct in enumerate(self.counts):
+			if len(ct):
+				Y += (ct[:,2]/conv).tolist()
+				if len(ct[0])==4:
+					dY += (ct[:,3]/conv).tolist()
+				X += [np.zeros(len(nz)) for i in ct]
+				time += ct[:,:2].tolist()
+				itp += (n*np.ones(len(ct),dtype=int)).tolist()
+
+		Y = np.array(Y)
+		dY = np.array(dY) if len(dY) else np.ones(len(Y))
+		X = np.asarray(X)
+
+		I = np.arange(len(self.isotopes))
+		for m,z in enumerate(nz):
+			A0 = np.copy(self._prev[0].A0) if len(self._prev) else np.zeros(len(self.isotopes))
+			for p in self._prev:
+				R_p = p.R/np.where(R_norm>0, R_norm, 1.0)
+				R_p[I!=z] = 0.0
+				A_old = np.copy(A0)
+				for n in I:
+					A0[n] = self.activity(self.isotopes[n], p.time[-1], _R=R_p, _A0=A_old)
+			X[:,m] = np.array([self.decays(self.isotopes[itp[n]], time[n][0], time[n][1], _A0=A0) for n in range(len(X))])
+		
+		func = lambda X_f, *R_f: np.dot(X_f, np.asarray(R_f).T)
+		fit, unc = curve_fit(func, X, Y, sigma=dY, p0=R_norm[nz], bounds=([0.0 for i in nz],[np.inf for i in nz]))
+		self._R_fit = np.zeros(len(R_norm))
+		self._R_fit[nz] = fit
+
+		if _update:
+			A0 = np.copy(self._prev[0].A0) if len(self._prev) else np.zeros(len(self.isotopes))
+			for p in self._prev:
+				p.A0 = np.copy(A0)
+				p.R = p.R*self._R_fit/np.where(R_norm>0, R_norm, 1.0)
+				for n in I:
+					A0[n] = p.activity(self.isotopes[n], p.time[-1])
+			self.A0 = np.copy(A0)
+
+		if istp is None:
+			return self._R_fit
+		return self._R_fit[self.index(istp)]
+
+	def fit_A0(self, istp=None, _update=True):
+		if self._A0_fit is not None:
+			if istp is None:
+				return self._A0_fit
+			return self._A0_fit[self.index(istp)]
+
+		if len(self._prev):
+			print('WARNING: Previous activities and production rates will not be fit.')
+
+		nz = np.where(self.A0>0)[0]
+
+		Y = []
+		dY = []
+		X = []
+		time = []
+		itp = []
+		for n,ct in enumerate(self.counts):
+			if len(ct):
+				Y += ct[:,2].tolist()
+				if len(ct[0])==4:
+					dY += ct[:,3].tolist()
+				X += [np.zeros(len(nz)) for i in ct]
+				time += ct[:,:2].tolist()
+				itp += (n*np.ones(len(ct),dtype=int)).tolist()
+
+		Y = np.array(Y)
+		dY = np.array(dY) if len(dY) else np.ones(len(Y))
+		X = np.asarray(X)
+
+		I = np.arange(len(self.isotopes))
+		for z in nz:
+			A0 = np.where(I!=z, np.zeros(len(self.isotopes)), 1.0)
+			X[:,z] = np.array([self.decays(self.isotopes[itp[n]], time[n][0], time[n][1], _A0=A0) for n in range(len(X))])
+
+		func = lambda X_f, *R_f: np.dot(X_f, np.asarray(R_f).T)
+		fit, unc = curve_fit(func, X, Y, sigma=dY, p0=self.A0[nz], bounds=([0.0 for i in nz],[np.inf for i in nz]))
+		self._A0_fit = np.copy(self.A0)
+		self._A0_fit[self.A0>0] = fit
+
+		if _update:
+			self.A0 = np.copy(self._A0_fit)
+
+		if istp is None:
+			return self._A0_fit
+		return self._A0_fit[self.index(istp)]
+
 
 	def __add__(self, other):
-		pass
+		self._others.append(other)
+		return self
 
-	def append(self, other):
-		pass
+	def append(self, other, time=None):
+		if time is not None:
+			self.time = time
+		if self.time is None:
+			raise ValueError('Decay Chain time is not set.')
+		if self.isotopes[0]!=other.isotopes[0]:
+			raise ValueError('Decay chains must have same parent.')
+		if self.units!=other.units:
+			raise ValueError('Units must be the same.')
 
+		tmp = [self.R, self.A0, self.time, self._others, self.counts]
+		new_A0 = {i:self.activity(i, self.time[-1]) for n,i in enumerate(self.isotopes) if self.chain[n,0]>1E-12}
+		self.R = other.R
+		self.A0 = other.A0
+		self.update_A0(new_A0)
+		self.time = other.time
+		self._others = other._others
+		self._counts = other.counts
+		other.R = tmp[0]
+		other.A0 = tmp[1]
+		other.time = tmp[2]
+		other._others = tmp[3]
+		other._counts = tmp[4]
+		self._prev += other._prev
+		self._prev.append(other)
+		other._prev = []
 
-if __name__=="__main__":
-	dc = DecayChain('238U','y')
+	def plot(self, time=None, logscale=False, saveas=None, show=True, N_plot=None, N_label=10):
+		f, ax = plt.subplots()
+		if time is not None:
+			self.time = time
+		if self.time is not None:
+			t = self.time
+		else:
+			t = np.linspace(0, 5.0*np.log(2)/self.chain[0,0], 1000)
+		if N_plot is None:
+			N_plot = len(self.isotopes)
+		A_meas = self.A_meas
+		ordr = int(np.floor(np.log10(np.average(self.A0))/3.0))
+		lb_or = {-4:'p',-3:'n',-2:r'$\mu$',-1:'m',0:'',1:'k',2:'M',3:'G',4:'T'}[ordr]
+		mult = 10.0**(-3*ordr)
+		for n,istp in enumerate(self.isotopes):
+			if self.chain[n,0]>1E-12 and n<N_plot:
+				dt = 0.0
+				tm, A = np.array([]),np.array([])
+				for p in self._prev:
+					dt += p.time[-1]
+					t_p, A_p = p.time, p.activity(istp)
+					tm, A = np.append(tm, t_p+(tm[-1] if len(tm) else 0.0)), np.append(A, A_p)
+				tm, A = np.append(tm-dt, t), np.append(A, self.activity(istp, t))
+				label = Isotope(istp).TeX if n<N_label else None
+				ax.plot(tm, mult*A, label=label)
+				if len(A_meas[n]):
+					am = A_meas[n]
+					if len(am[0])==3:
+						ax.errorbar(am[:,0],mult*am[:,1],yerr=mult*am[:,2],ls='None',marker='o')
+					else:
+						ax.plot(am[:,0],mult*am[:,1],ls='None',marker='o')
+
+		
+		if logscale:
+			ax.set_yscale('log')
+
+		ax.set_xlabel('Time ({})'.format(self.units))
+		ax.set_ylabel('Activity ({}Bq)'.format(lb_or))
+		ax.legend(loc=0)
+		f.tight_layout()
+		if saveas is not None:
+			f.savefig(saveas)
+		if show:
+			plt.show()
+		plt.close()
+

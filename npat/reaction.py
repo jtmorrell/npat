@@ -121,14 +121,14 @@ class Reaction(object):
 					self.library = Library(lb)
 					if lb=='tendl_n_rp':
 						self._check(True)
-					elif self._check:
+					elif self._check():
 						break
 			elif self.incident in ['p','d']:
 				for lb in ['iaea','tendl_'+self.incident+'_rp']:
 					self.library = Library(lb)
 					if lb=='tendl_d_rp':
 						self._check(True)
-					elif self._check:
+					elif self._check():
 						break
 			else:
 				self.library = Library('iaea')

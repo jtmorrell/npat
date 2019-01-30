@@ -99,7 +99,10 @@ class Sample(object):
 
 class Ziegler(Irradiation):
 	def __init__(self, stack=[], beam={}):
-		### stack is list of dicts, which must have 'compound', 'sample' and either 'ad' (mg/cm^2) or both 'density' (g/cm^3) and 'thickness' (mm)
+		### stack is list of dicts, which must have 'compound' specified.
+		### Areal density specified by either 'ad' (mg/cm^2), both mass (g) and area (cm^2),
+		### 'thickness' (mm) or both 'density' (g/cm^3) and 'thickness' (mm)
+
 		db = get_cursor('ziegler')
 		
 		self.protons = {int(i[0]):map(float,i[1:]) for i in db.execute('SELECT * FROM protons')}
@@ -127,7 +130,7 @@ class Ziegler(Irradiation):
 				self._beam[k] = default[k]
 		_ITP = Isotope(self._beam['istp'])
 		self._beam['Z'] = _ITP.Z
-		self._beam['amu'] = _ITP.amu
+		self._beam['amu'] = _ITP.mass
 		if len(self._samples):
 			self._solve()
 
@@ -139,11 +142,15 @@ class Ziegler(Irradiation):
 	def stack(self, _stack):
 		self._samples = []
 		for s in _stack:
+			if 'compound' not in s:
+				raise ValueError('compound must be specified')
 			if 'ad' not in s:
-				if 'density' in s:
+				if 'area' in s and 'mass' in s:
+					s['ad'] = 1e3*s['mass']/s['area']
+				elif 'density' in s and 'thickness' in s:
 					s['ad'] = 100.0*s['density']*s['thickness']
-				elif s['compound'] in self.densities:
-					s['ad'],s['density'] = 100.0*self.densities[s['compound']]*s['thickness'],self.densities[s['compound']]
+				elif s['compound'] in self.densities and 'thickness' in s:
+					s['ad'], s['density'] = 100.0*self.densities[s['compound']]*s['thickness'], self.densities[s['compound']]
 			if 'density' not in s:
 				s['density'] = self.densities[s['compound']]
 				if 'thickness' not in s and 'ad' in s:
