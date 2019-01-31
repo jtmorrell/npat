@@ -11,10 +11,9 @@ Welcome to the NPAT User's Guide!
     :maxdepth: 2
 
     beginners
-    install
     spectroscopy
     decay
     isotopes
-    ziegler
+    stopping
     plotting
     troubleshoot

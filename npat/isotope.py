@@ -8,6 +8,20 @@ import numpy as np
 from .dbmgr import get_cursor
 
 class Isotope(object):
+	"""Isotopic data
+
+	...
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	Methods
+	-------
+
+	"""
 	def __init__(self, istp):
 		if istp=='1n' or istp=='1ng':
 			self.element, self.A, self.isomer = 'n', 1, 'g'

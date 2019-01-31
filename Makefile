@@ -2,7 +2,7 @@ install :
 	python setup.py install --user
 
 test :
-	cd test && python test.py
+	echo "WARNING: Make test has not been implemented yet"
 
 validate :
 	echo "WARNING: Make validate has not been implemented yet"
@@ -10,4 +10,4 @@ validate :
 all :
 	make install
 
-.PHONY : test
+.PHONY : install

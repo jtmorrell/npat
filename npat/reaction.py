@@ -10,10 +10,24 @@ from scipy.interpolate import interp1d
 from .dbmgr import get_cursor
 from .isotope import Isotope
 from .plotter import colors
-from .plotter import init_plot
-from .plotter import close_plot
+from .plotter import _init_plot
+from .plotter import _close_plot
 
 class Library(object):
+	"""Interface with cross section library
+
+	...
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	Methods
+	-------
+
+	"""
 	def __init__(self, name='tendl'):
 		name = name.lower()
 		if name in ['endf']:
@@ -110,6 +124,20 @@ class Library(object):
 
 
 class Reaction(object):
+	"""Retrieves cross sections for a given nuclear reaction
+
+	...
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	Methods
+	-------
+
+	"""
 	def __init__(self, reaction_name, library='best'):
 		self.target, p = tuple(reaction_name.split('('))
 		p, self.product = tuple(p.split(')'))
@@ -187,7 +215,7 @@ class Reaction(object):
 		return np.sum(0.5*dE*(phisig[:-1]+phisig[1:]))/np.sum(0.5*dE*(phi[:-1]+phi[1:]))
 
 	def plot(self, label=None, title=True, **kwargs):
-		f, ax = init_plot(**kwargs)
+		f, ax = _init_plot(**kwargs)
 
 		if title:
 			ax.set_title(self.TeX)
@@ -206,6 +234,6 @@ class Reaction(object):
 		if label:
 			ax.legend(loc=0)
 
-		return close_plot(f, ax, default_log=False, **kwargs)
+		return _close_plot(f, ax, default_log=False, **kwargs)
 
 

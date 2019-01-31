@@ -13,13 +13,6 @@ if __name__=='__main__':
 	sp.summarize()
 	sp.plot()
 
-	
-	sp = Spectrum('/home/jmorrell/Documents/Radium_Bernstein_Oct2018/data/count_room_data/experiment/225Ac_separated_20cm_000.Spe')
-	sp.meta = {'istp':['221FR','221RN','213BI','209TL','226RA','214PB','214BI','228AC','210TL','210BI','212PB','212BI','212PO','208TL','40K']}
-	sp.summarize()
-	sp.plot()
-
-
 
 	########## Decay Chain Tests ##########
 

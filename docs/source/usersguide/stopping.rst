@@ -1,4 +1,4 @@
-.. _ziegler:
+.. _stopping:
 
 ===========================
 Stopping Power Calculations

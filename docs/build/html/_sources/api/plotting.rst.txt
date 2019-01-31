@@ -1,0 +1,8 @@
+.. _plotting:
+
+========
+Plotting
+========
+
+.. autofunction:: npat.colors
+.. autofunction:: npat.set_style

@@ -9,13 +9,27 @@ import datetime as dtm
 from scipy.interpolate import interp1d
 
 from .plotter import colors
-from .plotter import init_plot
-from .plotter import close_plot
+from .plotter import _init_plot
+from .plotter import _close_plot
 from .dbmgr import get_cursor
 from .isotope import Isotope
 
 
 class Irradiation(object):
+	"""Super class for activation experiments.
+
+	...
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	Methods
+	-------
+
+	"""
 	def __init__(self):
 		self._samples = []
 
@@ -55,6 +69,20 @@ class Irradiation(object):
 
 
 class Sample(object):
+	"""Material properties of samples in experiment
+
+	...
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	Methods
+	-------
+
+	"""
 	def __init__(self):
 		self.name = None
 		self.energy = None
@@ -82,17 +110,31 @@ class Sample(object):
 	def plot(self, ax=None, **kwargs):
 		x, y = np.array([self.bins[:-1],self.bins[1:]]).T.flatten(), np.array([self.flux,self.flux]).T.flatten()
 		if ax is None:
-			f, ax = init_plot(**kwargs)
+			f, ax = _init_plot(**kwargs)
 			ax.plot(x, y, label=self.name)
 			ax.set_xlabel('Energy (MeV)')
 			ax.set_ylabel('Flux (a.u.)')
-			return close_plot(f, ax, **kwargs)
+			return _close_plot(f, ax, **kwargs)
 		else:
 			ax.plot(x, y, label=self.name)
 		
 
 
 class Ziegler(Irradiation):
+	"""Method for solving energy loss within stacked-target foil experiment
+
+	...
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	Methods
+	-------
+
+	"""
 	def __init__(self, stack=[], beam={}):
 		### stack is list of dicts, which must have 'compound' specified.
 		### Areal density specified by either 'ad' (mg/cm^2), both mass (g) and area (cm^2),
@@ -264,7 +306,7 @@ class Ziegler(Irradiation):
 	def plot(self, samples=None, incl_no_names=False, **kwargs):
 		if type(samples)==str:
 			samples = [samples]
-		f,ax = init_plot(**kwargs)
+		f,ax = _init_plot(**kwargs)
 		for sm in self.samples:
 			if sm.name is not None or incl_no_names:
 				if samples is not None:
@@ -275,4 +317,4 @@ class Ziegler(Irradiation):
 		ax.set_xlabel('Energy (MeV)')
 		ax.set_ylabel('Flux (a.u.)')
 		ax.legend(loc=0)
-		return close_plot(f, ax, **kwargs)
+		return _close_plot(f, ax, **kwargs)

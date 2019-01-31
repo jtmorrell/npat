@@ -1,0 +1,7 @@
+.. _decay:
+
+===========
+Decay Chain
+===========
+
+.. autoclass:: npat.DecayChain

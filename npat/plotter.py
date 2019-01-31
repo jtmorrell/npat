@@ -7,6 +7,17 @@ from cycler import cycler
 
 
 def colors(style='default', shade='dark', aslist=False):
+	"""Some nice color maps.
+
+	...
+
+	Parameters
+	----------
+
+	Returns
+	-------
+
+	"""
 	default = {'light':{'k':'#34495e','gy':'#95a5a6','r':'#e74c3c','b':'#3498db','g':'#2ecc71',
 	'aq':'#1abc9c','o':'#e67e22','y':'#f1c40f','p':'#9b59b6','w':'#ecf0f1'},
 	'dark':{'k':'#2c3e50','gy':'#7f8c8d','r':'#c0392b','b':'#2980b9','g':'#27ae60',
@@ -59,6 +70,17 @@ def colors(style='default', shade='dark', aslist=False):
 
 
 def set_style(sty='show'):
+	"""Preset styles for various purposes.
+
+	...
+
+	Parameters
+	----------
+
+	Returns
+	-------
+
+	"""
 	cm = colors()
 	plt.rcParams['font.family']='sans-serif'
 	plt.rcParams['axes.prop_cycle'] = cycler(color=[cm['k'],cm['r'],cm['b'],cm['gy'],cm['g'],cm['p'],cm['o'],cm['aq'],cm['y']])
@@ -112,7 +134,7 @@ def set_style(sty='show'):
 		plt.rcParams['lines.linewidth'] = '1.8'
 
 
-def init_plot(**kwargs):
+def _init_plot(**kwargs):
 	f, ax = None, None
 	if 'f' in kwargs and 'ax' in kwargs:
 		f, ax = kwargs['f'], kwargs['ax']
@@ -128,7 +150,7 @@ def init_plot(**kwargs):
 	return f, ax
 
 
-def close_plot(fig, axis, **kwargs):
+def _close_plot(fig, axis, **kwargs):
 	f, ax = fig, axis
 
 	if 'default_log' in kwargs:

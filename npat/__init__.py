@@ -8,8 +8,7 @@ from .irradiation import *
 
 __version__ = '0.2.1'
 __all__ = ['get_cursor', 'get_connection', 'colors',
-			'set_style', 'init_plot', 'close_plot',
-			'Spectrum', 'Calibration', 
+			'set_style', 'Spectrum', 'Calibration', 
 			'Isotope', 'DecayChain', 'Reaction',
 			'Ziegler', 'Irradiation', 'Sample',
 			'Library']

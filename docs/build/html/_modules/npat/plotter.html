@@ -1,0 +1,287 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>npat.plotter &#8212; NPAT 0.2.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">NPAT 0.2.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for npat.plotter</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">cycler</span> <span class="k">import</span> <span class="n">cycler</span>
+
+
+<div class="viewcode-block" id="colors"><a class="viewcode-back" href="../../api/plotter.html#npat.colors">[docs]</a><span class="k">def</span> <span class="nf">colors</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="n">shade</span><span class="o">=</span><span class="s1">&#39;dark&#39;</span><span class="p">,</span> <span class="n">aslist</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Some nice color maps.</span>
+
+<span class="sd">	...</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">default</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;light&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#34495e&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#95a5a6&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#e74c3c&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#3498db&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#2ecc71&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#1abc9c&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#e67e22&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#f1c40f&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#9b59b6&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#ecf0f1&#39;</span><span class="p">},</span>
+	<span class="s1">&#39;dark&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#2c3e50&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#7f8c8d&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#c0392b&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#2980b9&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#27ae60&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#16a085&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#d35400&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#f39c12&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#8e44ad&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#bdc3c7&#39;</span><span class="p">}}</span>
+
+	<span class="n">american</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;light&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#636e72&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#dfe6e9&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#ff7675&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#74b9ff&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#55efc4&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#81ecec&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#fab1a0&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#ffeaa7&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#a29bfe&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#ecf0f1&#39;</span><span class="p">},</span>
+	<span class="s1">&#39;dark&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#2d3436&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#b2bec3&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#d63031&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#0984e3&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#00b894&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#00cec9&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#e17055&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#fdcb6e&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#6c5ce7&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#bdc3c7&#39;</span><span class="p">}}</span>
+
+	<span class="n">aussie</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;light&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#95afc0&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#dff9fb&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#ff7979&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#686de0&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#badc58&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#7ed6df&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#ffbe76&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#f6e58d&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#e056fd&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#ecf0f1&#39;</span><span class="p">},</span>
+	<span class="s1">&#39;dark&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#535c68&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#c7ecee&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#eb4d4b&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#4834d4&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#6ab04c&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#22a6b3&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#f0932b&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#f9ca24&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#be2edd&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#bdc3c7&#39;</span><span class="p">}}</span>
+
+	<span class="n">british</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;light&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#353b48&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#7f8fa6&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#e84118&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#273c75&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#4cd137&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#1abc9c&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#e67e22&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#fbc531&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#9c88ff&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#f5f6fa&#39;</span><span class="p">},</span>
+	<span class="s1">&#39;dark&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#2f3640&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#718093&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#c23616&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#192a56&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#44bd32&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#16a085&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#d35400&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#e1b12c&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#8c7ae6&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#dcdde1&#39;</span><span class="p">}}</span>
+
+	<span class="n">canadian</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;light&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#576574&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#c8d6e5&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#ff6b6b&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#54a0ff&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#1dd1a1&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#00d2d3&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#feca57&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#f1c40f&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#5f27cd&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#ecf0f1&#39;</span><span class="p">},</span>
+	<span class="s1">&#39;dark&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#222f3e&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#8395a7&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#ee5253&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#2e86de&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#10ac84&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#01a3a4&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#ff9f43&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#f39c12&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#341f97&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#bdc3c7&#39;</span><span class="p">}}</span>
+
+	<span class="n">chinese</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;light&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#57606f&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#a4b0be&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#ff6b81&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#70a1ff&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#7bed9f&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#1abc9c&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#ff7f50&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#eccc68&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#5352ed&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#ffffff&#39;</span><span class="p">},</span>
+	<span class="s1">&#39;dark&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#2f3542&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#747d8c&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#ff4757&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#1e90ff&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#2ed573&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#16a085&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#ff6348&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#ffa502&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#3742fa&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#f1f2f6&#39;</span><span class="p">}}</span>
+
+	<span class="n">german</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;light&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#778ca3&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#d1d8e0&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#fc5c65&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#45aaf2&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#26de81&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#2bcbba&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#fd9644&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#fed330&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#a55eea&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#ecf0f1&#39;</span><span class="p">},</span>
+	<span class="s1">&#39;dark&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#4b6584&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#a5b1c2&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#eb3b5a&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#2d98da&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#20bf6b&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#0fb9b1&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#fa8231&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#f7b731&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#8854d0&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#bdc3c7&#39;</span><span class="p">}}</span>
+
+	<span class="n">spanish</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;light&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#34495e&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#d1ccc0&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#ff5252&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#34ace0&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#33d9b2&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#1abc9c&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#ff793f&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#ffb142&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#706fd3&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#f7f1e3&#39;</span><span class="p">},</span>
+	<span class="s1">&#39;dark&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#2c3e50&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#84817a&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#b33939&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#227093&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#218c74&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#16a085&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#cd6133&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#cc8e35&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#474787&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#aaa69d&#39;</span><span class="p">}}</span>
+
+	<span class="n">swedish</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;light&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#485460&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#d2dae2&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#ff5e57&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#4bcffa&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#0be881&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#34e7e4&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#ffc048&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#ffdd59&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#575fcf&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#ecf0f1&#39;</span><span class="p">},</span>
+	<span class="s1">&#39;dark&#39;</span><span class="p">:{</span><span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;#1e272e&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">:</span><span class="s1">&#39;#808e9b&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="s1">&#39;#ff3f34&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="s1">&#39;#0fbcf9&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;#05c46b&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;aq&#39;</span><span class="p">:</span><span class="s1">&#39;#00d8d6&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">:</span><span class="s1">&#39;#ffa801&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;#ffd32a&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;#3c40c6&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;#bdc3c7&#39;</span><span class="p">}}</span>
+
+	<span class="n">cm</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;default&#39;</span><span class="p">:</span><span class="n">default</span><span class="p">,</span><span class="s1">&#39;american&#39;</span><span class="p">:</span><span class="n">american</span><span class="p">,</span><span class="s1">&#39;aussie&#39;</span><span class="p">:</span><span class="n">aussie</span><span class="p">,</span><span class="s1">&#39;british&#39;</span><span class="p">:</span><span class="n">british</span><span class="p">,</span><span class="s1">&#39;canadian&#39;</span><span class="p">:</span><span class="n">canadian</span><span class="p">,</span><span class="s1">&#39;chinese&#39;</span><span class="p">:</span><span class="n">chinese</span><span class="p">,</span><span class="s1">&#39;german&#39;</span><span class="p">:</span><span class="n">german</span><span class="p">,</span><span class="s1">&#39;spanish&#39;</span><span class="p">:</span><span class="n">spanish</span><span class="p">,</span><span class="s1">&#39;swedish&#39;</span><span class="p">:</span><span class="n">swedish</span><span class="p">}</span>
+	<span class="k">if</span> <span class="n">aslist</span><span class="p">:</span>
+		<span class="k">return</span> <span class="p">[</span><span class="n">cm</span><span class="p">[</span><span class="n">style</span><span class="p">][</span><span class="n">shade</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="s1">&#39;gy&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="s1">&#39;aq&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">]]</span>
+	<span class="k">return</span> <span class="n">cm</span><span class="p">[</span><span class="n">style</span><span class="p">][</span><span class="n">shade</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="set_style"><a class="viewcode-back" href="../../api/plotter.html#npat.set_style">[docs]</a><span class="k">def</span> <span class="nf">set_style</span><span class="p">(</span><span class="n">sty</span><span class="o">=</span><span class="s1">&#39;show&#39;</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Preset styles for various purposes.</span>
+
+<span class="sd">	...</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">cm</span> <span class="o">=</span> <span class="n">colors</span><span class="p">()</span>
+	<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.family&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;sans-serif&#39;</span>
+	<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.prop_cycle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cycler</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">],</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">],</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">],</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;gy&#39;</span><span class="p">],</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">],</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">],</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;o&#39;</span><span class="p">],</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;aq&#39;</span><span class="p">],</span><span class="n">cm</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]])</span>
+	<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.autolayout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;True&#39;</span>
+	<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.minor.visible&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;True&#39;</span>
+	<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.minor.visible&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;True&#39;</span>
+	<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.titlepad&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;8&#39;</span>
+	<span class="k">if</span> <span class="n">sty</span><span class="o">==</span><span class="s1">&#39;show&#39;</span><span class="p">:</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;14&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.major.pad&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;8&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.major.pad&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;8&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;legend.fontsize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;12&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;lines.markersize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;4.5&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;errorbar.capsize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;5.0&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;lines.linewidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1.8&#39;</span>
+	<span class="k">elif</span> <span class="n">sty</span><span class="o">==</span><span class="s1">&#39;paper&#39;</span><span class="p">:</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;14&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.major.pad&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;8&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.major.pad&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;8&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;legend.fontsize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;12&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;lines.markersize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;3.5&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;errorbar.capsize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;4.0&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;lines.linewidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;2.4&#39;</span>
+	<span class="k">elif</span> <span class="n">sty</span><span class="o">==</span><span class="s1">&#39;poster&#39;</span><span class="p">:</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;18&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.weight&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.titleweight&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.titlepad&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;14&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.major.pad&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;6&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.major.pad&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;6&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.major.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;5&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.minor.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;3.5&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.major.width&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;1.5&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.minor.width&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;1.2&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.major.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;5&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.minor.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;3.5&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.major.width&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;1.5&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.minor.width&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;1.2&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.linewidth&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;1.2&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;legend.fontsize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;14&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;lines.markersize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;4.5&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;errorbar.capsize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;5.0&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;lines.linewidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;2.8&#39;</span>
+	<span class="k">elif</span> <span class="n">sty</span><span class="o">==</span><span class="s1">&#39;presentation&#39;</span><span class="p">:</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;14&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.major.pad&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;8&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.major.pad&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;8&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;legend.fontsize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;12&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;lines.markersize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;3.5&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;errorbar.capsize&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;4.0&#39;</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;lines.linewidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1.8&#39;</span></div>
+
+
+<span class="k">def</span> <span class="nf">_init_plot</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+	<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+	<span class="k">if</span> <span class="s1">&#39;f&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="s1">&#39;ax&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+		<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ax&#39;</span><span class="p">]</span>
+	<span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="k">if</span> <span class="s1">&#39;figsize&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+			<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;figsize&#39;</span><span class="p">])</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+	<span class="k">if</span> <span class="s1">&#39;style&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+		<span class="n">set_style</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">])</span>
+
+	<span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">ax</span>
+
+
+<span class="k">def</span> <span class="nf">_close_plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+	<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axis</span>
+
+	<span class="k">if</span> <span class="s1">&#39;default_log&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;default_log&#39;</span><span class="p">]:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="s1">&#39;scale&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+		<span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;log&#39;</span><span class="p">,</span><span class="s1">&#39;logy&#39;</span><span class="p">]:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;lin&#39;</span><span class="p">,</span><span class="s1">&#39;liny&#39;</span><span class="p">]:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">s</span><span class="o">==</span><span class="s1">&#39;logx&#39;</span><span class="p">:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">s</span><span class="o">==</span><span class="s1">&#39;linx&#39;</span><span class="p">:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;linlog&#39;</span><span class="p">,</span><span class="s1">&#39;loglog&#39;</span><span class="p">,</span><span class="s1">&#39;loglin&#39;</span><span class="p">,</span><span class="s1">&#39;linlin&#39;</span><span class="p">]:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;lin&#39;</span><span class="p">,</span><span class="s1">&#39;linear&#39;</span><span class="p">))</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="n">s</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;lin&#39;</span><span class="p">,</span><span class="s1">&#39;linear&#39;</span><span class="p">))</span>
+
+	<span class="k">if</span> <span class="s1">&#39;logscale&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;logscale&#39;</span><span class="p">]:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="s1">&#39;logx&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;logx&#39;</span><span class="p">]:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="s1">&#39;logy&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;logy&#39;</span><span class="p">]:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+
+	<span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+	<span class="k">if</span> <span class="s1">&#39;saveas&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;saveas&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">f</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;saveas&#39;</span><span class="p">])</span>
+	<span class="k">if</span> <span class="s1">&#39;show&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;show&#39;</span><span class="p">]:</span>
+			<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+	<span class="k">if</span> <span class="s1">&#39;f&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="s1">&#39;ax&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">ax</span>
+
+	<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">set_style</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">NPAT 0.2.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019, Jonathan Morrell.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.
+    </div>
+  </body>
+</html>

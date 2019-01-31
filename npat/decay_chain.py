@@ -8,10 +8,24 @@ from scipy.optimize import curve_fit
 
 from .isotope import Isotope
 from .plotter import colors
-from .plotter import init_plot
-from .plotter import close_plot
+from .plotter import _init_plot
+from .plotter import _close_plot
 
 class DecayChain(object):
+	"""Calculating activities within a decay chain using Bateman equations
+
+	...
+
+	Parameters
+	----------
+
+	Attributes
+	----------
+
+	Methods
+	-------
+
+	"""
 	def __init__(self, parent, units='s', R=None, A0=None, time=None):
 		self.units = units
 
@@ -384,7 +398,7 @@ class DecayChain(object):
 		other._prev = []
 
 	def plot(self, time=None, N_plot=None, N_label=10, **kwargs):
-		f, ax = init_plot(**kwargs)
+		f, ax = _init_plot(**kwargs)
 		if time is not None:
 			self.time = time
 		if self.time is not None:
@@ -418,5 +432,5 @@ class DecayChain(object):
 		ax.set_xlabel('Time ({})'.format(self.units))
 		ax.set_ylabel('Activity ({}Bq)'.format(lb_or))
 		ax.legend(loc=0)
-		return close_plot(f, ax, default_log=False, **kwargs)
+		return _close_plot(f, ax, default_log=False, **kwargs)
 
