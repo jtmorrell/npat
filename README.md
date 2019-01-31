@@ -1,13 +1,24 @@
-# Nuclear Physics Analysis Tools (NPAT)
+# NPAT
 
-This repository contains data and analysis code for the NPAT library, which aims to assist in the analysis of nuclear physics experimental data.  The library is written for python 2.7.
+NPAT (nuclear physics analysis tools) is a python toolkit to aid in the analysis of experimental nuclear data.  
 
-Code has been tested with `python 2.7` on Ubuntu 17.1.
+## Features
 
-## Installation Instructions (Ubuntu)
+NPAT features the following classes to aid in your analysis:
+
+Spectrum
+Calibration
+Ziegler
+DecayChain
+Isotope
+Reaction
+Library
+
+
+## Installation
 
 `pip install -U npat`
 
 or
 
-`make all`
+`make install`
