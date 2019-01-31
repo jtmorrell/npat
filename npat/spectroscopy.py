@@ -20,6 +20,33 @@ from .plotter import close_plot
 DB_CONNECTIONS_DICT = {}
 
 class Calibration(object):
+	"""Calibration is an object for calibrating
+	gamma ray data from High-Purity Germanium (HPGe)
+	detectors.
+
+	...
+
+	Parameters
+	----------
+	meta : dict, optional
+		Meta attributes for calibration.
+
+	Attributes
+	----------
+	meta : dict
+		Metadata about spectrum. 
+	engcal : list
+		2 or 3 parameter energy calibration.
+
+	Methods
+	-------
+	plot(show=True, fit=True, saveas=None, zoom=None, logscale=True, 
+			grayscale=False, labels=False, square_fig=False)
+		Plots the spectrum. Various options for plotting.
+	calibrate(spectra, saveas=None, db=None, auto_calibrate=False)
+		Functionality depends on filetype.
+
+	"""
 	def __init__(self, meta={}):
 		self.calib = {}
 		self._default = {'engcal': [0.0, 0.3],

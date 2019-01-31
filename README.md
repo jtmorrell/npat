@@ -6,13 +6,13 @@ NPAT (nuclear physics analysis tools) is a python toolkit to aid in the analysis
 
 NPAT features the following classes to aid in your analysis:
 
-Spectrum
-Calibration
-Ziegler
-DecayChain
-Isotope
-Reaction
-Library
+* Spectrum
+* Calibration
+* Ziegler
+* DecayChain
+* Isotope
+* Reaction
+* Library
 
 
 ## Installation
