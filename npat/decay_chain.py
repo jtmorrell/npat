@@ -8,7 +8,8 @@ from scipy.optimize import curve_fit
 
 from .isotope import Isotope
 from .plotter import colors
-
+from .plotter import init_plot
+from .plotter import close_plot
 
 class DecayChain(object):
 	def __init__(self, parent, units='s', R=None, A0=None, time=None):
@@ -382,8 +383,8 @@ class DecayChain(object):
 		self._prev.append(other)
 		other._prev = []
 
-	def plot(self, time=None, logscale=False, saveas=None, show=True, N_plot=None, N_label=10):
-		f, ax = plt.subplots()
+	def plot(self, time=None, N_plot=None, N_label=10, **kwargs):
+		f, ax = init_plot(**kwargs)
 		if time is not None:
 			self.time = time
 		if self.time is not None:
@@ -406,25 +407,16 @@ class DecayChain(object):
 					tm, A = np.append(tm, t_p+(tm[-1] if len(tm) else 0.0)), np.append(A, A_p)
 				tm, A = np.append(tm-dt, t), np.append(A, self.activity(istp, t))
 				label = Isotope(istp).TeX if n<N_label else None
-				ax.plot(tm, mult*A, label=label)
+				line, = ax.plot(tm, mult*A, label=label)
 				if len(A_meas[n]):
 					am = A_meas[n]
 					if len(am[0])==3:
-						ax.errorbar(am[:,0],mult*am[:,1],yerr=mult*am[:,2],ls='None',marker='o')
+						ax.errorbar(am[:,0], mult*am[:,1], yerr=mult*am[:,2], ls='None', marker='o', color=line.get_color())
 					else:
-						ax.plot(am[:,0],mult*am[:,1],ls='None',marker='o')
-
-		
-		if logscale:
-			ax.set_yscale('log')
+						ax.plot(am[:,0], mult*am[:,1], ls='None', marker='o', color=line.get_color())
 
 		ax.set_xlabel('Time ({})'.format(self.units))
 		ax.set_ylabel('Activity ({}Bq)'.format(lb_or))
 		ax.legend(loc=0)
-		f.tight_layout()
-		if saveas is not None:
-			f.savefig(saveas)
-		if show:
-			plt.show()
-		plt.close()
+		return close_plot(f, ax, default_log=False, **kwargs)
 

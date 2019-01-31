@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from cycler import cycler
 
 
-def colors(style='default',shade='dark'):
+def colors(style='default', shade='dark', aslist=False):
 	default = {'light':{'k':'#34495e','gy':'#95a5a6','r':'#e74c3c','b':'#3498db','g':'#2ecc71',
 	'aq':'#1abc9c','o':'#e67e22','y':'#f1c40f','p':'#9b59b6','w':'#ecf0f1'},
 	'dark':{'k':'#2c3e50','gy':'#7f8c8d','r':'#c0392b','b':'#2980b9','g':'#27ae60',
@@ -53,6 +53,8 @@ def colors(style='default',shade='dark'):
 	'aq':'#00d8d6','o':'#ffa801','y':'#ffd32a','p':'#3c40c6','w':'#bdc3c7'}}
 
 	cm = {'default':default,'american':american,'aussie':aussie,'british':british,'canadian':canadian,'chinese':chinese,'german':german,'spanish':spanish,'swedish':swedish}
+	if aslist:
+		return [cm[style][shade][c] for c in ['k','gy','r','b','g','o','aq','y','p']]
 	return cm[style][shade]
 
 
@@ -108,5 +110,79 @@ def set_style(sty='show'):
 		plt.rcParams['lines.markersize']='3.5'
 		plt.rcParams['errorbar.capsize']='4.0'
 		plt.rcParams['lines.linewidth'] = '1.8'
+
+
+def init_plot(**kwargs):
+	f, ax = None, None
+	if 'f' in kwargs and 'ax' in kwargs:
+		f, ax = kwargs['f'], kwargs['ax']
+	if f is None or ax is None:
+		if 'figsize' in kwargs:
+			f, ax = plt.subplots(figsize=kwargs['figsize'])
+		else:
+			f, ax = plt.subplots()
+
+	if 'style' in kwargs:
+		set_style(kwargs['style'])
+
+	return f, ax
+
+
+def close_plot(fig, axis, **kwargs):
+	f, ax = fig, axis
+
+	if 'default_log' in kwargs:
+		if kwargs['default_log']:
+			ax.set_yscale('log')
+	else:
+		ax.set_yscale('log')
+
+	if 'scale' in kwargs:
+		s = kwargs['scale'].lower()
+		if s in ['log','logy']:
+			ax.set_yscale('log')
+		elif s in ['lin','liny']:
+			ax.set_yscale('linear')
+		elif s=='logx':
+			ax.set_xscale('log')
+		elif s=='linx':
+			ax.set_xscale('linear')
+		elif s in ['linlog','loglog','loglin','linlin']:
+			ax.set_yscale(s[3:].replace('lin','linear'))
+			ax.set_xscale(s[:3].replace('lin','linear'))
+
+	if 'logscale' in kwargs:
+		if kwargs['logscale']:
+			ax.set_yscale('log')
+		else:
+			ax.set_yscale('linear')
+
+	if 'logx' in kwargs:
+		if kwargs['logx']:
+			ax.set_xscale('log')
+		else:
+			ax.set_xscale('linear')
+
+	if 'logy' in kwargs:
+		if kwargs['logy']:
+			ax.set_yscale('log')
+		else:
+			ax.set_yscale('linear')
+
+	f.tight_layout()
+
+	if 'saveas' in kwargs:
+		if kwargs['saveas'] is not None:
+			f.savefig(kwargs['saveas'])
+	if 'show' in kwargs:
+		if kwargs['show']:
+			plt.show()
+	else:
+		plt.show()
+
+	if 'f' in kwargs and 'ax' in kwargs:
+		return f, ax
+
+	plt.close()
 
 set_style()

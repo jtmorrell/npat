@@ -9,6 +9,9 @@ from scipy.interpolate import interp1d
 
 from .dbmgr import get_cursor
 from .isotope import Isotope
+from .plotter import colors
+from .plotter import init_plot
+from .plotter import close_plot
 
 class Library(object):
 	def __init__(self, name='tendl'):
@@ -183,15 +186,16 @@ class Reaction(object):
 		dE = E[1:]-E[:-1]
 		return np.sum(0.5*dE*(phisig[:-1]+phisig[1:]))/np.sum(0.5*dE*(phi[:-1]+phi[1:]))
 
-	def plot(self, show=True, saveas=None, logscale=False, f=None, ax=None, label=None, title=False):
-		if f is None or ax is None:
-			f, ax = plt.subplots()
-			if title:
-				ax.set_title(self.TeX)
+	def plot(self, label=None, title=True, **kwargs):
+		f, ax = init_plot(**kwargs)
+
+		if title:
+			ax.set_title(self.TeX)
 
 		if label is not None:
 			if label.lower() in ['both','library','reaction']:
 				label = {'both':'{0}\n({1})'.format(self.TeX, self.library.name),'library':self.library.name,'reaction':self.TeX}[label.lower()]
+
 		line, = ax.plot(self.eng, self.xs, label=label)
 		if np.any(self.unc_xs>0):
 			ax.fill_between(self.eng, self.xs+self.unc_xs, self.xs-self.unc_xs, facecolor=line.get_color(), alpha=0.5)
@@ -199,20 +203,9 @@ class Reaction(object):
 		ax.set_xlabel('Incident Energy (MeV)')
 		ax.set_ylabel('Cross Section (mb)')
 
-		if logscale:
-			ax.set_yscale('log')
-		else:
-			ax.set_yscale('linear')
-
 		if label:
 			ax.legend(loc=0)
-		f.tight_layout()
 
-		if saveas is not None:
-			f.savefig(saveas)
-		if show:
-			plt.show()
-
-		return f, ax
+		return close_plot(f, ax, default_log=False, **kwargs)
 
 

@@ -14,6 +14,8 @@ from scipy.interpolate import interp1d
 
 from .isotope import Isotope
 from .plotter import colors
+from .plotter import init_plot
+from .plotter import close_plot
 
 DB_CONNECTIONS_DICT = {}
 
@@ -154,18 +156,35 @@ class Calibration(object):
 		return fit
 
 	def _calibrate_efficiency(self, spectra, p0):
-		### NEED TO UPDATE WITH MORE PRECISE EFFICIENCY ###
 		E, eff, unc_eff = [], [], []
+		lms = {}
 		for sp in spectra:
 			sp.meta = {'effcal':p0}
 			for f in sp.fits:
 				E += f.gm[:,0].tolist()
 				if type(sp.meta['A0'])==list:
-					A = np.array([sp.meta['A0'][sp.meta['istp'].index(i)] for i in f.istp])
+					A0 = np.array([sp.meta['A0'][sp.meta['istp'].index(i)] for i in f.istp])
 				else:
-					A = sp.meta['A0']
-				eff += (f.activity[0]*f.cb.eff(f.gm[:,0])/A).tolist()
-				unc_eff += (f.activity[1]*f.cb.eff(f.gm[:,0])/A).tolist()
+					A0 = np.array([sp.meta['A0'] for i in f.istp])
+				if type(sp.meta['ref_date'])==list:
+					rd = [sp.meta['ref_date'][sp.meta['istp'].index(i)] for i in f.istp]
+					d0 = [dtm.datetime.strptime(r, '%m/%d/%Y %H:%M:%S') for r in rd]
+					t_d = np.array([(sp.meta['start_time']-d).total_seconds() for d in d0])
+				else:
+					rd = sp.meta['ref_date']
+					d0 = dtm.datetime.strptime(rd, '%m/%d/%Y %H:%M:%S')
+					t_d = np.array([(sp.meta['start_time']-d0).total_seconds() for i in f.istp])
+
+				lm = []
+				for i in f.istp:
+					if i not in lms:
+						lms[i] = Isotope(i).decay_const(unc=True)
+					lm.append(lms[i])
+				lm = np.array(lm)
+
+				ef = f.counts[0]*lm[:,0]/((1.0-np.exp(-lm[:,0]*sp.meta['real_time']))*np.exp(-lm[:,0]*t_d)*f.gm[:,1]*A0*(sp.meta['live_time']/sp.meta['real_time']))
+				unc_eff += (ef*np.sqrt((f.counts[1]/f.counts[0])**2+(f.gm[:,2]/f.gm[:,1])**2+(lm[:,1]/lm[:,0])**2+0.01**2)).tolist()
+				eff += ef.tolist()
 
 		E, eff, unc_eff = np.array(E), np.array(eff), np.array(unc_eff)
 		idx = np.where(eff>unc_eff)
@@ -198,7 +217,7 @@ class Calibration(object):
 		self._calib_data['rescal'] = {'fit':fit, 'unc':unc, 'x':mu, 'y':sig, 'yerr':unc_sig}
 		return fit
 
-	def plot(self, show=True, saveas=None):
+	def plot(self, **kwargs):
 		cm = colors()
 		f = plt.figure(figsize=(10, 6))
 		gs = gridspec.GridSpec(2, 10)
@@ -229,15 +248,10 @@ class Calibration(object):
 			ax2.fill_between(x, low, high, facecolor=cm['gy'], alpha=0.5)
 		ax2.set_xlabel('Energy (keV)')
 		ax2.set_ylabel('Efficiency')
-		if len([d['shelf'] for d in self._calib_data['effcal']]):
+		if any([d['shelf'] for d in self._calib_data['effcal']]):
 			ax2.legend(loc=0)
 
-		f.tight_layout()
-		if saveas is not None:
-			f.savefig(saveas)
-		if show:
-			plt.show()
-		plt.close()
+		return close_plot(f, None, default_log=False, **kwargs)
 
 
 	
@@ -478,14 +492,14 @@ class PeakFit(object):
 		if self._activity is not None:
 			return self._activity
 		N, unc_N = self.counts
-		A = N*(self.meta['real_time']/self.meta['live_time']**2)/(self.gm[:,1]*self.cb.eff(self.gm[:,0]))
+		A = (N/self.meta['real_time'])/(self.gm[:,1]*self.cb.eff(self.gm[:,0]))
 		unc_A = np.sqrt((unc_N/N)**2+(self.cb.unc_eff(self.gm[:,0])/self.cb.eff(self.gm[:,0]))**2+(self.gm[:,2]/self.gm[:,1])**2)*A
 		self._activity = (A, unc_A)
 		return self._activity
 	
 
-	def plot(self, show=True, saveas=None, logscale=False, grayscale=False, labels=False):
-		f, ax = plt.subplots()
+	def plot(self, labels=False, **kwargs):
+		f, ax = init_plot(**kwargs)
 
 		erange = self.cb.eng(np.array([self.x-0.5, self.x+0.5])).T.flatten()
 		spec = np.array([self.hist, self.hist]).T.flatten()
@@ -495,19 +509,10 @@ class PeakFit(object):
 		if self.fit is not None:
 			ax.plot(self.cb.eng(xgrid), self.Npeak(xgrid, *self.fit), lw=1.2)
 
-		if logscale:
-			ax.set_yscale('log')
-
 		ax.set_xlabel('Energy (keV)')
 		ax.set_ylabel('Counts')
 		# ax.legend(loc=0)
-		f.tight_layout()
-
-		if saveas is not None:
-			f.savefig(saveas)
-		if show:
-			plt.show()
-		plt.close()
+		return close_plot(f, ax, **kwargs)
 
 
 
@@ -716,7 +721,7 @@ class Spectrum(object):
 		from scipy.optimize import differential_evolution
 		guess = guess if len(guess) else self.cb.engcal
 		obj = lambda m: np.average(np.sqrt(np.absolute(self._hist-self._snip-np.dot(*self._guess_p0_A(*[guess[0], m[0]])))))
-		self.meta = {'engcal': [guess[0], differential_evolution(obj, [(0.975*guess[1], 1.025*guess[1])]).x[0]]}
+		self.meta = {'engcal': [guess[0], differential_evolution(obj, [(0.995*guess[1], 1.005*guess[1])]).x[0]]}
 		if ('A0' in self.meta and 'ref_date' in self.meta) and (param['_cb_cal'] if '_cb_cal' in param else True):
 			try:
 				self.cb.calibrate([self])
@@ -792,33 +797,26 @@ class Spectrum(object):
 					print('N:{0}({1}), A(Bq):{2}({3}), A(uCi):{4}({5}), chi2/dof:{6}'.format(*ln2))
 					print('')
 
-	def plot(self, show=True, fit=True, saveas=None, zoom=None, logscale=True, 
-				grayscale=False, labels=False, square_fig=False):
+	def plot(self, fit=True, labels=True, square_fig=False, **kwargs):
 		
 		erange = self.cb.eng(np.array([np.arange(len(self._hist))-0.5, np.arange(len(self._hist))+0.5])).T.flatten()
 		spec = np.array([self.hist, self.hist]).T.flatten()
 
-		f, ax = plt.subplots(figsize=(None if square_fig else (12.8, 4.8)))
+		f, ax = init_plot(figsize=(None if square_fig else (12.8, 4.8)), **kwargs)
 		spec_label = self._fnm if self._fnm is not None else 'Spectrum'
-		ax.plot(erange, spec, lw=1.2, zorder=1, label=spec_label)
+		ax.plot(erange, spec, lw=1.2, zorder=1, label=(spec_label if labels else None))
 
 		if fit:
 			for p in self.fits:
 				xgrid = np.arange(p.x[0], p.x[-1], 0.1)
 				ax.plot(self.cb.eng(xgrid), p.Npeak(xgrid, *p.fit), lw=1.2)
 
-		if logscale:
-			ax.set_yscale('log')
-			ax.set_ylim((0.5, ax.get_ylim()[1]))
+		ax.set_ylim((0.1, ax.get_ylim()[1]))
 
 		ax.set_xlabel('Energy (keV)')
 		ax.set_ylabel('Counts')
-		ax.legend(loc=0)
-		f.tight_layout()
+		if labels:
+			ax.legend(loc=0)
 
-		if saveas is not None:
-			f.savefig(saveas)
-		if show:
-			plt.show()
-		plt.close()
+		return close_plot(f, ax, **kwargs)
 

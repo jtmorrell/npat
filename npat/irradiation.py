@@ -9,6 +9,8 @@ import datetime as dtm
 from scipy.interpolate import interp1d
 
 from .plotter import colors
+from .plotter import init_plot
+from .plotter import close_plot
 from .dbmgr import get_cursor
 from .isotope import Isotope
 
@@ -77,21 +79,14 @@ class Sample(object):
 			return self._flux_interp
 		return self._flux_interp(E)
 	
-	def plot(self, ax=None, saveas=None, show=True):
+	def plot(self, ax=None, **kwargs):
 		x, y = np.array([self.bins[:-1],self.bins[1:]]).T.flatten(), np.array([self.flux,self.flux]).T.flatten()
 		if ax is None:
-			f, ax = plt.subplots()
+			f, ax = init_plot(**kwargs)
 			ax.plot(x, y, label=self.name)
-			ax.set_yscale('log')
 			ax.set_xlabel('Energy (MeV)')
 			ax.set_ylabel('Flux (a.u.)')
-			ax.legend(loc=0)
-			f.tight_layout()
-			if saveas is not None:
-				f.savefig(saveas)
-			if show:
-				plt.show()
-			plt.close()
+			return close_plot(f, ax, **kwargs)
 		else:
 			ax.plot(x, y, label=self.name)
 		
@@ -266,10 +261,10 @@ class Ziegler(Irradiation):
 		if saveas is not None:
 			self.save_csv(saveas, [names, mu_E, sig_E], ['Name', 'mu_E (MeV)', 'sig_E (MeV)'])
 
-	def plot(self, samples=None, saveas=None, show=True, incl_no_names=False):
+	def plot(self, samples=None, incl_no_names=False, **kwargs):
 		if type(samples)==str:
 			samples = [samples]
-		f,ax = plt.subplots()
+		f,ax = init_plot(**kwargs)
 		for sm in self.samples:
 			if sm.name is not None or incl_no_names:
 				if samples is not None:
@@ -277,13 +272,7 @@ class Ziegler(Irradiation):
 						continue
 				sm.plot(ax)
 
-		ax.set_yscale('log')
 		ax.set_xlabel('Energy (MeV)')
 		ax.set_ylabel('Flux (a.u.)')
 		ax.legend(loc=0)
-		f.tight_layout()
-		if saveas is not None:
-			f.savefig(saveas)
-		if show:
-			plt.show()
-		plt.close()
+		return close_plot(f, ax, **kwargs)
