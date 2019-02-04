@@ -4,4 +4,19 @@
 Theory & Methodology
 ====================
 
-Welcome to the NPAT User's Guide!
+
+Gamma Ray Peak Fitting
+----------------------
+
+Detector Calibration
+--------------------
+
+Decay Chains
+------------
+
+Stopping Power Calculations
+---------------------------
+
+Nuclear Data Quality
+--------------------
+

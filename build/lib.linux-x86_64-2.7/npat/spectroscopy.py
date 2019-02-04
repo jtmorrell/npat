@@ -17,7 +17,6 @@ from .plotter import colors
 from .plotter import _init_plot
 from .plotter import _close_plot
 
-global DB_CONNECTIONS_DICT
 DB_CONNECTIONS_DICT = {}
 
 class Calibration(object):
@@ -89,7 +88,6 @@ class Calibration(object):
 		return self.calib['rescal']
 	
 	def eng(self, idx, *cal):
-		idx = np.asarray(idx)
 		cal = cal if len(cal) else self.calib['engcal']
 		if len(cal)==2:
 			return cal[0]+cal[1]*idx
@@ -97,7 +95,6 @@ class Calibration(object):
 			return cal[0]+cal[1]*idx+cal[2]*idx**2
 
 	def eff(self, energy, *c):
-		energy = np.asarray(energy)
 		c = c if len(c) else self.calib['effcal']
 		if len(c)==3:
 			return c[0]*np.exp(-c[1]*energy**c[2])
@@ -105,11 +102,9 @@ class Calibration(object):
 			return c[0]*np.exp(-c[1]*energy**c[2])*(1.0-np.exp(-c[3]*energy**c[4]))
 			
 	def unc_eff(self, energy, c=None, u=None):
-		energy = np.asarray(energy)
 		if c is None or u is None:
 			c, u = self.calib['effcal'], self.calib['unc_effcal']
-		eps = 1E-8
-		var= np.zeros(len(energy)) if energy.shape else 0.0
+		var, eps = np.zeros(len(energy)), 1E-8
 		for n in range(len(c)):
 			for m in range(n, len(c)):
 				c_n, c_m = list(c), list(c)
@@ -120,13 +115,11 @@ class Calibration(object):
 		return np.sqrt(var)
 
 	def res(self, idx, *cal):
-		idx = np.asarray(idx)
 		cal = cal if len(cal) else self.calib['rescal']
 		if len(cal)==1:
 			return cal[0]*np.sqrt(idx)
 
 	def map_idx(self, energy, *cal):
-		energy = np.asarray(energy)
 		cal = cal if len(cal) else self.calib['engcal']
 		if len(cal)==2:
 			return np.array(np.rint((energy-cal[0])/cal[1]), dtype=np.int32)
@@ -168,7 +161,7 @@ class Calibration(object):
 					if saveas is not None:
 						if type(saveas)==str:
 							saveas = [saveas]
-						sp.save(*saveas)
+						sp.save(saveas)
 
 	def _calibrate_energy(self, spectra, p0):
 		E, chn, unc_chn = [], [], []
@@ -324,7 +317,7 @@ class PeakFit(object):
 		self.snip = interp1d(x, snip)
 		self._snip = snip
 		self._fit, self._cov = None, None
-		self._chi2, self._counts, self._decay_rate = None, None, None
+		self._chi2, self._counts, self._activity = None, None, None
 		self._fit_param, self._cov_param = None, None
 
 	def p0_bg(self, quadratic=False):
@@ -533,17 +526,17 @@ class PeakFit(object):
 		return self._counts
 	
 	@property
-	def decay_rate(self):
+	def activity(self):
 		if 'live_time' not in self.meta or 'real_time' not in self.meta:
-			print('WARNING: Need real-time/live-time to compute decay-rate.')
+			print('WARNING: Need real-time/live-time to compute activity.')
 			return np.zeros(len(gm)), np.zeros(len(gm))
-		if self._decay_rate is not None:
-			return self._decay_rate
+		if self._activity is not None:
+			return self._activity
 		N, unc_N = self.counts
 		A = (N/self.meta['real_time'])/(self.gm[:,1]*self.cb.eff(self.gm[:,0]))
 		unc_A = np.sqrt((unc_N/N)**2+(self.cb.unc_eff(self.gm[:,0])/self.cb.eff(self.gm[:,0]))**2+(self.gm[:,2]/self.gm[:,1])**2)*A
-		self._decay_rate = (A, unc_A)
-		return self._decay_rate
+		self._activity = (A, unc_A)
+		return self._activity
 	
 
 	def plot(self, labels=False, **kwargs):
@@ -572,12 +565,11 @@ class Spectrum(object):
 
 	...
 
-
 	Parameters
 	----------
 	filename : str
 		Path to .Spe file.
-	db : str or sqlite3.cursor, optional
+	db : str, optional
 		Path to sqlite database
 
 	Attributes
@@ -614,28 +606,14 @@ class Spectrum(object):
 			if os.path.exists(os.path.join(self._path, self._fnm)):
 				if self._fnm.endswith('.Spe'):
 					self._from_Spe()
-				elif self._fnm.endswith('.Chn'):
-					self._from_Chn()
 			else:
 				raise ValueError('File does not exist: {}'.format(filename))
 
-		self._check_db(db)
+			self._check_db(db)
 		self.cb.update(self._meta)
-
-	def __add__(self, other):
-		if not type(other)==Spectrum:
-			raise ValueError('Cannot add spectrum to type {}'.format(type(other)))
-
-		self.hist += other.hist
-		self.meta['live_time'] += other.meta['live_time']
-		self.meta['real_time'] += other.meta['real_time']
-		if abs((other.meta['start_time']-self.meta['start_time']).total_seconds()-self.meta['real_time'])>60:
-			print('WARNING: spectra start and stop times not syncronous.')
-		return self
 
 	def _default_params(self):
 		self._path, self._fnm = None, None
-		self.db, self.db_connection = None, None
 		self._hist = np.zeros(2, dtype=np.int32)
 		self._meta = {'fit_config':{'snip_sig':8.5, 'snip_adj':1.5, 'snip_alpha':0.15,
 									'R':0.1, 'alpha':0.9, 'step':0.0, 'bg_fit':False,
@@ -650,114 +628,31 @@ class Spectrum(object):
 		self._fits = None
 
 	def _get_db_params(self):
-		if self.db is not None:
-			from ast import literal_eval
-			tables = [str(i[0]) for i in self.db.execute('SELECT name FROM sqlite_master WHERE type="table"')]
-
-			if 'spectra' not in tables:
-				q = 'CREATE TABLE `spectra` (`spec_id` INTEGER, `filename` TEXT, `file_path` TEXT, '
-				q += '`start_time` TEXT, `live_time` REAL, `real_time` REAL, `calib_id` INTEGER, `meta` TEXT);'
-				self.db.execute(q)
-				self.db_connection.commit()
-
-			q = list(self.db.execute('SELECT * FROM spectra WHERE filename LIKE ? AND file_path LIKE ?', ('%'+self._fnm+'%', '%'+self._path+'%')))
-			if len(q):
-				self.meta = literal_eval(q[0][7])
-				self.meta['spec_id'] = q[0][0]
-				self.meta['calib_id'] = q[0][6]
-			else:
-				ids = [i[0] for i in self.db.execute('SELECT spec_id FROM spectra')]
-				self.meta['spec_id'] = max(ids)+1 if len(ids) else 1
-				self.meta['calib_id'] = None
-				vals = [self.meta['spec_id'], self._fnm, self._path, dtm.datetime.strftime(self.meta['start_time'], '%m/%d/%Y %H:%M:%S'),
-						self.meta['live_time'], self.meta['real_time'], self.meta['calib_id'],
-						str({i:self.meta[i] for i in self.meta if i not in ['start_time']})]
-				self.db.execute('INSERT INTO spectra VALUES(?,?,?,?,?,?,?,?)', tuple(vals))
-				self.db_connection.commit()
-
-			if 'calibration' not in tables:
-				q = 'CREATE TABLE `calibration` (`calib_id` INTEGER, `shelf` TEXT, `engcal` TEXT, `effcal` TEXT, `unc_effcal` TEXT, `rescal` TEXT);'
-				self.db.execute(q)
-				self.db_connection.commit()
-			else:
-				if self.meta['calib_id'] is not None:
-					q = list(self.db.execute('SELECT * FROM calibration WHERE calib_id=?',(self.meta['calib_id'],)))
-					if len(q):
-						self.meta['shelf'] = str(q[0][1]) if q[0][1] else None
-						self.meta = {'engcal':literal_eval(q[0][2]), 'effcal':literal_eval(q[0][3]), 
-									'unc_effcal':literal_eval(q[0][4]), 'rescal':literal_eval(q[0][5])}
-					else:
-						self.meta['calib_id'] = None
-				if self.meta['calib_id'] is None:
-					ids = [i[0] for i in self.db.execute('SELECT calib_id FROM calibration')]
-					self.meta['calib_id'] = max(ids)+1 if len(ids) else 1
-					self.db.execute('UPDATE spectra SET calib_id=? WHERE spec_id=?', (self.meta['calib_id'], self.meta['spec_id']))
-					vals = [self.meta['calib_id'], self.meta['shelf'], str(list(self.meta['engcal'])), str(list(self.meta['effcal'])), 
-							(str(self.meta['unc_effcal']) if type(self.meta['unc_effcal'])==list else str(self.meta['unc_effcal'].tolist())),
-							str(list(self.meta['rescal']))]
-					self.db.execute('INSERT INTO calibration VALUES(?,?,?,?,?,?)', tuple(vals))
-					self.db_connection.commit()
-
-			if 'peaks' not in tables:
-				q = 'CREATE TABLE `peaks` (`spec_id` INTEGER, `filename` TEXT, '
-				q += '`isotope` TEXT, `energy` REAL, `counts` REAL, `unc_counts` REAL, '
-				q += '`intensity` REAL, `unc_intensity` REAL, `efficiency` REAL,'
-				q += '`unc_efficiency` REAL, `count_rate` REAL, `unc_count_rate` REAL, '
-				q += '`decay_rate` REAL, `unc_decay_rate` REAL, `chi2` REAL);'
-				self.db.execute(q)
-				self.db_connection.commit()
+		pass
 
 	def _check_db(self, db=None):
-		self.db_connection = None
-		self.db = None
 		if db is not None:
 			path, fnm = os.path.split(db)
 			if path in ['',' ']:
 				path = os.getcwd()
 			if fnm in ['',' ']:
 				raise ValueError('Invalid db Filename: {}'.format(db))
-			db_fnm = os.path.join(path, fnm)
-
+			self.db_fnm = os.path.join(path, fnm)
+		else:
+			self.db_fnm = os.path.join(self._path, 'npat_analysis.db')
+		if os.path.exists(self.db_fnm):
 			global DB_CONNECTIONS_DICT
-			if os.path.exists(db_fnm):
-				
-				if db_fnm not in DB_CONNECTIONS_DICT:
-					DB_CONNECTIONS_DICT[db_fnm] = sqlite3.connect(db_fnm)
-				self.db_connection = DB_CONNECTIONS_DICT[db_fnm]
+			if self.db_fnm in DB_CONNECTIONS_DICT:
+				self.db_connection = DB_CONNECTIONS_DICT[self.db_fnm]
 				self.db = self.db_connection.cursor()
-				self._get_db_params()
 			else:
-				print('WARNING: DB {} does not exist, creating new file.'.format(fnm))
-				from sqlite3 import Error
-				try:
-					self.db_connection = sqlite3.connect(db_fnm)
-					DB_CONNECTIONS_DICT[db_fnm] = self.db_connection
-					self.db = self.db_connection.cursor()
-				except Error as e:
-					print(e)
-
-	def _update_db(self):
-		if self.db is not None:
-			meta_str = str({i:self.meta[i] for i in self.meta if i not in ['start_time']})
-			self.db.execute('UPDATE spectra SET meta=? WHERE spec_id=?', (self.meta['spec_id'], meta_str))
-			vals = [self.meta['shelf'], str(list(self.meta['engcal'])), str(list(self.meta['effcal'])), 
-					(str(self.meta['unc_effcal']) if type(self.meta['unc_effcal'])==list else str(self.meta['unc_effcal'].tolist())),
-					str(list(self.meta['rescal'])), self.meta['calib_id']]
-			self.db.execute('UPDATE calibration SET shelf=?, engcal=?, effcal=?, unc_effcal=?, rescal=? WHERE calib_id=?', tuple(vals))
-			if self._fits is not None:
-				vals = []
-				for f in self._fits:
-					for n in range(len(f.gm)):
-						val = [self.meta['spec_id'], self._fnm, f.istp[n], f.gm[n][0],
-								int(f.counts[0][n]), (int(f.counts[1][n]) if np.isfinite(f.counts[1][n]) else None),
-								f.gm[n][1]*100.0, f.gm[n][2]*100.0, self.cb.eff(f.gm[n][0]), self.cb.unc_eff(f.gm[n][0]),
-								f.counts[0][n]/self.meta['live_time'],
-								(f.counts[1][n]/self.meta['live_time'] if np.isfinite(f.counts[1][n]) else None),
-								f.decay_rate[0][n], (f.decay_rate[1][n] if np.isfinite(f.decay_rate[1][n]) else None), f.chi2]
-						vals.append(tuple(val))
-				self.db.execute('DELETE FROM peaks WHERE spec_id=?',(self.meta['spec_id'],))
-				self.db.executemany('INSERT INTO peaks VALUES('+','.join(15*['?'])+')', vals)
-			self.db_connection.commit()
+				self.db_connection = sqlite3.connect(self.db_fnm)
+				DB_CONNECTIONS_DICT[self.db_fnm] = self.db_connection
+				self.db = self.db_connection.cursor()
+			self._get_db_params()
+		else:
+			self.db_connection = None
+			self.db = None
 
 	@property
 	def hist(self):
@@ -772,55 +667,19 @@ class Spectrum(object):
 		if filename is None:
 			filename = os.path.join(self._path, self._fnm)
 		with open(filename) as f:
-			ln = f.readline()
-			while ln:
-				if ln.startswith('$'):
-					section = ln.strip()[1:-1]
-					if section=='DATA':
-						L = int(f.readline().strip().split(' ')[1])+1
-						self.hist = np.fromfile(f, dtype=np.int64, count=L, sep='\n')
-					else:
-						self._meta[section] = []
-				else:
-					self._meta[section].append(ln.strip())
-				ln = f.readline()
+			fl = map(str.strip, f.readlines())
 
-		start_time = dtm.datetime.strptime(self._meta['DATE_MEA'][0], '%m/%d/%Y %H:%M:%S')
-		LT, RT = tuple(map(float, self._meta['MEAS_TIM'][0].split(' ')))
-		engcal = map(float, self._meta['MCA_CAL'][-1].split(' ')[:-1])
-		self.meta = {'start_time':start_time, 'live_time':LT, 'real_time':RT, 'engcal':engcal}
+		idx = fl.index('$DATA:')
+		head = fl[:idx]
+		self.hist = fl[idx+2:idx+3+int(fl[idx+1].split(' ')[1])]
+		foot = fl[idx+2+len(self._hist):]
 
-	def _from_Chn(self, filename=None):
-		if filename is None:
-			filename = os.path.join(self._path, self._fnm)
-		with open(filename) as f:
-			det_no = np.frombuffer(f.read(6),dtype='i2')[1]
-			sts = np.frombuffer(f.read(2),dtype='S2')[0]
-			RT, LT = tuple(map(float, 0.02*np.frombuffer(f.read(8), dtype='i4')))
-			st = np.frombuffer(f.read(12),dtype='S12')[0]
-			months = {'jan':'01','feb':'02','mar':'03','apr':'04',
-						'may':'05','jun':'06','jul':'07','aug':'08',
-						'sep':'09','oct':'10','nov':'11','dec':'12'}
-			start_time = '{0}/{1}/{2} {3}:{4}:{5}'.format(months[st[2:5].lower()],st[:2],('20' if st[7]=='1' else '19')+st[5:7],st[8:10],st[10:],sts)
-			start_time = dtm.datetime.strptime(start_time, '%m/%d/%Y %H:%M:%S')
-			L = np.frombuffer(f.read(4),dtype='i2')[1]
-			self.hist = np.asarray(np.frombuffer(f.read(4*L), dtype='i4'), dtype=np.int64)
-			f.read(4)
-			engcal = np.frombuffer(f.read(12),dtype='f4').tolist()
-			self.meta = {'start_time':start_time, 'live_time':LT, 'real_time':RT, 'engcal':engcal}
-			shape = np.frombuffer(f.read(12), dtype='f4').tolist()
-			self.meta['SHAPE_CAL'] = ['3', ' '.join(map(str, shape))]
-			f.read(228)
-			L = np.frombuffer(f.read(1),dtype='i1')[0]
-			if L:
-				det_desc = np.frombuffer(f.read(L),dtype='S{}'.format(L))[0]
-				self.meta['SPEC_REM'] = ['DET# '+str(det_no), 'DETDESC# '+det_desc, 'AP# Maestro Version 7.01']
-			if L<63:
-				f.read(63-L)
-			L = np.frombuffer(f.read(1),dtype='i1')[0]
-			if L:
-				sample_desc = np.frombuffer(f.read(L),dtype='S{}'.format(L))[0]
-				self.meta['SPEC_ID'] = [sample_desc]
+		start_time = dtm.datetime.strptime(head[head.index('$DATE_MEA:')+1], '%m/%d/%Y %H:%M:%S')
+		LT, RT = tuple(map(float, head[head.index('$MEAS_TIM:')+1].split(' ')))
+		engcal = map(float, foot[foot.index('$MCA_CAL:')+2].split(' ')[:-1])
+
+		self.meta = {'start_time':start_time, 'live_time':LT, 'real_time':RT, 'engcal':engcal,
+						'Spe_head':'\n'.join(head), 'Spe_foot':'\n'.join(foot)}
 
 	@property
 	def meta(self):
@@ -832,7 +691,6 @@ class Spectrum(object):
 			if nm.endswith('cal'):
 				self.cb.calib[nm] = meta_dict[nm]
 			self._meta[nm] = meta_dict[nm]
-		self._update_db()
 	
 	@property
 	def fit_config(self):
@@ -916,6 +774,8 @@ class Spectrum(object):
 					self.meta = {'engcal':guess}
 					print('WARNING: auto calibrate failed. Setting engcal to guess.')
 
+
+
 	def _get_p0(self):
 		p0_A, cov_p0_A = self._fit_p0_A()
 		pks = []
@@ -959,90 +819,11 @@ class Spectrum(object):
 		"""
 		if self._fits is None:
 			self._fits = self._get_p0()
-			self._update_db()
 		return self._fits
 
-	def saveas(self, *fnms):
-		for fl in fnms:
-			if fl.startswith('*'):
-				fl = os.path.join(self._path, '.'.join(self._fnm.split('.')[:-1])+'.'+fl.split('.')[-1])
-			if fl.endswith('.Spe'):
-				### Maestro ASCII .Spe ###
-				if 'DATE_MEA' not in self.meta:
-					self._meta['DATE_MEA'] = [dtm.datetime.strftime(self.meta['start_time'], '%m/%d/%Y %H:%M:%S')]
-				if 'MEAS_TIM' not in self.meta:
-					self._meta['MEAS_TIM'] = ['{0} {1}'.format(int(self.meta['live_time']), int(self.meta['real_time']))]
-				self._meta['ENER_FIT'] = ['{0} {1}'.format(self.cb.engcal[0], self.cb.engcal[1])]
-				self._meta['MCA_CAL'] = ['3','{0} {1} {2} keV'.format(self.cb.engcal[0], self.cb.engcal[1], (self.cb.engcal[2] if len(self.cb.engcal)>2 else 0.0))]
-				defaults = {'ROI':['0'],'SPEC_REM':['DET# 0','DETDESC# ','AP# Maestro Version 7.01'],'PRESETS':['0'],
-							'SHAPE_CAL':['3','0E+00 0E+00 0E+00'],'SPEC_ID':['No sample description was entered.']}
-				for d in defaults:
-					if d not in self.meta:
-						self._meta[d] = defaults[d]
-				ss = '\n'.join(['${}:\n'.format(sc)+'\n'.join(self.meta[sc]) for sc in ['SPEC_ID','SPEC_REM','DATE_MEA','MEAS_TIM']])
-				ss += '\n$DATA:\n0 {}\n'.format(len(self.hist)-1)
-				ss += '\n'.join([' '*(8-len(i))+i for i in map(str, self.hist)])+'\n'
-				ss += '\n'.join(['${}:\n'.format(sc)+'\n'.join(self.meta[sc]) for sc in ['ROI','PRESETS','ENER_FIT','MCA_CAL','SHAPE_CAL']])+'\n'
-				with open(fl,'w') as f:
-					f.write(ss)
-
-			if fl.endswith('.Chn'):
-				### Maestro integer .Chn ###
-				if 'SPEC_REM' in self.meta:
-					det_no = int(self.meta['SPEC_REM'][0].split(' ')[1].strip())
-				else:
-					det_no = 0
-				ss = np.array([-1, det_no, 1], dtype='i2').tobytes()
-				st = self.meta['start_time']
-				ss += np.array(('0' if st.second<10 else '')+str(st.second), dtype='S2').tobytes()
-				ss += np.array([self.meta['real_time']/0.02, self.meta['live_time']/0.02], dtype='i4').tobytes()
-				months = {1:'Jan',2:'Feb',3:'Mar',4:'Apr',5:'May',6:'Jun',7:'Jul',8:'Aug',9:'Sep',10:'Oct',11:'Nov',12:'Dec'}
-				ss += np.array(('0' if st.day<10 else '')+str(st.day)+months[st.month]+str(st.year)[-2:]+('1' if st.year>1999 else '0'), dtype='S8').tobytes()
-				ss += np.array(('0' if st.hour<10 else '')+str(st.hour)+('0' if st.minute<10 else '')+str(st.minute), dtype='S4').tobytes()
-				ss += np.array([0, len(self.hist)], dtype='i2').tobytes()
-				ss += np.array(self.hist, dtype='i4').tobytes()
-				ss += np.array([-102, 0], dtype='i2').tobytes()
-				ss += np.array(self.cb.engcal, dtype='f4').tobytes()
-				if 'SHAPE_CAL' in self.meta:
-					ss += np.array(self.meta['SHAPE_CAL'][1].split(' '), dtype='f4').tobytes()
-				else:
-					ss += np.array([0,0,0], dtype='f4').tobytes()
-				ss += np.zeros(228, dtype='i1').tobytes()
-				if 'SPEC_REM' in self.meta:
-					L = len(self.meta['SPEC_REM'][1].split('# ')[1])
-					L = min((63, L))
-					ss += np.array(L, dtype='i1').tobytes()
-					ss += np.array(self.meta['SPEC_REM'][1].split('# ')[1][:L], dtype='S{}'.format(L)).tobytes()
-				else:
-					ss += np.array(0, dtype='i1').tobytes()
-				if 'SPEC_ID' in self.meta:
-					if self.meta['SPEC_ID'][0]!='No sample description was entered.':
-						L = len(''.join(self.meta['SPEC_ID']))
-						L = min((63, L))
-						ss += np.array(L, dtype='i1').tobytes()
-						ss += np.array(''.join(self.meta['SPEC_ID'])[:L])
-					else:
-						ss += np.array(0, dtype='i1').tobytes()
-						ss += np.array('\x00'*63, dtype='S63').tobytes()
-				else:
-					ss += np.array(0, dtype='i1').tobytes()
-					ss += np.array('\x00'*63, dtype='S63').tobytes()
-				ss += np.array('\x00'*128, dtype='S128').tobytes()
-				with open(fl, 'wb') as f:
-					f.write(ss)
-
-			if fl.endswith('.spe'):
-				### Radware gf3 .spe ###
-				name = self._fnm[:8]+' '*(8-len(self._fnm))
-				with open(fl, 'wb') as f:
-					ss = np.array(24, dtype=np.uint32).tobytes()
-					ss += np.array(name, dtype='c').tobytes()
-					ss += np.array([len(self.hist), 1, 1, 1, 24, 4*len(self.hist)], dtype=np.uint32).tobytes()
-					ss += np.array(self.hist, dtype=np.float32).tobytes()
-					ss += np.array(4*len(self.hist), dtype=np.uint32).tobytes()
-					f.write(ss)
-
-
+	def save(self, *saveas):
+		for fl in saveas:
+			print(fl)
 
 	def summarize(self, printout=True, saveas=None):
 		if printout:
@@ -1051,8 +832,8 @@ class Spectrum(object):
 					ln1 = [f.gm[n][0], f.istp[n], f.gm[n][1]*100.0]
 					print('{0} keV peak in {1} ({2}% intensity)'.format(*ln1))
 					ln2 = [int(f.counts[0][n]), (int(f.counts[1][n]) if np.isfinite(f.counts[1][n]) else np.inf),
-							round(f.decay_rate[0][n],1),round(f.decay_rate[1][n],1), 
-							round(f.decay_rate[0][n]/3.7E4,3), round(f.decay_rate[1][n]/3.7E4,3), 
+							round(f.activity[0][n],1),round(f.activity[1][n],1), 
+							round(f.activity[0][n]/3.7E4,3), round(f.activity[1][n]/3.7E4,3), 
 							round(f.chi2,3)]
 					print('N:{0}({1}), A(Bq):{2}({3}), A(uCi):{4}({5}), chi2/dof:{6}'.format(*ln2))
 					print('')
@@ -1069,10 +850,9 @@ class Spectrum(object):
 		if fit:
 			for p in self.fits:
 				xgrid = np.arange(p.x[0], p.x[-1], 0.1)
-				pk_fit = p.Npeak(xgrid, *p.fit)
-				ax.plot(self.cb.eng(xgrid), np.where(pk_fit>0.1, pk_fit, 0.1), lw=1.2)
+				ax.plot(self.cb.eng(xgrid), p.Npeak(xgrid, *p.fit), lw=1.2)
 
-		# ax.set_ylim((0.1, ax.get_ylim()[1]))
+		ax.set_ylim((0.1, ax.get_ylim()[1]))
 
 		ax.set_xlabel('Energy (keV)')
 		ax.set_ylabel('Counts')

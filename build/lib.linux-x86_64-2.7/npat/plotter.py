@@ -17,15 +17,6 @@ def colors(style='default', shade='dark', aslist=False):
 	Returns
 	-------
 
-	Notes
-	-----
-
-	References
-	----------
-
-	Examples
-	--------
-
 	"""
 	default = {'light':{'k':'#34495e','gy':'#95a5a6','r':'#e74c3c','b':'#3498db','g':'#2ecc71',
 	'aq':'#1abc9c','o':'#e67e22','y':'#f1c40f','p':'#9b59b6','w':'#ecf0f1'},

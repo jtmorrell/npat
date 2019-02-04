@@ -19,3 +19,13 @@ If you'd like to install the most recent (unreleased) version of NPAT, you can c
 .. _Python Package index: https://pypi.org/
 .. _pip: https://pip.pypa.io/en/stable
 .. _github: https://github.com/jtmorrell/npat
+
+
+Troubleshooting
+---------------
+
+NPAT should download about 1GB of nuclear data during setup, however if this download fails for some reason the databases can be downloaded by downloading the `setup`_ file and running it with the command::
+
+	python setup.py install --user
+
+.. _setup: https://github.com/jtmorrell/npat/blob/master/setup.py

@@ -1,17 +1,27 @@
 from npat import *
 import matplotlib.pyplot as plt
+import datetime as dtm
+import numpy as np
 
 if __name__=='__main__':
 
 	######### Spectroscopy Tests #########
 
-	sp = Spectrum('eu_calib_7cm.Spe')
+	sp = Spectrum('eu_calib_7cm.Spe','test.db')
 	sp.meta = {'istp':['152EU'], 'A0':3.7E4, 'ref_date':'01/01/2009 12:00:00'}
+
 	sp.fit_config = {'xrays':True, 'E_min':20.0}
 	sp.auto_calibrate()
 	sp.cb.plot()
 	sp.summarize()
 	sp.plot()
+
+	sp = Spectrum('AH20190131_Na22_10cm_IDM4.Chn','test.db')
+	sp = Spectrum('AH20190131_Na22_10cm_IDM4.Spe')
+	sp.saveas('AH20190131_Na22_10cm_IDM4 (copy).Chn')
+	sp = Spectrum('AH20190131_Na22_10cm_IDM4 (copy).Chn')
+	sp.plot()
+
 
 
 	########## Decay Chain Tests ##########
