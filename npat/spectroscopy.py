@@ -57,7 +57,7 @@ class Calibration(object):
 									 [-2.151e-02, -1.416e-02,  9.367e-03,  2.294e-05,  2.569e-03],
 									 [-4.869e-05, -3.416e-05,  2.294e-05,  5.411e-07, -1.165e-04],
 									 [-7.748e-03, -4.137e-03,  2.569e-03, -1.165e-04,  3.332e-02]],
-						'rescal': [0.05]}
+						'rescal': [1.0, 1e-3]}
 		self.update(meta)
 
 	def update(self, meta={}):
@@ -124,6 +124,8 @@ class Calibration(object):
 		cal = cal if len(cal) else self.calib['rescal']
 		if len(cal)==1:
 			return cal[0]*np.sqrt(idx)
+		elif len(cal)==2:
+			return cal[0]+cal[1]*idx
 
 	def map_idx(self, energy, *cal):
 		energy = np.asarray(energy)
@@ -228,7 +230,14 @@ class Calibration(object):
 
 		try:		
 			bounds = ([0.0, 0.0, -1.0, 0.0, -2.0], [10.0, 2.0, 3.0, 0.5, 3.0])
-			fit, unc = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0, bounds=bounds)
+			fit5, unc5 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0, bounds=bounds)
+			fit3, unc3 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0[:3], bounds=(bounds[0][:3], bounds[1][:3]))
+			chi5 = np.sum((eff-self.eff(E, *fit5))**2/unc_eff**2)
+			chi3 = np.sum((eff-self.eff(E, *fit3))**2/unc_eff**2)
+			## Invert to find which is closer to one
+			chi5 = chi5 if chi5>1.0 else 1.0/chi5
+			chi3 = chi3 if chi3>1.0 else 1.0/chi3
+			fit, unc = (fit3, unc3) if chi3<=chi5 else (fit5, unc5)
 		except:
 			fit, unc = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0[:3], bounds=(bounds[0][:3], bounds[1][:3]))
 
@@ -309,6 +318,7 @@ class PeakFit(object):
 	def __init__(self,*args):
 		if len(args):
 			self.fit_params(*args)
+
 	def fit_params(self, x, hist, gm, istp, A0, cov_A0, meta, cb, snip):
 		self.x = x
 		self.hist = hist
@@ -326,6 +336,7 @@ class PeakFit(object):
 		self._fit, self._cov = None, None
 		self._chi2, self._counts, self._decay_rate = None, None, None
 		self._fit_param, self._cov_param = None, None
+		self.converged = (self.cov is not None)
 
 	def p0_bg(self, quadratic=False):
 		N = 3 if quadratic else 2
@@ -401,9 +412,9 @@ class PeakFit(object):
 			bounds = ([-np.inf for i in p0],[np.inf for i in p0])
 		try:
 			self._fit, self._cov = curve_fit(self.Npeak, self.x, self.hist, sigma=np.sqrt(self.hist+0.1), p0=p0, bounds=tuple(bounds))
-		except Exception, err:
+		except Exception as err:
 			print('Error on peak at {} (keV)'.format(round(self.gm[0][0],1)))
-			print(Exception, err)
+			print(err)
 			self._fit, self._cov = np.array(p0), None
 		return self._fit
 
@@ -708,8 +719,6 @@ class Spectrum(object):
 				self.db_connection.commit()
 
 	def _check_db(self, db=None):
-		self.db_connection = None
-		self.db = None
 		if db is not None:
 			path, fnm = os.path.split(db)
 			if path in ['',' ']:
@@ -720,12 +729,10 @@ class Spectrum(object):
 
 			global DB_CONNECTIONS_DICT
 			if os.path.exists(db_fnm):
-				
 				if db_fnm not in DB_CONNECTIONS_DICT:
 					DB_CONNECTIONS_DICT[db_fnm] = sqlite3.connect(db_fnm)
 				self.db_connection = DB_CONNECTIONS_DICT[db_fnm]
 				self.db = self.db_connection.cursor()
-				self._get_db_params()
 			else:
 				print('WARNING: DB {} does not exist, creating new file.'.format(fnm))
 				from sqlite3 import Error
@@ -735,6 +742,7 @@ class Spectrum(object):
 					self.db = self.db_connection.cursor()
 				except Error as e:
 					print(e)
+			self._get_db_params()
 
 	def _update_db(self):
 		if self.db is not None:
@@ -787,23 +795,23 @@ class Spectrum(object):
 
 		start_time = dtm.datetime.strptime(self._meta['DATE_MEA'][0], '%m/%d/%Y %H:%M:%S')
 		LT, RT = tuple(map(float, self._meta['MEAS_TIM'][0].split(' ')))
-		engcal = map(float, self._meta['MCA_CAL'][-1].split(' ')[:-1])
+		engcal = list(map(float, self._meta['MCA_CAL'][-1].split(' ')[:-1]))
 		self.meta = {'start_time':start_time, 'live_time':LT, 'real_time':RT, 'engcal':engcal}
 
 	def _from_Chn(self, filename=None):
 		if filename is None:
 			filename = os.path.join(self._path, self._fnm)
-		with open(filename) as f:
-			det_no = np.frombuffer(f.read(6),dtype='i2')[1]
-			sts = np.frombuffer(f.read(2),dtype='S2')[0]
+		with open(filename, 'rb') as f:
+			det_no = np.frombuffer(f.read(6), dtype='i2')[1]
+			sts = np.frombuffer(f.read(2), dtype='S2')[0].decode('utf-8')
 			RT, LT = tuple(map(float, 0.02*np.frombuffer(f.read(8), dtype='i4')))
-			st = np.frombuffer(f.read(12),dtype='S12')[0]
+			st = np.frombuffer(f.read(12), dtype='S12')[0].decode('utf-8')
 			months = {'jan':'01','feb':'02','mar':'03','apr':'04',
 						'may':'05','jun':'06','jul':'07','aug':'08',
 						'sep':'09','oct':'10','nov':'11','dec':'12'}
 			start_time = '{0}/{1}/{2} {3}:{4}:{5}'.format(months[st[2:5].lower()],st[:2],('20' if st[7]=='1' else '19')+st[5:7],st[8:10],st[10:],sts)
 			start_time = dtm.datetime.strptime(start_time, '%m/%d/%Y %H:%M:%S')
-			L = np.frombuffer(f.read(4),dtype='i2')[1]
+			L = np.frombuffer(f.read(4), dtype='i2')[1]
 			self.hist = np.asarray(np.frombuffer(f.read(4*L), dtype='i4'), dtype=np.int64)
 			f.read(4)
 			engcal = np.frombuffer(f.read(12),dtype='f4').tolist()
@@ -811,15 +819,15 @@ class Spectrum(object):
 			shape = np.frombuffer(f.read(12), dtype='f4').tolist()
 			self.meta['SHAPE_CAL'] = ['3', ' '.join(map(str, shape))]
 			f.read(228)
-			L = np.frombuffer(f.read(1),dtype='i1')[0]
+			L = np.frombuffer(f.read(1), dtype='i1')[0]
 			if L:
-				det_desc = np.frombuffer(f.read(L),dtype='S{}'.format(L))[0]
+				det_desc = np.frombuffer(f.read(L), dtype='S{}'.format(L))[0].decode('utf-8')
 				self.meta['SPEC_REM'] = ['DET# '+str(det_no), 'DETDESC# '+det_desc, 'AP# Maestro Version 7.01']
 			if L<63:
 				f.read(63-L)
-			L = np.frombuffer(f.read(1),dtype='i1')[0]
+			L = np.frombuffer(f.read(1), dtype='i1')[0]
 			if L:
-				sample_desc = np.frombuffer(f.read(L),dtype='S{}'.format(L))[0]
+				sample_desc = np.frombuffer(f.read(L),dtype='S{}'.format(L))[0].decode('utf-8')
 				self.meta['SPEC_ID'] = [sample_desc]
 
 	@property
@@ -951,7 +959,7 @@ class Spectrum(object):
 		pks = np.delete(pks, pairs, axis=0)
 		p0 += [PeakFit(x[p[0]:p[1]], self._hist[p[0]:p[1]], [self.gamma_list[p[2]][p[3]]], [self._meta['istp'][p[2]]],
 				[p0_A[p[2]-p[4]]], [[cov_p0_A[p[2]-p[4],p[2]-p[4]]]], self._meta, self.cb, self._snip[p[0]:p[1]]) for p in pks]
-		return p0
+		return [p for p in p0 if p.converged]
 
 	@property
 	def fits(self):

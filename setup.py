@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 from setuptools import setup, find_packages
 import os
 from distutils.core import setup
@@ -11,10 +15,13 @@ def _post_install(dir):
 		os.mkdir(path(''))
 
 	for fl in ['wwd6b1gk2ge5tgt/decay.db','tkndjqs036piojm/endf.db','zkoi6t2jicc9yqs/tendl.db','x2vfjr7uv7ffex5/tendl_d_rp.db','n0jjc0dv61j9of9/tendl_n_rp.db',
-				'ib2a5lrhiwkcro5/tendl_p_rp.db','kq07684wtp890v5/ziegler.db','lzn8zs6y8zu3v0s/iaea_monitors.db']:
+				'ib2a5lrhiwkcro5/tendl_p_rp.db','kq07684wtp890v5/ziegler.db','lzn8zs6y8zu3v0s/iaea_monitors.db','34sgcvt8n57b0aw/IRDFF.db']:
 		fnm = fl.split('/')[1]
 		if not os.path.isfile(path(fnm)):
-			import urllib2
+			try:
+				import urllib2
+			except:
+				import urllib.request as urllib2
 			try:
 				print('Downloading {}'.format(fnm))
 				with open(path(fnm),'wb') as f:
@@ -30,7 +37,7 @@ class install(_install):
 					 msg="Downloading nuclear data files...")
 
 setup(name='npat',
-	  version='0.2.2',
+	  version='0.2.3',
 	  description='Nuclear Physics Analysis Tools (NPAT) is a library written in python to assist in analysis of the physics of nuclear reactions and spectroscopy.',
 	  url='https://github.com/jtmorrell/npat',
 	  author='Jonathan Morrell',

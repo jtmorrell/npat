@@ -57,7 +57,7 @@ class Isotope(object):
 			self._meta['unc_abundance'] = q[13]
 			self._meta['mass'] = q[14]
 			self._meta['Delta'] = q[15]
-			self._meta['decay_mode'] = map(lambda i:[float(p) if n==2 else p for n,p in enumerate(i.split(':'))], str(q[16]).split(','))
+			self._meta['decay_mode'] = list(map(lambda i:[float(p) if n==2 else p for n,p in enumerate(i.split(':'))], str(q[16]).split(',')))
 			state = '' if len(Q)==1 else (self.isomer[0] if len(Q)==2 else self.isomer)
 			self._meta['TeX'] = r'$^{'+str(self.A)+state+r'}$'+self.element.title()
 		return self._meta

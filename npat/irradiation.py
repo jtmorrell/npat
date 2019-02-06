@@ -142,10 +142,10 @@ class Ziegler(Irradiation):
 
 		db = get_cursor('ziegler')
 		
-		self.protons = {int(i[0]):map(float,i[1:]) for i in db.execute('SELECT * FROM protons')}
-		self.helium = {int(i[0]):map(float,i[1:]) for i in db.execute('SELECT * FROM helium')}
-		self.ionization = {int(i[0]):map(float,i[1:]) for i in db.execute('SELECT * FROM ionization')}
-		self.weights = {int(i[0]):map(float,i[1:3]) for i in db.execute('SELECT * FROM weights')}
+		self.protons = {int(i[0]):list(map(float,i[1:])) for i in db.execute('SELECT * FROM protons')}
+		self.helium = {int(i[0]):list(map(float,i[1:])) for i in db.execute('SELECT * FROM helium')}
+		self.ionization = {int(i[0]):list(map(float,i[1:])) for i in db.execute('SELECT * FROM ionization')}
+		self.weights = {int(i[0]):list(map(float,i[1:3])) for i in db.execute('SELECT * FROM weights')}
 		self.compounds = {str(i[0]):[[int(h.split(':')[0]),float(h.split(':')[1])] for h in i[2].split(',')] for i in db.execute('SELECT * FROM compounds')}
 		self.compounds = {cm:[[i[0],i[1]/sum([m[1] for m in self.compounds[cm]])] for i in self.compounds[cm]] for cm in self.compounds}
 		self.densities = {str(i[0]):float(i[1]) for i in db.execute('SELECT * FROM compounds')}

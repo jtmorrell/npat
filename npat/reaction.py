@@ -69,7 +69,7 @@ class Library(object):
 			q = [('%'+i+'%' if not n%2 else i) for n,i in enumerate([target, outgoing, product]) if i]
 			ss += ' WHERE ' if len(q) else ''
 			ss += ' AND '.join([i for i in [('target LIKE ?' if target else ''),('outgoing=?' if outgoing else ''),('product LIKE ?' if product else '')] if i])
-			reacs = [map(str,i) for i in self.db.execute(ss, tuple(q))]
+			reacs = [list(map(str, i)) for i in self.db.execute(ss, tuple(q))]
 			fmt = '{0}(n,{1}){2}'
 
 		elif self.db_name in ['tendl_n_rp','tendl_p_rp','tendl_d_rp']:
@@ -82,14 +82,14 @@ class Library(object):
 			q = ['%'+i+'%' for i in [target, product] if i]
 			ss += ' WHERE ' if len(q) else ''
 			ss += ' AND '.join([i for i in [('target LIKE ?' if target else ''),('product LIKE ?' if product else '')] if i])
-			reacs = [map(str,i) for i in self.db.execute(ss, tuple(q))]
+			reacs = [list(map(str, i)) for i in self.db.execute(ss, tuple(q))]
 			fmt = '{0}('+self.db_name.split('_')[1]+',x){2}'
 
 		elif self.db_name=='iaea_medical':
 			q = [('%'+i+'%' if n in [0,3] else i) for n,i in enumerate([target, incident, outgoing, product]) if i]
 			ss += ' WHERE ' if len(q) else ''
 			ss += ' AND '.join([i for i in [('target LIKE ?' if target else ''),('incident=?' if incident else ''),('outgoing=?' if outgoing else ''),('product LIKE ?' if product else '')] if i])
-			reacs = [map(str,i) for i in self.db.execute(ss, tuple(q))]
+			reacs = [list(map(str, i)) for i in self.db.execute(ss, tuple(q))]
 			fmt = '{0}({1},{2}){3}'
 
 		if target:

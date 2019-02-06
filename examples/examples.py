@@ -10,7 +10,7 @@ if __name__=='__main__':
 	sp = Spectrum('eu_calib_7cm.Spe','test.db')
 	sp.meta = {'istp':['152EU'], 'A0':3.7E4, 'ref_date':'01/01/2009 12:00:00'}
 
-	sp.fit_config = {'xrays':True, 'E_min':20.0}
+	# sp.fit_config = {'xrays':True, 'E_min':20.0}
 	sp.auto_calibrate()
 	sp.cb.plot()
 	sp.summarize()
@@ -18,7 +18,10 @@ if __name__=='__main__':
 
 	sp = Spectrum('AH20190131_Na22_10cm_IDM4.Chn','test.db')
 	sp = Spectrum('AH20190131_Na22_10cm_IDM4.Spe')
+
 	sp.saveas('AH20190131_Na22_10cm_IDM4 (copy).Chn')
+	sp.saveas('AH20190131_Na22_10cm_IDM4 (copy).spe')
+
 	sp = Spectrum('AH20190131_Na22_10cm_IDM4 (copy).Chn')
 	sp.plot()
 
@@ -36,7 +39,7 @@ if __name__=='__main__':
 
 	######## Ziegler Tests #############
 
-	zg = Ziegler(stack=[{'compound':'Ni','name':'Ni01','thickness':0.025},{'compound':'Ti','name':'Ti01','thickness':0.025},{'compound':'U','name':'U01','thickness':1.0,'density':20.0}], beam={'istp':'2H', 'N':1E5})
+	zg = Ziegler(stack=[{'compound':'Ni','name':'Ni01','thickness':0.025},{'compound':'Ti','name':'Ti01','thickness':0.025},{'compound':'U','name':'U01','thickness':0.7,'density':20.0}], beam={'istp':'2H', 'N':1E5})
 	zg.plot(['U','Ni','Ti'])
 	zg.summarize()
 
@@ -44,10 +47,10 @@ if __name__=='__main__':
 	####### Isotope Tests ############
 
 	ISTP = Isotope('133BA')
-	print ISTP.TeX
-	print ISTP.mass
-	print ISTP.half_life(ISTP.optimum_units(),unc=True),ISTP.optimum_units()
-	print ISTP.gammas()
+	print(ISTP.TeX)
+	print(ISTP.mass)
+	print(ISTP.half_life(ISTP.optimum_units(),unc=True),ISTP.optimum_units())
+	print(ISTP.gammas())
 
 
 	####### Reaction Tests ##########
@@ -69,5 +72,5 @@ if __name__=='__main__':
 
 	plt.show()
 
-	lb = Library('tendl')
-	print lb.search(target='226RA', outgoing='2n')
+	lb = Library('tendl_n')
+	print(lb.search(target='226RA',product='225RAg'))
