@@ -202,8 +202,8 @@ class Isotope(object):
 		alphas = list(self.meta['al'])
 		for n,L in enumerate([E_lim,I_lim]):
 			if L[0] is not None:
-				alphas = [a for a in alphas if b[n]>=L[0]]
+				alphas = [a for a in alphas if a[n]>=L[0]]
 			if L[1] is not None:
-				alphas = [a for a in betas if b[n]<=L[1]]
+				alphas = [a for a in alphas if a[n]<=L[1]]
 		return {l:[a[n] for a in alphas] for n,l in enumerate(['E','I','dI'])}
 

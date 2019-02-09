@@ -335,11 +335,12 @@ class DecayChain(object):
 		X = []
 		time = []
 		itp = []
+		conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557.6E3,'ky':31557.6E6}[self.units]
 		for n,ct in enumerate(self.counts):
 			if len(ct):
-				Y += ct[:,2].tolist()
+				Y += (ct[:,2]/conv).tolist()
 				if len(ct[0])==4:
-					dY += ct[:,3].tolist()
+					dY += (ct[:,3]/conv).tolist()
 				X += [np.zeros(len(nz)) for i in ct]
 				time += ct[:,:2].tolist()
 				itp += (n*np.ones(len(ct),dtype=int)).tolist()

@@ -146,9 +146,10 @@ class Ziegler(Irradiation):
 		self.helium = {int(i[0]):list(map(float,i[1:])) for i in db.execute('SELECT * FROM helium')}
 		self.ionization = {int(i[0]):list(map(float,i[1:])) for i in db.execute('SELECT * FROM ionization')}
 		self.weights = {int(i[0]):list(map(float,i[1:3])) for i in db.execute('SELECT * FROM weights')}
-		self.compounds = {str(i[0]):[[int(h.split(':')[0]),float(h.split(':')[1])] for h in i[2].split(',')] for i in db.execute('SELECT * FROM compounds')}
+		self.compounds = {str(i[0]):[[int(h.split(':')[0]), float(h.split(':')[1])] for h in i[2].split(',')] for i in db.execute('SELECT * FROM compounds')}
 		self.compounds = {cm:[[i[0],i[1]/sum([m[1] for m in self.compounds[cm]])] for i in self.compounds[cm]] for cm in self.compounds}
 		self.densities = {str(i[0]):float(i[1]) for i in db.execute('SELECT * FROM compounds')}
+		self.elements = sorted([[str(i[0]), int(i[2].split(':')[0])] for i in db.execute('SELECT * FROM compounds') if len(i[2].split(':'))==2], key=lambda h:len(h[0]), reverse=True)
 
 		Irradiation.__init__(self)
 		self.beam = beam
@@ -181,6 +182,16 @@ class Ziegler(Irradiation):
 		for s in _stack:
 			if 'compound' not in s:
 				raise ValueError('compound must be specified')
+
+			if type(s['compound'])==dict:
+				cs = ''
+				for c in s['compound']:
+					cs = c
+					self.compounds[c] = s['compound'][c]
+				s['compound'] = cs
+				if s['compound']=='':
+					raise ValueError('compound must be specified')
+
 			if 'ad' not in s:
 				if 'area' in s and 'mass' in s:
 					s['ad'] = 1e3*s['mass']/s['area']
@@ -196,7 +207,38 @@ class Ziegler(Irradiation):
 			sm = Sample()
 			if 'name' in s:
 				sm.name = s['name']
+			if 'ad' not in s:
+				raise ValueError('Areal density either not specified or not computable: {}'.format(s))
 			sm.ad = s['ad']
+
+			if s['compound'] not in self.compounds:
+				cm = s['compound']
+				nums = [str(i) for i in range(10)]
+				cm_list = []
+				for el,Z in self.elements:
+					if len(cm)==0:
+						break
+					f = cm.split(el)
+					if len(f)>1:
+						c = f[0]
+						for e in f[1:]:
+							if len(e):
+								if e[0] in nums:
+									cm_list.append([Z, float(e[0])])
+									if len(e)>1:
+										c += e[1:]
+								else:
+									cm_list.append([Z, 1.0])
+									c += e
+							else:
+								cm_list.append([Z, 1.0])
+						cm = c
+				if len(cm)==0 and len(cm_list):
+					self.compounds[s['compound']] = [[i[0], i[1]/sum([i[1] for i in cm_list])] for i in cm_list] 
+
+			if s['compound'] not in self.compounds:
+				raise ValueError('compound {} not known.'.format(s['compound']))
+
 			sm.compound = s['compound']
 			sm.meta = s
 			self._samples.append(sm)

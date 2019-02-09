@@ -57,7 +57,7 @@ class Calibration(object):
 									 [-2.151e-02, -1.416e-02,  9.367e-03,  2.294e-05,  2.569e-03],
 									 [-4.869e-05, -3.416e-05,  2.294e-05,  5.411e-07, -1.165e-04],
 									 [-7.748e-03, -4.137e-03,  2.569e-03, -1.165e-04,  3.332e-02]],
-						'rescal': [1.0, 1e-3]}
+						'rescal': [2.0, 4e-4]}
 		self.update(meta)
 
 	def update(self, meta={}):
@@ -130,10 +130,10 @@ class Calibration(object):
 	def map_idx(self, energy, *cal):
 		energy = np.asarray(energy)
 		cal = cal if len(cal) else self.calib['engcal']
-		if len(cal)==2:
-			return np.array(np.rint((energy-cal[0])/cal[1]), dtype=np.int32)
-		elif len(cal)==3:
-			return np.array(np.rint(0.5*(np.sqrt(cal[1]**2-4.0*cal[2]*(cal[0]-energy))-cal[1])/cal[2]), dtype=np.int32)
+		if len(cal)==3:
+			if cal[2]!=0.0:
+				return np.array(np.rint(0.5*(np.sqrt(cal[1]**2-4.0*cal[2]*(cal[0]-energy))-cal[1])/cal[2]), dtype=np.int32)
+		return np.array(np.rint((energy-cal[0])/cal[1]), dtype=np.int32)
 
 	def calibrate(self, spectra, saveas=None, db=None, auto_calibrate=False):
 		shelves = []
@@ -228,17 +228,21 @@ class Calibration(object):
 		p0 = p0 if len(p0)==5 else p0.tolist()+[0.001, 1.476]
 		p0[0] = p0[0]*np.average(np.array(eff)/self.eff(np.array(E), *p0), weights=(self.eff(np.array(E), *p0)/np.array(unc_eff))**2)
 
-		try:		
-			bounds = ([0.0, 0.0, -1.0, 0.0, -2.0], [10.0, 2.0, 3.0, 0.5, 3.0])
-			fit5, unc5 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0, bounds=bounds)
-			fit3, unc3 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0[:3], bounds=(bounds[0][:3], bounds[1][:3]))
-			chi5 = np.sum((eff-self.eff(E, *fit5))**2/unc_eff**2)
-			chi3 = np.sum((eff-self.eff(E, *fit3))**2/unc_eff**2)
-			## Invert to find which is closer to one
-			chi5 = chi5 if chi5>1.0 else 1.0/chi5
-			chi3 = chi3 if chi3>1.0 else 1.0/chi3
-			fit, unc = (fit3, unc3) if chi3<=chi5 else (fit5, unc5)
-		except:
+		bounds = ([0.0, 0.0, -1.0, 0.0, -2.0], [10.0, 2.0, 3.0, 0.5, 3.0])
+		if any([sp.fit_config['xrays'] for sp in spectra]):
+			try:		
+				fit5, unc5 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0, bounds=bounds)
+				fit3, unc3 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0[:3], bounds=(bounds[0][:3], bounds[1][:3]))
+				chi5 = np.sum((eff-self.eff(E, *fit5))**2/unc_eff**2)
+				chi3 = np.sum((eff-self.eff(E, *fit3))**2/unc_eff**2)
+				## Invert to find which is closer to one
+				chi5 = chi5 if chi5>1.0 else 1.0/chi5
+				chi3 = chi3 if chi3>1.0 else 1.0/chi3
+				fit, unc = (fit3, unc3) if chi3<=chi5 else (fit5, unc5)
+			except:
+				fit, unc = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0[:3], bounds=(bounds[0][:3], bounds[1][:3]))
+
+		else:
 			fit, unc = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0[:3], bounds=(bounds[0][:3], bounds[1][:3]))
 
 		self._calib_data['effcal'].append({'fit':fit, 'unc':unc, 'x':E, 'y':eff, 'yerr':unc_eff, 'shelf':spectra[0].meta['shelf']})
@@ -334,7 +338,7 @@ class PeakFit(object):
 		self.snip = interp1d(x, snip)
 		self._snip = snip
 		self._fit, self._cov = None, None
-		self._chi2, self._counts, self._decay_rate = None, None, None
+		self._chi2, self._counts, self._decay_rate, self._decays = None, None, None, None
 		self._fit_param, self._cov_param = None, None
 		self.converged = (self.cov is not None)
 
@@ -542,6 +546,19 @@ class PeakFit(object):
 				unc_N.append(np.inf)
 		self._counts = (np.array(N_cts), np.array(unc_N))
 		return self._counts
+
+	@property
+	def decays(self):
+		if 'live_time' not in self.meta or 'real_time' not in self.meta:
+			print('WARNING: Need real-time/live-time to compute decay-rate.')
+			return np.zeros(len(gm)), np.zeros(len(gm))
+		if self._decays is not None:
+			return self._decays
+		N, unc_N = self.counts
+		D = N/(self.gm[:,1]*self.cb.eff(self.gm[:,0])*(self.meta['live_time']/self.meta['real_time']))
+		unc_D = np.sqrt((unc_N/N)**2+(self.cb.unc_eff(self.gm[:,0])/self.cb.eff(self.gm[:,0]))**2+(self.gm[:,2]/self.gm[:,1])**2)*D
+		self._decays = (D, unc_D)
+		return self._decays
 	
 	@property
 	def decay_rate(self):
@@ -644,6 +661,18 @@ class Spectrum(object):
 			print('WARNING: spectra start and stop times not syncronous.')
 		return self
 
+	def rebin(self, N_bins):
+		L = len(self.hist)
+		if N_bins>L:
+			raise ValueError('N_bins: {0} must be greater than current value: {1}'.format(N_bins, L))
+		r = int(round(L/float(N_bins)))
+		self.hist = np.sum(self.hist.reshape((int(L/r), r)), axis=1)
+		ec = self.cb.engcal
+		self.meta = {'engcal':[ec[0], ec[1]*r]+([ec[2]*r**2] if len(ec)==3 else [])}
+		rc = self.cb.rescal
+		self.meta = {'rescal':([rc[0]*np.sqrt(r)] if len(rc)==1 else [rc[0], rc[1]*r])}
+
+
 	def _default_params(self):
 		self._path, self._fnm = None, None
 		self.db, self.db_connection = None, None
@@ -667,47 +696,31 @@ class Spectrum(object):
 
 			if 'spectra' not in tables:
 				q = 'CREATE TABLE `spectra` (`spec_id` INTEGER, `filename` TEXT, `file_path` TEXT, '
-				q += '`start_time` TEXT, `live_time` REAL, `real_time` REAL, `calib_id` INTEGER, `meta` TEXT);'
+				q += '`start_time` TEXT, `live_time` REAL, `real_time` REAL, `meta` TEXT, `fit_config` TEXT, '
+				q += '`engcal` TEXT, `effcal` TEXT, `unc_effcal` TEXT, `rescal` TEXT);'
 				self.db.execute(q)
 				self.db_connection.commit()
 
 			q = list(self.db.execute('SELECT * FROM spectra WHERE filename LIKE ? AND file_path LIKE ?', ('%'+self._fnm+'%', '%'+self._path+'%')))
 			if len(q):
-				self.meta = literal_eval(q[0][7])
+				self.meta = literal_eval(str(q[0][6]))
+				self.fit_config = literal_eval(str(q[0][7]))
+				self.meta = {'engcal':literal_eval(str(q[0][8])), 'effcal':literal_eval(str(q[0][9])), 
+							'unc_effcal':literal_eval(str(q[0][10])), 'rescal':literal_eval(str(q[0][11]))}
 				self.meta['spec_id'] = q[0][0]
-				self.meta['calib_id'] = q[0][6]
 			else:
 				ids = [i[0] for i in self.db.execute('SELECT spec_id FROM spectra')]
 				self.meta['spec_id'] = max(ids)+1 if len(ids) else 1
-				self.meta['calib_id'] = None
+				
 				vals = [self.meta['spec_id'], self._fnm, self._path, dtm.datetime.strftime(self.meta['start_time'], '%m/%d/%Y %H:%M:%S'),
-						self.meta['live_time'], self.meta['real_time'], self.meta['calib_id'],
-						str({i:self.meta[i] for i in self.meta if i not in ['start_time']})]
-				self.db.execute('INSERT INTO spectra VALUES(?,?,?,?,?,?,?,?)', tuple(vals))
+						self.meta['live_time'], self.meta['real_time'],
+						str({i:self.meta[i] for i in self.meta if i not in ['start_time', 'fit_config']}),
+						str({i:self.fit_config[i] for i in self.fit_config if i not in []}),
+						str(list(self.meta['engcal'])), str(list(self.meta['effcal'])), 
+						(str(self.meta['unc_effcal']) if type(self.meta['unc_effcal'])==list else str(self.meta['unc_effcal'].tolist())),
+						str(list(self.meta['rescal']))]
+				self.db.execute('INSERT INTO spectra VALUES('+','.join(12*['?'])+')', tuple(vals))
 				self.db_connection.commit()
-
-			if 'calibration' not in tables:
-				q = 'CREATE TABLE `calibration` (`calib_id` INTEGER, `shelf` TEXT, `engcal` TEXT, `effcal` TEXT, `unc_effcal` TEXT, `rescal` TEXT);'
-				self.db.execute(q)
-				self.db_connection.commit()
-			else:
-				if self.meta['calib_id'] is not None:
-					q = list(self.db.execute('SELECT * FROM calibration WHERE calib_id=?',(self.meta['calib_id'],)))
-					if len(q):
-						self.meta['shelf'] = str(q[0][1]) if q[0][1] else None
-						self.meta = {'engcal':literal_eval(q[0][2]), 'effcal':literal_eval(q[0][3]), 
-									'unc_effcal':literal_eval(q[0][4]), 'rescal':literal_eval(q[0][5])}
-					else:
-						self.meta['calib_id'] = None
-				if self.meta['calib_id'] is None:
-					ids = [i[0] for i in self.db.execute('SELECT calib_id FROM calibration')]
-					self.meta['calib_id'] = max(ids)+1 if len(ids) else 1
-					self.db.execute('UPDATE spectra SET calib_id=? WHERE spec_id=?', (self.meta['calib_id'], self.meta['spec_id']))
-					vals = [self.meta['calib_id'], self.meta['shelf'], str(list(self.meta['engcal'])), str(list(self.meta['effcal'])), 
-							(str(self.meta['unc_effcal']) if type(self.meta['unc_effcal'])==list else str(self.meta['unc_effcal'].tolist())),
-							str(list(self.meta['rescal']))]
-					self.db.execute('INSERT INTO calibration VALUES(?,?,?,?,?,?)', tuple(vals))
-					self.db_connection.commit()
 
 			if 'peaks' not in tables:
 				q = 'CREATE TABLE `peaks` (`spec_id` INTEGER, `filename` TEXT, '
@@ -746,12 +759,14 @@ class Spectrum(object):
 
 	def _update_db(self):
 		if self.db is not None:
-			meta_str = str({i:self.meta[i] for i in self.meta if i not in ['start_time']})
+			meta_str = str({i:self.meta[i] for i in self.meta if i not in ['start_time','fit_config']})
 			self.db.execute('UPDATE spectra SET meta=? WHERE spec_id=?', (self.meta['spec_id'], meta_str))
-			vals = [self.meta['shelf'], str(list(self.meta['engcal'])), str(list(self.meta['effcal'])), 
+			fit_config_str = str({i:self.fit_config[i] for i in self.fit_config if i not in []})
+			self.db.execute('UPDATE spectra SET fit_config=? WHERE spec_id=?', (self.meta['spec_id'], fit_config_str))
+			vals = [str(list(self.meta['engcal'])), str(list(self.meta['effcal'])), 
 					(str(self.meta['unc_effcal']) if type(self.meta['unc_effcal'])==list else str(self.meta['unc_effcal'].tolist())),
-					str(list(self.meta['rescal'])), self.meta['calib_id']]
-			self.db.execute('UPDATE calibration SET shelf=?, engcal=?, effcal=?, unc_effcal=?, rescal=? WHERE calib_id=?', tuple(vals))
+					str(list(self.meta['rescal'])), self.meta['spec_id']]
+			self.db.execute('UPDATE spectra SET engcal=?, effcal=?, unc_effcal=?, rescal=? WHERE spec_id=?', tuple(vals))
 			if self._fits is not None:
 				vals = []
 				for f in self._fits:
@@ -859,13 +874,13 @@ class Spectrum(object):
 
 	def snip_bg(self):
 		sig, adj, alpha = self.fit_config['snip_sig'], self.fit_config['snip_adj'], self.fit_config['snip_alpha']
-		r, x, dead = self.cb.rescal[0], np.arange(len(self._hist)), int(self.cb.rescal[0]*sig*len(self._hist)**0.5)
+		x, dead = np.arange(len(self._hist)), int(sig*self.cb.res(len(self._hist)))
 		V_i, L = np.log(np.log(np.sqrt(self._hist+1.0)+1.0)+1.0), len(x)-dead
 		while self._hist[dead]==0:
 			dead += 1
 		
 		for M in np.linspace(0, sig, 10):
-			l, h = np.array(x-M*r*np.sqrt(x), dtype=np.int32), np.array(x+M*r*np.sqrt(x), dtype=np.int32)
+			l, h = np.array(x-M*self.cb.res(x), dtype=np.int32), np.array(x+M*self.cb.res(x), dtype=np.int32)
 			V_i[dead:L] = np.minimum(V_i[dead:L],0.5*(V_i[l[dead:L]]+V_i[h[dead:L]]))
 
 		snip = self.exp_smooth((np.exp(np.exp(V_i)-1.0)-1.0)**2-1.0, alpha)
@@ -959,7 +974,8 @@ class Spectrum(object):
 		pks = np.delete(pks, pairs, axis=0)
 		p0 += [PeakFit(x[p[0]:p[1]], self._hist[p[0]:p[1]], [self.gamma_list[p[2]][p[3]]], [self._meta['istp'][p[2]]],
 				[p0_A[p[2]-p[4]]], [[cov_p0_A[p[2]-p[4],p[2]-p[4]]]], self._meta, self.cb, self._snip[p[0]:p[1]]) for p in pks]
-		return [p for p in p0 if p.converged]
+
+		return sorted([p for p in p0 if p.converged], key=lambda p:p.gm[0][0])
 
 	@property
 	def fits(self):
@@ -976,10 +992,8 @@ class Spectrum(object):
 				fl = os.path.join(self._path, '.'.join(self._fnm.split('.')[:-1])+'.'+fl.split('.')[-1])
 			if fl.endswith('.Spe'):
 				### Maestro ASCII .Spe ###
-				if 'DATE_MEA' not in self.meta:
-					self._meta['DATE_MEA'] = [dtm.datetime.strftime(self.meta['start_time'], '%m/%d/%Y %H:%M:%S')]
-				if 'MEAS_TIM' not in self.meta:
-					self._meta['MEAS_TIM'] = ['{0} {1}'.format(int(self.meta['live_time']), int(self.meta['real_time']))]
+				self._meta['DATE_MEA'] = [dtm.datetime.strftime(self.meta['start_time'], '%m/%d/%Y %H:%M:%S')]
+				self._meta['MEAS_TIM'] = ['{0} {1}'.format(int(self.meta['live_time']), int(self.meta['real_time']))]
 				self._meta['ENER_FIT'] = ['{0} {1}'.format(self.cb.engcal[0], self.cb.engcal[1])]
 				self._meta['MCA_CAL'] = ['3','{0} {1} {2} keV'.format(self.cb.engcal[0], self.cb.engcal[1], (self.cb.engcal[2] if len(self.cb.engcal)>2 else 0.0))]
 				defaults = {'ROI':['0'],'SPEC_REM':['DET# 0','DETDESC# ','AP# Maestro Version 7.01'],'PRESETS':['0'],
@@ -1057,12 +1071,21 @@ class Spectrum(object):
 			for f in self.fits:
 				for n in range(len(f.gm)):
 					ln1 = [f.gm[n][0], f.istp[n], f.gm[n][1]*100.0]
-					print('{0} keV peak in {1} ({2}% intensity)'.format(*ln1))
+					# print('{0} keV peak in {1} ({2}% intensity)'.format(*ln1))
+					ln0 = '{1} - {0} keV (I = {2}%)'.format(*ln1)
+					print(ln0)
+					print(''.join(['-']*len(ln0)))
 					ln2 = [int(f.counts[0][n]), (int(f.counts[1][n]) if np.isfinite(f.counts[1][n]) else np.inf),
-							round(f.decay_rate[0][n],1),round(f.decay_rate[1][n],1), 
-							round(f.decay_rate[0][n]/3.7E4,3), round(f.decay_rate[1][n]/3.7E4,3), 
+							format(f.decays[0][n], '.3e'), format(f.decays[1][n], '.3e'), 
+							format(f.decay_rate[0][n], '.3e'), format(f.decay_rate[1][n], '.3e'), 
+							format(f.decay_rate[0][n]/3.7E4, '.3e'), format(f.decay_rate[1][n]/3.7E4, '.3e'), 
 							round(f.chi2,3)]
-					print('N:{0}({1}), A(Bq):{2}({3}), A(uCi):{4}({5}), chi2/dof:{6}'.format(*ln2))
+					print('counts: {0} +/- {1}'.format(ln2[0], ln2[1]))
+					print('decays: {0} +/- {1}'.format(ln2[2], ln2[3]))
+					print('activity (Bq): {0} +/- {1}'.format(ln2[4], ln2[5]))
+					print('activity (uCi): {0} +/- {1}'.format(ln2[6], ln2[7]))
+					print('chi2/dof: {}'.format(ln2[8]))
+					# print('N:{0}({1}), A(Bq):{2}({3}), A(uCi):{4}({5}), chi2/dof:{6}'.format(*ln2))
 					print('')
 
 	def plot(self, fit=True, labels=True, square_fig=False, **kwargs):
