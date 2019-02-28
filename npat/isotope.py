@@ -27,10 +27,13 @@ class Isotope(object):
 			self.element, self.A, self.isomer = 'n', 1, 'g'
 		else:
 			self.element = ''.join(re.findall('[A-Z]+',istp))
-			self.A = int(istp.split(self.element)[0])
+			if istp.startswith('nat'):
+				self.A = 'nat'
+			else:
+				self.A = int(istp.split(self.element)[0])
 			self.isomer = istp.split(self.element)[1]
 		self.isotope = str(self.A)+self.element
-		if self.isomer=='':
+		if self.isomer=='' and type(self.A)==int:
 			self.isomer = 'g'
 		if self.isomer=='m':
 			self.isomer = 'm1'
@@ -45,7 +48,13 @@ class Isotope(object):
 			for i in ['SFY','gm','el','bm','bp','al']:
 				self._meta[i] = None
 			Q = list(self.db.execute('SELECT * FROM chart WHERE isotope=?',(self.isotope,)))
-			q = [i for i in Q if i[3]==self.isomer][0]
+			q = [i for i in Q if i[3]==self.isomer]
+			if len(q):
+				q = q[0]
+			elif len(Q):
+				q = Q[0]
+			else:
+				q = [0,0,0,0,'',0,None,None,None,None,None,None,None,None,None,None,'']
 			self._meta['E_level'] = q[2]
 			self._meta['J_pi'] = str(q[4]) if q[4] else '?'
 			self._meta['Z'] = q[6]
@@ -156,8 +165,8 @@ class Isotope(object):
 			if L[1] is not None:
 				gammas = [g for g in gammas if g[n]<=L[1]]
 		if not xrays:
-			gammas = [g for g in gammas if g[3]=='' and abs(g[0]-511.0)>4.0]
-		return {l:[g[n] for g in gammas] for n,l in enumerate(['E','I','dI','notes'])}
+			gammas = [g for g in gammas if g[3]=='']
+		return {l:[g[n] for g in gammas if abs(g[0]-511.0)>1.0] for n,l in enumerate(['E','I','dI','notes'])}
 
 	def electrons(self,I_lim=(None,None),E_lim=(None,None),CE_only=False,Auger_only=False):
 		if self.meta['el'] is None:

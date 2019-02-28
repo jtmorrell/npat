@@ -112,6 +112,8 @@ class Calibration(object):
 		var= np.zeros(len(energy)) if energy.shape else 0.0
 		for n in range(len(c)):
 			for m in range(n, len(c)):
+				if not np.isfinite(u[n][m]):
+					return np.inf
 				c_n, c_m = list(c), list(c)
 				c_n[n], c_m[m] = c_n[n]+eps, c_m[m]+eps
 				par_n = (self.eff(energy, *c_n)-self.eff(energy, *c))/eps
@@ -143,11 +145,10 @@ class Calibration(object):
 			if type(sp)==str:
 				sp = Spectrum(sp, db)
 			sps.append(sp)
-			if 'shelf' in sp.meta:
+			if ('A0' in sp.meta and 'ref_date' in sp.meta):
+				if 'shelf' not in sp.meta:
+					sp.meta = {'shelf':None}
 				shelves.append(sp.meta['shelf'])
-			else:
-				sp.meta = {'shelf':None}
-				shelves.append(None)
 		cal_spec = [sp for sp in spectra if ('A0' in sp.meta and 'ref_date' in sp.meta)]
 		if len(cal_spec)==0:
 			raise ValueError('Cannot calibrate: A0 and ref_date required for calibration.')
@@ -158,15 +159,17 @@ class Calibration(object):
 		p0_engcal = np.average([s.cb.engcal for s in cal_spec if len(s.cb.engcal)==len(cal_spec[0].cb.engcal)], axis=0)
 		engcal = self._calibrate_energy(cal_spec, p0_engcal)
 		rescal = self._calibrate_resolution(cal_spec, np.average([s.cb.rescal for s in cal_spec], axis=0))
+		for sp in sps:
+			sp.meta = {'engcal':engcal, 'rescal':rescal}
 
 		shelves = {sh:[s for s in cal_spec if s.meta['shelf']==sh] for sh in set(shelves)}
 		for shelf in shelves:
-			spectra = shelves[shelf]
-			p0_effcal = np.average([s.cb.effcal for s in spectra if len(s.cb.effcal)==len(spectra[0].cb.effcal)], axis=0)
-			effcal, unc_effcal = self._calibrate_efficiency(spectra, p0_effcal)
+			shelf_specs = shelves[shelf]
+			p0_effcal = np.average([s.cb.effcal for s in shelf_specs if len(s.cb.effcal)==len(shelf_specs[0].cb.effcal)], axis=0)
+			effcal, unc_effcal = self._calibrate_efficiency(shelf_specs, p0_effcal)
 			for sp in sps:
 				if shelf==sp.meta['shelf']:
-					sp.meta = {'engcal':engcal, 'effcal':effcal, 'unc_effcal':unc_effcal, 'rescal':rescal}
+					sp.meta = {'effcal':effcal, 'unc_effcal':unc_effcal}
 					if saveas is not None:
 						if type(saveas)==str:
 							saveas = [saveas]
@@ -186,7 +189,7 @@ class Calibration(object):
 		E, chn, unc_chn = E[idx], chn[idx], unc_chn[idx]
 
 		p0 = p0 if len(p0)==3 else [p0[0], p0[1], 0.0]
-		fit, unc = curve_fit(self.map_idx, E, chn, sigma=unc_chn, p0=p0)
+		fit, unc = curve_fit(self.eng, chn, E, sigma=self.eng(unc_chn), p0=p0)
 
 		self._calib_data['engcal'] = {'fit':fit, 'unc':unc, 'x':E, 'y':chn, 'yerr':unc_chn}
 		return fit
@@ -228,7 +231,7 @@ class Calibration(object):
 		p0 = p0 if len(p0)==5 else p0.tolist()+[0.001, 1.476]
 		p0[0] = p0[0]*np.average(np.array(eff)/self.eff(np.array(E), *p0), weights=(self.eff(np.array(E), *p0)/np.array(unc_eff))**2)
 
-		bounds = ([0.0, 0.0, -1.0, 0.0, -2.0], [10.0, 2.0, 3.0, 0.5, 3.0])
+		bounds = ([0.0, 0.0, -1.0, 0.0, -2.0], [10.0, 3.0, 3.0, 0.5, 3.0])
 		if any([sp.fit_config['xrays'] for sp in spectra]):
 			try:		
 				fit5, unc5 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0, bounds=bounds)
@@ -259,13 +262,14 @@ class Calibration(object):
 		mu, sig, unc_sig = np.array(mu), np.array(sig), np.array(unc_sig)
 		idx = np.where(sig>unc_sig)
 		mu, sig, unc_sig = mu[idx], sig[idx], unc_sig[idx]
-		fit, unc = curve_fit(self.res, mu, sig, sigma=unc_sig, p0=p0)
+		fit, unc = curve_fit(self.res, mu, sig, sigma=unc_sig, p0=p0, bounds=([-np.inf, 0.0],[np.inf, np.inf]))
 
 		self._calib_data['rescal'] = {'fit':fit, 'unc':unc, 'x':mu, 'y':sig, 'yerr':unc_sig}
 		return fit
 
 	def plot(self, **kwargs):
 		cm = colors()
+		cm_light = colors(shade='light')
 		f = plt.figure(figsize=(10, 6))
 		gs = gridspec.GridSpec(2, 10)
 		ax0 = plt.subplot(gs[0, 0:4])
@@ -286,13 +290,15 @@ class Calibration(object):
 		ax1.set_xlabel('ADC Channel')
 		ax1.set_ylabel('Peak Width')
 		
-		for d in self._calib_data['effcal']:
-			ax2.errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o')
+		clrs = [c for c in cm]
+		for N,d in enumerate(sorted(self._calib_data['effcal'], key=lambda h: h['shelf'])):
+			cl = clrs[N%len(clrs)]
+			ax2.errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o', color=cm[cl])
 			x = np.arange(min(d['x']), max(d['x']), 0.1)
-			ax2.plot(x, self.eff(x, *d['fit']), color=cm['k'], label=d['shelf'])
+			ax2.plot(x, self.eff(x, *d['fit']), color=cm[cl], label=d['shelf'])
 			low = self.eff(x, *d['fit'])-self.unc_eff(x, d['fit'], d['unc'])
 			high = self.eff(x, *d['fit'])+self.unc_eff(x, d['fit'], d['unc'])
-			ax2.fill_between(x, low, high, facecolor=cm['gy'], alpha=0.5)
+			ax2.fill_between(x, low, high, facecolor=cm_light[cl], alpha=0.5)
 		ax2.set_xlabel('Energy (keV)')
 		ax2.set_ylabel('Efficiency')
 		if any([d['shelf'] for d in self._calib_data['effcal']]):
@@ -402,8 +408,8 @@ class PeakFit(object):
 			idx = float(self.cb.map_idx(g[0]))
 			sig = float(self.cb.res(idx))
 			p0 += [self.A0[n]*self.cb.eff(g[0])*g[1]/sig, idx, sig]
-			bounds[0] += [0.0, idx-B_f*idx/sig, sig-sig/B_f] ### bounds[0][0] = 0.1*B_f*self.A0[n]*self.cb.eff(g[0])*g[1]/sig
-			bounds[1] += [p0[-3]+10.0*B_f*self.A0[n]*self.cb.eff(g[0])*g[1]/sig, idx+B_f*idx/sig, sig+0.5*sig*B_f]
+			bounds[0] += [0.0, idx-B_f*sig*0.5, sig-sig*np.exp(-0.1*B_f)] ### bounds[0][0] = 0.1*B_f*self.A0[n]*self.cb.eff(g[0])*g[1]/sig
+			bounds[1] += [p0[-3]+10.0*B_f*p0[-3], idx+B_f*sig*0.5, sig+sig*np.exp(0.1*B_f)]
 			if self.fit_config['skew_fit']:
 				p0 += [R, alpha]
 				bounds[0] += [0.0, 0.5]
@@ -680,7 +686,7 @@ class Spectrum(object):
 		self._meta = {'fit_config':{'snip_sig':8.5, 'snip_adj':1.5, 'snip_alpha':0.15,
 									'R':0.1, 'alpha':0.9, 'step':0.0, 'bg_fit':False,
 									'skew_fit':False, 'step_fit':False, 'quad_bg':False,
-									'iter_fit':True, 'SNR_cut':3.0, 'fit_bound':2.5, 
+									'iter_fit':True, 'SNR_cut':4.0, 'fit_bound':2.5, 
 									'xrays':False, 'pk_width':7.5, 'E_min':75.0,
 									'I_min':0.05}, 'istp':[], 'shelf':None}
 		self.cb = Calibration()
@@ -703,18 +709,23 @@ class Spectrum(object):
 
 			q = list(self.db.execute('SELECT * FROM spectra WHERE filename LIKE ? AND file_path LIKE ?', ('%'+self._fnm+'%', '%'+self._path+'%')))
 			if len(q):
-				self.meta = literal_eval(str(q[0][6]))
+				meta = literal_eval(str(q[0][6]))
+				for m in meta:
+					self._meta[m] = meta[m]
 				self.fit_config = literal_eval(str(q[0][7]))
-				self.meta = {'engcal':literal_eval(str(q[0][8])), 'effcal':literal_eval(str(q[0][9])), 
-							'unc_effcal':literal_eval(str(q[0][10])), 'rescal':literal_eval(str(q[0][11]))}
-				self.meta['spec_id'] = q[0][0]
+				meta = {'engcal':literal_eval(str(q[0][8])), 'effcal':literal_eval(str(q[0][9])), 
+							'unc_effcal':np.array(literal_eval(str(q[0][10]).replace('inf',"'inf'")), dtype=np.float64), 
+							'rescal':literal_eval(str(q[0][11]))}
+				for m in meta:
+					self._meta[m] = meta[m]
+				self._meta['spec_id'] = q[0][0]
 			else:
 				ids = [i[0] for i in self.db.execute('SELECT spec_id FROM spectra')]
-				self.meta['spec_id'] = max(ids)+1 if len(ids) else 1
+				self._meta['spec_id'] = max(ids)+1 if len(ids) else 1
 				
 				vals = [self.meta['spec_id'], self._fnm, self._path, dtm.datetime.strftime(self.meta['start_time'], '%m/%d/%Y %H:%M:%S'),
 						self.meta['live_time'], self.meta['real_time'],
-						str({i:self.meta[i] for i in self.meta if i not in ['start_time', 'fit_config']}),
+						str({i:self.meta[i] for i in self.meta if i not in ['start_time', 'fit_config','engcal','effcal','unc_effcal','rescal']}),
 						str({i:self.fit_config[i] for i in self.fit_config if i not in []}),
 						str(list(self.meta['engcal'])), str(list(self.meta['effcal'])), 
 						(str(self.meta['unc_effcal']) if type(self.meta['unc_effcal'])==list else str(self.meta['unc_effcal'].tolist())),
@@ -759,10 +770,10 @@ class Spectrum(object):
 
 	def _update_db(self):
 		if self.db is not None:
-			meta_str = str({i:self.meta[i] for i in self.meta if i not in ['start_time','fit_config']})
-			self.db.execute('UPDATE spectra SET meta=? WHERE spec_id=?', (self.meta['spec_id'], meta_str))
+			meta_str = str({i:self.meta[i] for i in self.meta if i not in ['start_time','fit_config','engcal','effcal','unc_effcal','rescal']})
+			self.db.execute('UPDATE spectra SET meta=? WHERE spec_id=?', (meta_str, self.meta['spec_id']))
 			fit_config_str = str({i:self.fit_config[i] for i in self.fit_config if i not in []})
-			self.db.execute('UPDATE spectra SET fit_config=? WHERE spec_id=?', (self.meta['spec_id'], fit_config_str))
+			self.db.execute('UPDATE spectra SET fit_config=? WHERE spec_id=?', (fit_config_str, self.meta['spec_id']))
 			vals = [str(list(self.meta['engcal'])), str(list(self.meta['effcal'])), 
 					(str(self.meta['unc_effcal']) if type(self.meta['unc_effcal'])==list else str(self.meta['unc_effcal'].tolist())),
 					str(list(self.meta['rescal'])), self.meta['spec_id']]
@@ -808,10 +819,10 @@ class Spectrum(object):
 					self._meta[section].append(ln.strip())
 				ln = f.readline()
 
-		start_time = dtm.datetime.strptime(self._meta['DATE_MEA'][0], '%m/%d/%Y %H:%M:%S')
-		LT, RT = tuple(map(float, self._meta['MEAS_TIM'][0].split(' ')))
-		engcal = list(map(float, self._meta['MCA_CAL'][-1].split(' ')[:-1]))
-		self.meta = {'start_time':start_time, 'live_time':LT, 'real_time':RT, 'engcal':engcal}
+		self._meta['start_time'] = dtm.datetime.strptime(self._meta['DATE_MEA'][0], '%m/%d/%Y %H:%M:%S')
+		self._meta['real_time'], self._meta['live_time'] = tuple(map(float, self._meta['MEAS_TIM'][0].split(' ')))
+		self._meta['engcal'] = list(map(float, self._meta['MCA_CAL'][-1].split(' ')[:-1]))
+
 
 	def _from_Chn(self, filename=None):
 		if filename is None:
@@ -819,31 +830,31 @@ class Spectrum(object):
 		with open(filename, 'rb') as f:
 			det_no = np.frombuffer(f.read(6), dtype='i2')[1]
 			sts = np.frombuffer(f.read(2), dtype='S2')[0].decode('utf-8')
-			RT, LT = tuple(map(float, 0.02*np.frombuffer(f.read(8), dtype='i4')))
+			self._meta['real_time'], self._meta['live_time'] = tuple(map(float, 0.02*np.frombuffer(f.read(8), dtype='i4')))
 			st = np.frombuffer(f.read(12), dtype='S12')[0].decode('utf-8')
 			months = {'jan':'01','feb':'02','mar':'03','apr':'04',
 						'may':'05','jun':'06','jul':'07','aug':'08',
 						'sep':'09','oct':'10','nov':'11','dec':'12'}
 			start_time = '{0}/{1}/{2} {3}:{4}:{5}'.format(months[st[2:5].lower()],st[:2],('20' if st[7]=='1' else '19')+st[5:7],st[8:10],st[10:],sts)
-			start_time = dtm.datetime.strptime(start_time, '%m/%d/%Y %H:%M:%S')
+			self._meta['start_time'] = dtm.datetime.strptime(start_time, '%m/%d/%Y %H:%M:%S')
 			L = np.frombuffer(f.read(4), dtype='i2')[1]
 			self.hist = np.asarray(np.frombuffer(f.read(4*L), dtype='i4'), dtype=np.int64)
 			f.read(4)
-			engcal = np.frombuffer(f.read(12),dtype='f4').tolist()
-			self.meta = {'start_time':start_time, 'live_time':LT, 'real_time':RT, 'engcal':engcal}
+			self._meta['engcal'] = np.frombuffer(f.read(12),dtype='f4').tolist()
+
 			shape = np.frombuffer(f.read(12), dtype='f4').tolist()
-			self.meta['SHAPE_CAL'] = ['3', ' '.join(map(str, shape))]
+			self._meta['SHAPE_CAL'] = ['3', ' '.join(map(str, shape))]
 			f.read(228)
 			L = np.frombuffer(f.read(1), dtype='i1')[0]
 			if L:
 				det_desc = np.frombuffer(f.read(L), dtype='S{}'.format(L))[0].decode('utf-8')
-				self.meta['SPEC_REM'] = ['DET# '+str(det_no), 'DETDESC# '+det_desc, 'AP# Maestro Version 7.01']
+				self._meta['SPEC_REM'] = ['DET# '+str(det_no), 'DETDESC# '+det_desc, 'AP# Maestro Version 7.01']
 			if L<63:
 				f.read(63-L)
 			L = np.frombuffer(f.read(1), dtype='i1')[0]
 			if L:
 				sample_desc = np.frombuffer(f.read(L),dtype='S{}'.format(L))[0].decode('utf-8')
-				self.meta['SPEC_ID'] = [sample_desc]
+				self._meta['SPEC_ID'] = [sample_desc]
 
 	@property
 	def meta(self):
@@ -901,12 +912,14 @@ class Spectrum(object):
 		clip = np.where(self._hist>self._snip, self._hist-self._snip, 0.0)
 		W = self.fit_config['pk_width']
 		for gm in self.gamma_list:
-			y = np.zeros(len(self._hist))
+			L = len(self._hist)
+			y = np.zeros(L)
 			if len(gm):
 				idx = self.cb.map_idx(gm[:,0], *engcal)
 				sig = self.cb.res(idx)
 				norm = self.cb.eff(gm[:,0])*gm[:,1]/sig
-				p0_A.append((np.average((clip[idx]/norm), weights=np.sqrt(norm))))
+				idx, sig, norm = idx[idx<L], sig[idx<L], norm[idx<L]
+				p0_A.append(np.average((clip[idx]/norm), weights=np.sqrt(norm)))
 				if p0_A[-1]<0:
 					p0_A[-1] = 0.0
 				l, h = np.array(idx-W*sig, dtype=np.int32), np.array(idx+W*sig, dtype=np.int32)
@@ -961,9 +974,9 @@ class Spectrum(object):
 		pairs = np.where(pks[:-1,1]>pks[1:,0])[0]
 		pairs = np.unique(np.concatenate((pairs, pairs+1)))
 		if len(pairs):
-			groups = [[pairs[0],pairs[1]]]
+			groups = [[pairs[0], pairs[1]]]
 			for p in pairs[2:]:
-				if (p-groups[-1][-1])==1 and len(groups[-1])<8:
+				if (pks[p][0]<pks[groups[-1][-1]][1]) and len(groups[-1])<8:
 					groups[-1].append(p)
 				else:
 					groups.append([p])

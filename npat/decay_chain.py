@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import numpy as np
 import matplotlib.pyplot as plt
+import datetime as dtm
 from scipy.optimize import curve_fit
 
 from .isotope import Isotope
@@ -60,6 +61,7 @@ class DecayChain(object):
 		self._prev = []
 		self._R_fit = None
 		self._A0_fit = None
+		self._EoB = None
 
 	def filter_name(self, istp):
 		if istp[-1] in 'g0123456789':
@@ -119,7 +121,7 @@ class DecayChain(object):
 
 		for ot in self._others:
 			if self.filter_name(istp) in ot.isotopes:
-				A += ot.activity(istp, t, units=self.units)
+				A += ot.activity(istp, t, units=(self.units if units is None else units))
 		return A
 
 
@@ -129,8 +131,8 @@ class DecayChain(object):
 		t_start, t_stop = np.asarray(t_start), np.asarray(t_stop)
 		D = np.zeros(len(t_start)) if t_start.shape else (np.zeros(len(t_stop)) if t_stop.shape else 0.0)
 		R_lm = 1.0
+		conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557600.0}
 		if units is not None:
-			conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557600.0}
 			R_lm = conv[units]/conv[self.units]
 
 		for m,(BR, chain) in enumerate(zip(*self._get_branches(istp))):
@@ -154,10 +156,10 @@ class DecayChain(object):
 						D += A_i*B_i*(np.exp(-lm[j]*t_start)-np.exp(-lm[j]*t_stop))/(lm[j]*C_j)
 					else:
 						D += A_i*B_i*(t_stop-t_start)/C_j
-
+		D = D*conv[(self.units if units is None else units)]
 		for ot in self._others:
 			if self.filter_name(istp) in ot.isotopes:
-				D += ot.decays(istp, t_start, t_stop, units=self.units)
+				D += ot.decays(istp, t_start, t_stop, units=(self.units if units is None else units))
 		return D
 
 	def set_R(self, R):
@@ -180,6 +182,17 @@ class DecayChain(object):
 				self.A0[0] += float(A0)
 
 	@property
+	def EoB(self):
+		return self._EoB
+
+	@EoB.setter
+	def EoB(self, eob):
+		if type(eob)==str:
+			eob = dtm.datetime.strptime(eob, '%m/%d/%Y %H:%M:%S')
+		self._EoB = eob
+	
+
+	@property
 	def counts(self):
 		return self._counts
 
@@ -187,7 +200,7 @@ class DecayChain(object):
 	def counts(self, N_c):
 		if N_c is not None:
 			if type(N_c)!=dict:
-				N_c = {self.isotopes[0]:N_c}
+				N_c = {self.isotopes[0]:np.array(N_c)}
 			for istp in N_c:
 				if self.filter_name(istp) in self.isotopes:
 					x = np.array(N_c[istp])
@@ -238,8 +251,7 @@ class DecayChain(object):
 
 	def calc_M(self, i, j, t_start, t_stop):
 		a_n = self.activity(i, t_start)
-		conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557.6E3,'ky':31557.6E6}[self.units]
-		d_m = self.decays(j, t_start, t_stop)*conv
+		d_m = self.decays(j, t_start, t_stop)
 		if d_m>0:
 			return a_n/d_m
 		return 0.0
@@ -276,12 +288,11 @@ class DecayChain(object):
 		X = []
 		time = []
 		itp = []
-		conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557.6E3,'ky':31557.6E6}[self.units]
 		for n,ct in enumerate(self.counts):
 			if len(ct):
-				Y += (ct[:,2]/conv).tolist()
+				Y += ct[:,2].tolist()
 				if len(ct[0])==4:
-					dY += (ct[:,3]/conv).tolist()
+					dY += ct[:,3].tolist()
 				X += [np.zeros(len(nz)) for i in ct]
 				time += ct[:,:2].tolist()
 				itp += (n*np.ones(len(ct),dtype=int)).tolist()
@@ -335,12 +346,11 @@ class DecayChain(object):
 		X = []
 		time = []
 		itp = []
-		conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557.6E3,'ky':31557.6E6}[self.units]
 		for n,ct in enumerate(self.counts):
 			if len(ct):
-				Y += (ct[:,2]/conv).tolist()
+				Y += ct[:,2].tolist()
 				if len(ct[0])==4:
-					dY += (ct[:,3]/conv).tolist()
+					dY += ct[:,3].tolist()
 				X += [np.zeros(len(nz)) for i in ct]
 				time += ct[:,:2].tolist()
 				itp += (n*np.ones(len(ct),dtype=int)).tolist()

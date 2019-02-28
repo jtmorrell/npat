@@ -7,14 +7,14 @@ if __name__=='__main__':
 
 	######### Spectroscopy Tests #########
 
-	# sp = Spectrum('eu_calib_7cm.Spe','test.db')
-	# sp.meta = {'istp':['152EU'], 'A0':3.7E4, 'ref_date':'01/01/2009 12:00:00'}
+	sp = Spectrum('eu_calib_7cm.Spe','test.db')
+	sp.meta = {'istp':['152EU'], 'A0':3.7E4, 'ref_date':'01/01/2009 12:00:00'}
 
-	# # sp.fit_config = {'xrays':True, 'E_min':20.0}
-	# sp.auto_calibrate()
-	# sp.cb.plot()
-	# sp.summarize()
-	# sp.plot()
+	# sp.fit_config = {'xrays':True, 'E_min':20.0}
+	sp.auto_calibrate()
+	sp.cb.plot()
+	sp.summarize()
+	sp.plot()
 
 	# sp = Spectrum('AH20190131_Na22_10cm_IDM4.Chn','test.db')
 	# sp = Spectrum('AH20190131_Na22_10cm_IDM4.Spe')
@@ -39,7 +39,7 @@ if __name__=='__main__':
 
 	######## Ziegler Tests #############
 
-	zg = Ziegler(stack=[{'compound':'Ni','name':'Ni01','thickness':0.025},{'compound':'Ti','name':'Ti01','thickness':0.025},{'compound':'SrCO3','name':'SrCO3','thickness':0.7,'density':3.5}], beam={'istp':'2H', 'N':1E5})
+	zg = Ziegler(stack=[{'compound':'Ni','name':'Ni01','thickness':1.025},{'compound':'Ti','name':'Ti01','thickness':1.025},{'compound':'SrCO3','name':'SrCO3','thickness':0.7,'density':3.5}], beam={'istp':'2H', 'N':1E5})
 	zg.plot(['Sr','Ni','Ti'])
 	zg.summarize()
 
