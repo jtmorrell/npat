@@ -3,9 +3,12 @@ from __future__ import division
 from __future__ import print_function
 
 import re
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime as dtm
+import multiprocessing
+import sqlite3
 from scipy.interpolate import interp1d
 
 from .plotter import colors
@@ -14,116 +17,118 @@ from .plotter import _close_plot
 from .dbmgr import get_cursor
 from .isotope import Isotope
 
+global ZG_CONNECTIONS_DICT
+ZG_CONNECTIONS_DICT = {}
 
-class Irradiation(object):
-	"""Super class for activation experiments.
+# class Irradiation(object):
+# 	"""Super class for activation experiments.
 
-	...
+# 	...
 
-	Parameters
-	----------
+# 	Parameters
+# 	----------
 
-	Attributes
-	----------
+# 	Attributes
+# 	----------
 
-	Methods
-	-------
+# 	Methods
+# 	-------
 
-	"""
-	def __init__(self):
-		self._samples = []
+# 	"""
+# 	def __init__(self):
+# 		self._samples = []
 
-	@property
-	def samples(self):
-		return self._samples
+# 	@property
+# 	def samples(self):
+# 		return self._samples
 	
-	def read_csv(self, filename):
-		with open(filename) as f:
-			lines = f.read().split('\n')
+# 	def read_csv(self, filename):
+# 		with open(filename) as f:
+# 			lines = f.read().split('\n')
 
-		dat = [[i if i!='' else None for i in l.split(',')] for l in lines if not l.startswith('#')]
-		dat = [l for l in dat if len(l) and any(l)]
+# 		dat = [[i if i!='' else None for i in l.split(',')] for l in lines if not l.startswith('#')]
+# 		dat = [l for l in dat if len(l) and any(l)]
 		
-		if lines[0].startswith('#'):
-			head = lines[0].replace('#','').split(',')
-		else:
-			head = [None for i in dat[0]]
+# 		if lines[0].startswith('#'):
+# 			head = lines[0].replace('#','').split(',')
+# 		else:
+# 			head = [None for i in dat[0]]
 		
-		csv = []
-		for n in range(len(head)):
-			col = [d[n] for d in dat]
-			try:
-				csv.append([float(c) if c is not None else None for n,c in enumerate(col)])
-			except:
-				csv.append(col)
+# 		csv = []
+# 		for n in range(len(head)):
+# 			col = [d[n] for d in dat]
+# 			try:
+# 				csv.append([float(c) if c is not None else None for n,c in enumerate(col)])
+# 			except:
+# 				csv.append(col)
 
-		return csv, head
+# 		return csv, head
 
-	def save_csv(self, filename, csv, head=None):
-		with open(filename, 'w+') as f:
-			hs = '' if head is None else '#'+','.join(head)+'\n'
-			f.write(hs+'\n'.join(map(','.join, zip(*[map(str,i) for i in csv]))))
-
-
+# 	def save_csv(self, filename, csv, head=None):
+# 		with open(filename, 'w+') as f:
+# 			hs = '' if head is None else '#'+','.join(head)+'\n'
+# 			f.write(hs+'\n'.join(map(','.join, zip(*[map(str,i) for i in csv]))))
 
 
 
-class Sample(object):
-	"""Material properties of samples in experiment
 
-	...
 
-	Parameters
-	----------
+# class Sample(object):
+# 	"""Material properties of samples in experiment
 
-	Attributes
-	----------
+# 	...
 
-	Methods
-	-------
+# 	Parameters
+# 	----------
 
-	"""
-	def __init__(self):
-		self.name = None
-		self.energy = None
-		self.flux = None
-		self.bins = None
+# 	Attributes
+# 	----------
 
-	def _set_hist(self, hist):
-		self.flux = hist[0]
-		self.bins = hist[1]
-		self.energy = 0.5*(self.bins[1:]+self.bins[:-1])
-		self.mu_E = np.sum(self.flux*self.energy)/np.sum(self.flux)
-		self.sig_E = np.sqrt(np.sum(self.flux*(self.energy-self.mu_E)**2)/np.sum(self.flux))
-		if len(self.energy)<2:
-			self._flux_interp = interp1d([0, 1], [0, 0], bounds_error=False, fill_value=0.0)
-		else:
-			self._flux_interp = interp1d(self.energy, self.flux, bounds_error=False, fill_value=0.0)
+# 	Methods
+# 	-------
 
-	def reaction_integral(self, sig):
-		# Trapezoidal Riemann sum
-		phisig = self.flux*np.asarray(sig)
-		return np.sum(0.5*(self.energy[1:]-self.energy[:-1])*(phisig[:-1]+phisig[1:]))
+# 	"""
+# 	def __init__(self):
+# 		self.name = None
+# 		self.energy = None
+# 		self.flux = None
+# 		self.bins = None
 
-	def interp_flux(self, E=None):
-		if E is None:
-			return self._flux_interp
-		return self._flux_interp(E)
+# 	def _set_hist(self, hist):
+# 		self.flux = hist[0]/np.sum(hist[0])
+# 		self.bins = hist[1]
+# 		self.energy = 0.5*(self.bins[1:]+self.bins[:-1])
+# 		self.mu_E = np.sum(self.flux*self.energy)/np.sum(self.flux)
+# 		self.sig_E = np.sqrt(np.sum(self.flux*(self.energy-self.mu_E)**2)/np.sum(self.flux))
+# 		if len(self.energy)<2:
+# 			self._flux_interp = interp1d([0, 1], [0, 0], bounds_error=False, fill_value=0.0)
+# 		else:
+# 			self._flux_interp = interp1d(self.energy, self.flux, bounds_error=False, fill_value=0.0)
+
+# 	# def reaction_integral(self, sig):
+# 	# 	# Trapezoidal Riemann sum
+# 	# 	phisig = self.flux*np.asarray(sig)
+# 	# 	return np.sum(0.5*(self.energy[1:]-self.energy[:-1])*(phisig[:-1]+phisig[1:]))
+
+# 	def interp_flux(self, E=None):
+# 		if E is None:
+# 			return self._flux_interp
+# 		return self._flux_interp(E)
 	
-	def plot(self, ax=None, **kwargs):
-		x, y = np.array([self.bins[:-1],self.bins[1:]]).T.flatten(), np.array([self.flux,self.flux]).T.flatten()
-		if ax is None:
-			f, ax = _init_plot(**kwargs)
-			ax.plot(x, y, label=self.name)
-			ax.set_xlabel('Energy (MeV)')
-			ax.set_ylabel('Flux (a.u.)')
-			return _close_plot(f, ax, **kwargs)
-		else:
-			ax.plot(x, y, label=self.name)
+	# def plot(self, ax=None, **kwargs):
+	# 	x, y = np.array([self.bins[:-1],self.bins[1:]]).T.flatten(), np.array([self.flux,self.flux]).T.flatten()
+	# 	if ax is None:
+	# 		f, ax = _init_plot(**kwargs)
+	# 		ax.plot(x, y, label=self.name)
+	# 		ax.set_xlabel('Energy (MeV)')
+	# 		ax.set_ylabel('Flux (a.u.)')
+	# 		return _close_plot(f, ax, **kwargs)
+	# 	else:
+	# 		ax.plot(x, y, label=self.name)
 		
 
 
-class Ziegler(Irradiation):
+class Ziegler(object):
 	"""Method for solving energy loss within stacked-target foil experiment
 
 	...
@@ -138,51 +143,96 @@ class Ziegler(Irradiation):
 	-------
 
 	"""
-	def __init__(self, stack=[], beam={}):
+	def __init__(self, stack, db=None, **kwargs):
 		### stack is list of dicts, which must have 'compound' specified.
 		### Areal density specified by either 'ad' (mg/cm^2), both mass (g) and area (cm^2),
 		### 'thickness' (mm) or both 'density' (g/cm^3) and 'thickness' (mm)
 
-		db = get_cursor('ziegler')
+		zdb = get_cursor('ziegler')
 		
-		self.protons = {int(i[0]):list(map(float,i[1:])) for i in db.execute('SELECT * FROM protons')}
-		self.helium = {int(i[0]):list(map(float,i[1:])) for i in db.execute('SELECT * FROM helium')}
-		self.ionization = {int(i[0]):list(map(float,i[1:])) for i in db.execute('SELECT * FROM ionization')}
-		self.weights = {int(i[0]):list(map(float,i[1:3])) for i in db.execute('SELECT * FROM weights')}
-		self.compounds = {str(i[0]):[[int(h.split(':')[0]), float(h.split(':')[1])] for h in i[2].split(',')] for i in db.execute('SELECT * FROM compounds')}
+		self.protons = {int(i[0]):list(map(float,i[1:])) for i in zdb.execute('SELECT * FROM protons')}
+		self.helium = {int(i[0]):list(map(float,i[1:])) for i in zdb.execute('SELECT * FROM helium')}
+		self.ionization = {int(i[0]):list(map(float,i[1:])) for i in zdb.execute('SELECT * FROM ionization')}
+		self.weights = {int(i[0]):list(map(float,i[1:3])) for i in zdb.execute('SELECT * FROM weights')}
+		self.compounds = {str(i[0]):[[int(h.split(':')[0]), float(h.split(':')[1])] for h in i[2].split(',')] for i in zdb.execute('SELECT * FROM compounds')}
 		self.compounds = {cm:[[i[0],i[1]/sum([m[1] for m in self.compounds[cm]])] for i in self.compounds[cm]] for cm in self.compounds}
-		self.densities = {str(i[0]):float(i[1]) for i in db.execute('SELECT * FROM compounds')}
-		self.elements = sorted([[str(i[0]), int(i[2].split(':')[0])] for i in db.execute('SELECT * FROM compounds') if len(i[2].split(':'))==2], key=lambda h:len(h[0]), reverse=True)
+		self.densities = {str(i[0]):float(i[1]) for i in zdb.execute('SELECT * FROM compounds')}
+		self.elements = sorted([[str(i[0]), int(i[2].split(':')[0])] for i in zdb.execute('SELECT * FROM compounds') if len(i[2].split(':'))==2], key=lambda h:len(h[0]), reverse=True)
 
-		Irradiation.__init__(self)
-		self.beam = beam
+		# Irradiation.__init__(self)
+		# self.beam = beam
+		self._meta = {'beam_istp':'1H', 'E0':33.0, 'dE0':0.3, 'N':10000, 'dp':1.0,
+						'chunk_size':1E5, 'threads':multiprocessing.cpu_count(),
+						'solved':False, 'accuracy':0.01}
+		self._stack = []
+		self.check_db(db)
+		self.meta = kwargs
 		self.stack = stack
 
-	@property
-	def beam(self):
-		return self._beam
+	def check_db(self, db=None):
+		if db is not None:
+			path, fnm = os.path.split(db)
+			if path in ['',' ']:
+				path = os.getcwd()
+			if fnm in ['',' ']:
+				raise ValueError('Invalid db Filename: {}'.format(db))
+			db_fnm = os.path.join(path, fnm)
 
-	@beam.setter
-	def beam(self, _beam):
-		self._beam = _beam
-		default = {'istp':'1H', 'E0':33.0, 'dE0':0.3, 'N':10000}
-		for k in default:
-			if k not in _beam:
-				self._beam[k] = default[k]
-		_ITP = Isotope(self._beam['istp'])
-		self._beam['Z'] = _ITP.Z
-		self._beam['amu'] = _ITP.mass
-		if len(self._samples):
-			self._solve()
+			global ZG_CONNECTIONS_DICT
+			if os.path.exists(db_fnm):
+				if db_fnm not in ZG_CONNECTIONS_DICT:
+					ZG_CONNECTIONS_DICT[db_fnm] = sqlite3.connect(db_fnm)
+				self.db_connection = ZG_CONNECTIONS_DICT[db_fnm]
+				self.db = self.db_connection.cursor()
+			else:
+				print('WARNING: DB {} does not exist, creating new file.'.format(fnm))
+				from sqlite3 import Error
+				try:
+					self.db_connection = sqlite3.connect(db_fnm)
+					ZG_CONNECTIONS_DICT[db_fnm] = self.db_connection
+					self.db = self.db_connection.cursor()
+				except Error as e:
+					print(e)
+		
+
+	# @property
+	# def beam(self):
+	# 	return self._beam
+
+	# @beam.setter
+	# def beam(self, _beam):
+	# 	self._beam = _beam
+	# 	default = {'istp':'1H', 'E0':33.0, 'dE0':0.3, 'N':10000, 'dN':1E5, 'threads':multiprocessing.cpu_count()}
+	# 	for k in default:
+	# 		if k not in _beam:
+	# 			self._beam[k] = default[k]
+	# 	_ITP = Isotope(self._beam['istp'])
+	# 	self._beam['Z'] = _ITP.Z
+	# 	self._beam['amu'] = _ITP.mass
+	# 	if len(self._samples):
+	# 		self._solve()
+
+	@property
+	def meta(self):
+		return self._meta
+
+	@meta.setter
+	def meta(self, meta_dict):
+		for nm in meta_dict:
+			self._meta[nm] = meta_dict[nm]
+			if nm=='beam_istp':
+				_ITP = Isotope(meta_dict[nm])
+				self._meta['Z'] = _ITP.Z
+				self._meta['amu'] = _ITP.mass
 
 	@property
 	def stack(self):
-		return self._samples
+		return self._stack
 
 	@stack.setter
 	def stack(self, _stack):
-		self._samples = []
-		for s in _stack:
+		self._stack = list(_stack)
+		for s in self._stack:
 			if 'compound' not in s:
 				raise ValueError('compound must be specified')
 
@@ -207,12 +257,8 @@ class Ziegler(Irradiation):
 				if 'thickness' not in s and 'ad' in s:
 					s['thickness'] = s['ad']/(100.0*s['density'])
 
-			sm = Sample()
-			if 'name' in s:
-				sm.name = s['name']
 			if 'ad' not in s:
 				raise ValueError('Areal density either not specified or not computable: {}'.format(s))
-			sm.ad = s['ad']
 
 			if s['compound'] not in self.compounds:
 				cm = s['compound']
@@ -242,32 +288,30 @@ class Ziegler(Irradiation):
 			if s['compound'] not in self.compounds:
 				raise ValueError('compound {} not known.'.format(s['compound']))
 
-			sm.compound = s['compound']
-			sm.meta = s
-			self._samples.append(sm)
-		self._solve()
 
 	def get_S(self, E, cm):
 		# energy E in MeV , stopping power in MeV/(mg/cm2)
-		E = np.asarray(E)
-		S = 0.0
+		E, r0 = np.asarray(E), False
+		if not E.shape:
+			E, r0 = np.array([E]), True
+		S = np.zeros(len(E))
 		A_ave = sum([self.weights[z2][0]*w for z2,w in self.compounds[cm]])
 		for z2, w in self.compounds[cm]:
-			S_nucl = self.get_S_nucl(E, self.beam['Z'], self.beam['amu'], z2, self.weights[z2][0])
-			if self.beam['Z']==1:
-				S += w*(S_nucl+self.get_S_p(E, z2, self.beam['amu']))
-			elif self.beam['Z']==2:
-				S += w*(S_nucl+self.get_S_He(E, z2, self.beam['amu']))
+			S_nucl = self.get_S_nucl(E, self.meta['Z'], self.meta['amu'], z2, self.weights[z2][0])
+			if self.meta['Z']==1:
+				S += w*(S_nucl+self.get_S_p(E, z2, self.meta['amu']))
+			elif self.meta['Z']==2:
+				S += w*(S_nucl+self.get_S_He(E, z2, self.meta['amu']))
 			else:
-				S += w*(S_nucl+self.get_S_elec(E, z2, self.beam['amu'], self.beam['Z']))
-		return S*0.6022140857/A_ave
+				S += w*(S_nucl+self.get_S_elec(E, z2, self.meta['amu'], self.meta['Z']))
+		return S[0]*0.6022140857/A_ave if r0 else S*0.6022140857/A_ave
 
-	def get_S_nucl(self,E,z1,m1,z2,m2):
+	def get_S_nucl(self, E, z1, m1, z2, m2):
 		RM = (m1+m2)*np.sqrt((z1**(2/3.0)+z2**(2/3.0)))
 		ER = 32.53*m2*1E3*E/(z1*z2*RM)
 		return (0.5*np.log(1.0+ER)/(ER+0.10718+ER**0.37544))*8.462*z1*z2*m1/RM
 
-	def get_S_p(self,eng,z2,M1=1.00727647):
+	def get_S_p(self, eng, z2, M1=1.00727647):
 		S = np.zeros(len(eng))
 		E = 1E3*eng/M1
 		A = self.protons[z2]
@@ -294,7 +338,7 @@ class Ziegler(Irradiation):
 		S[E>10] = np.exp(A[5]+A[6]*Y+A[7]*Y**2+A[8]*Y**3)
 		return S
 
-	def get_S_elec(self,eng,z2,M1,z1):
+	def get_S_elec(self, eng, z2, M1, z1):
 		S = np.zeros(len(eng))
 		E_keV = 1E3*eng
 		S[E_keV/M1<1000] = self.get_eff_Z_ratio(E_keV[E_keV/M1<1000],z1,M1)**2*self.get_S_p(eng[E_keV/M1<1000],z2,M1)
@@ -306,9 +350,9 @@ class Ziegler(Irradiation):
 		S[E_keV/M1>=1000] = 4E-1*np.pi*(1.9732857/137.03604)**2*Z1EFF**2*z2*(FX-np.log(self.ionization[z2][0]))/(0.511003*beta_sq)
 		return S
 
-	def get_eff_Z_ratio(self,E_keV,z1,M1):
+	def get_eff_Z_ratio(self, E_keV, z1, M1):
 		if z1==1:
-			return np.ones(len(E_keV))
+			return np.ones(len(eng))
 		elif z1==2:
 			Y = np.log(E_keV/M1)
 			return z1*(1.0-np.exp(-0.7446-0.1429*Y-0.01562*Y**2+0.00267*Y**3-0.000001325*Y**8))
@@ -318,39 +362,76 @@ class Ziegler(Irradiation):
 		BB = -0.886*np.sqrt(0.04*E_keV/M1)/z1**(2/3.0)
 		return z1*(1.0-np.exp(BB-0.0378*np.sin(0.5*np.pi*BB))*(1.034-0.1777*np.exp(-0.08114*z1)))
 
-	def _solve(self, dp=1.0):
-		E0 = self.beam['E0']+self.beam['dE0']*np.random.normal(size=int(self.beam['N']))
-		steps = 2
+	def _calc_bins(self):
+		return np.arange(0.0, self.meta['E0']+10.0*self.meta['dE0'], min([0.1, self.meta['E0']/500.0]))
+
+	def _solve_chunk(self, N):
+		E0 = self.meta['E0']+self.meta['dE0']*np.random.normal(size=int(N))
+		bins = self._calc_bins()
 		warn = True
-		for n, sm in enumerate(self._samples):
+		hists = []
+		dp = self.meta['dp']
+		for n, sm in enumerate(self.stack):
 			E_bar = [E0]
-			ds = (1.0/float(steps))
+			steps = int((1.0/self.meta['accuracy'])*sm['ad']*dp*self.get_S(np.average(E0), sm['compound'])/np.average(E0))
+			steps = min([max([2, steps]), 50])
+			dr = (1.0/float(steps))
 			for i in range(steps):
-				S1 = self.get_S(E0, sm.compound)
-				E1 = E0 - ds*dp*sm.ad*S1
+				S1 = self.get_S(E0, sm['compound'])
+				E1 = E0 - dr*dp*sm['ad']*S1
 				E1 = np.where(E1>0, E1, 0.0)
-				E0 = E0 - ds*0.5*dp*sm.ad*(S1+self.get_S(E1, sm.compound))
-				if np.average(np.abs(E0-E1)/np.where(E0>0, E0, np.ones(len(E0))))>1E-3:
-					steps += 1
+				E0 = E0 - dr*0.5*dp*sm['ad']*(S1+self.get_S(E1, sm['compound']))
 				E0 = np.where(E0>0, E0, 0.0)
 				if not np.all(E0>0) and warn:
-					print('WARNING: Beam stopped in foil {}'.format((sm.name if sm.name is not None else sm.compound+str(n+1))))
+					print('WARNING: Beam stopped in foil {}'.format((sm['name'] if sm['name'] is not None else sm['compound']+str(n+1))))
 					warn = False
 				E_bar.append(E0)
-			self.samples[n]._set_hist(np.histogram(np.average(E_bar, axis=0), bins='auto'))
+			hists.append(np.histogram(np.concatenate(E_bar), bins=bins)[0])
+		return hists
+
+	def _solve(self):
+		if self.meta['solved']:
+			return
+		if int(self.meta['N']/float(self.meta['chunk_size']))>=self.meta['threads']:
+			N = [int(self.meta['chunk_size']) for n in range(int(self.meta['N']/float(self.meta['chunk_size'])))]
+		else:
+			N = [int(self.meta['N']/float(self.meta['threads'])) for n in range(self.meta['threads'])]
+
+		if self.meta['threads']>1:
+			pool = multiprocessing.Pool(processes=self.meta['threads'])
+			histos = pool.map(self._solve_chunk, N)
+			pool.close()
+			pool.join()
+		else:
+			histos = list(map(self._solve_chunk, N))
+
+		bins = self._calc_bins()
+		energy = 0.5*(bins[1:]+bins[:-1])
+		for n,sm in enumerate(self.stack):
+			sm['flux'] = np.sum([h[n] for h in histos], axis=0)
+			sm['flux'] = sm['flux']/np.sum(sm['flux'])
+			sm['mu_E'] = np.sum(sm['flux']*energy)
+			sm['sig_E'] = np.sqrt(np.sum(sm['flux']*(energy-sm['mu_E'])**2))
+			lh = np.where(sm['flux']>0)[0]
+			sm['flux'] = sm['flux'][lh[0]:lh[-1]]
+			sm['energy'] = energy[lh[0]:lh[-1]]
+			sm['bins'] = bins[lh[0]:lh[-1]+1]
+		self.meta['solved'] = True
+
 
 	def summarize(self, samples=None, printout=True, saveas=None, incl_no_names=False):
+		self._solve()
 		names, mu_E, sig_E = [], [], []
-		for sm in self.samples:
-			if sm.name is not None:
+		for sm in self.stack:
+			if sm['name'] is not None:
 				if samples is not None or incl_no_names:
-					if not any([re.match(s, sm.name) for s in samples]):
+					if not any([re.match(s, sm['name']) for s in samples]):
 						continue
-				print(sm.name+': '+str(round(sm.mu_E, 2))+' +/- '+str(round(sm.sig_E, 2))+' (MeV)')
+				print(sm['name']+': '+str(round(sm['mu_E'], 2))+' +/- '+str(round(sm['sig_E'], 2))+' (MeV)')
 				if saveas is not None:
-					names.append(sm.name)
-					mu_E.append(sm.mu_E)
-					sig_E.append(sm.sig_E)
+					names.append(sm['name'])
+					mu_E.append(sm['mu_E'])
+					sig_E.append(sm['sig_E'])
 		if saveas is not None:
 			self.save_csv(saveas, [names, mu_E, sig_E], ['Name', 'mu_E (MeV)', 'sig_E (MeV)'])
 
@@ -366,15 +447,18 @@ class Ziegler(Irradiation):
 		return _close_plot(f, ax, **kwargs)
 
 	def plot(self, samples=None, incl_no_names=False, **kwargs):
+		self._solve()
 		if type(samples)==str:
 			samples = [samples]
 		f,ax = _init_plot(**kwargs)
-		for sm in self.samples:
-			if sm.name is not None or incl_no_names:
+		for sm in self.stack:
+			if sm['name'] is not None or incl_no_names:
 				if samples is not None:
-					if not any([re.match(s, sm.name) for s in samples]):
+					if not any([re.match(s, sm['name']) for s in samples]):
 						continue
-				sm.plot(ax)
+				x, y = np.array([sm['bins'][:-1],sm['bins'][1:]]).T.flatten(), np.array([sm['flux'],sm['flux']]).T.flatten()
+		
+				ax.plot(x,y,label=sm['name'])
 
 		ax.set_xlabel('Energy (MeV)')
 		ax.set_ylabel('Flux (a.u.)')

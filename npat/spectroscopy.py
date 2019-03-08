@@ -7,7 +7,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import datetime as dtm
-import functools
 import multiprocessing
 
 from matplotlib import gridspec
@@ -275,37 +274,36 @@ class Calibration(object):
 	def plot(self, **kwargs):
 		cm = colors(aslist=True)
 		cm_light = colors(shade='light', aslist=True)
-		f = plt.figure(figsize=(10, 6))
-		gs = gridspec.GridSpec(2, 10)
-		ax0 = plt.subplot(gs[0, 0:4])
-		ax1 = plt.subplot(gs[1, 0:4])
-		ax2 = plt.subplot(gs[0:2, 4:10])
+		f, ax = plt.subplots(1, 3, figsize=(12.8, 4.8))
 
 		d = self._calib_data['engcal']
-		ax0.errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o')
+		ax[0].errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o')
 		x = np.arange(min(d['x']), max(d['x']), 0.1)
-		ax0.plot(x, self.map_idx(x, *d['fit']))
-		ax0.set_xlabel('Energy (keV)')
-		ax0.set_ylabel('ADC Channel')
+		ax[0].plot(x, self.map_idx(x, *d['fit']))
+		ax[0].set_xlabel('Energy (keV)')
+		ax[0].set_ylabel('ADC Channel')
+		ax[0].set_title('Energy Calibration')
 
 		d = self._calib_data['rescal']
-		ax1.errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o')
+		ax[1].errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o')
 		x = np.arange(min(d['x']), max(d['x']), 0.1)
-		ax1.plot(x, self.res(x, *d['fit']))
-		ax1.set_xlabel('ADC Channel')
-		ax1.set_ylabel('Peak Width')
+		ax[1].plot(x, self.res(x, *d['fit']))
+		ax[1].set_xlabel('ADC Channel')
+		ax[1].set_ylabel('Peak Width')
+		ax[1].set_title('Resolution Calibration')
 		
 		for N,d in enumerate(sorted(self._calib_data['effcal'], key=lambda h: h['shelf'])):
-			ax2.errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o', color=cm[N%len(cm)])
+			ax[2].errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o', color=cm[N%len(cm)])
 			x = np.arange(min(d['x']), max(d['x']), 0.1)
-			ax2.plot(x, self.eff(x, *d['fit']), color=cm[N%len(cm)], label=d['shelf'])
+			ax[2].plot(x, self.eff(x, *d['fit']), color=cm[N%len(cm)], label=d['shelf'])
 			low = self.eff(x, *d['fit'])-self.unc_eff(x, d['fit'], d['unc'])
 			high = self.eff(x, *d['fit'])+self.unc_eff(x, d['fit'], d['unc'])
-			ax2.fill_between(x, low, high, facecolor=cm_light[N%len(cm)], alpha=0.5)
-		ax2.set_xlabel('Energy (keV)')
-		ax2.set_ylabel('Efficiency')
+			ax[2].fill_between(x, low, high, facecolor=cm_light[N%len(cm)], alpha=0.5)
+		ax[2].set_xlabel('Energy (keV)')
+		ax[2].set_ylabel('Efficiency')
+		ax[2].set_title('Efficiency Calibration')
 		if any([d['shelf'] for d in self._calib_data['effcal']]):
-			ax2.legend(loc=0)
+			ax[2].legend(loc=0)
 
 		return _close_plot(f, None, default_log=False, **kwargs)
 
@@ -824,16 +822,20 @@ class Spectrum(object):
 				pool.join()
 			else:
 				multiplets = list(map(self._multi_fit, p0))
-
-			self._fits = [i[0] for i in multiplets]
-			self._peaks = pd.concat([i[1] for i in multiplets], ignore_index=True)
+			if len(p0):
+				multiplets = sorted(multiplets, key=lambda h:h[0]['l'])
+				self._fits = [i[0] for i in multiplets]
+				self._peaks = pd.concat([i[1] for i in multiplets], ignore_index=True)
+			else:
+				self._fits = []
+				self._peaks = pd.DataFrame([])
 			self._update_db(False)
 		return self._fits
 
 
 	@property
 	def peaks(self):
-		"""Dataframe of peaks
+		"""DataFrame of peaks
 
 		"""
 		if self._peaks is None:
