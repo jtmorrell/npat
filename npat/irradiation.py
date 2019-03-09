@@ -6,10 +6,9 @@ import re
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import datetime as dtm
 import multiprocessing
 import sqlite3
-from scipy.interpolate import interp1d
+import pandas as pd
 
 from .plotter import colors
 from .plotter import _init_plot
@@ -19,113 +18,6 @@ from .isotope import Isotope
 
 global ZG_CONNECTIONS_DICT
 ZG_CONNECTIONS_DICT = {}
-
-# class Irradiation(object):
-# 	"""Super class for activation experiments.
-
-# 	...
-
-# 	Parameters
-# 	----------
-
-# 	Attributes
-# 	----------
-
-# 	Methods
-# 	-------
-
-# 	"""
-# 	def __init__(self):
-# 		self._samples = []
-
-# 	@property
-# 	def samples(self):
-# 		return self._samples
-	
-# 	def read_csv(self, filename):
-# 		with open(filename) as f:
-# 			lines = f.read().split('\n')
-
-# 		dat = [[i if i!='' else None for i in l.split(',')] for l in lines if not l.startswith('#')]
-# 		dat = [l for l in dat if len(l) and any(l)]
-		
-# 		if lines[0].startswith('#'):
-# 			head = lines[0].replace('#','').split(',')
-# 		else:
-# 			head = [None for i in dat[0]]
-		
-# 		csv = []
-# 		for n in range(len(head)):
-# 			col = [d[n] for d in dat]
-# 			try:
-# 				csv.append([float(c) if c is not None else None for n,c in enumerate(col)])
-# 			except:
-# 				csv.append(col)
-
-# 		return csv, head
-
-# 	def save_csv(self, filename, csv, head=None):
-# 		with open(filename, 'w+') as f:
-# 			hs = '' if head is None else '#'+','.join(head)+'\n'
-# 			f.write(hs+'\n'.join(map(','.join, zip(*[map(str,i) for i in csv]))))
-
-
-
-
-
-# class Sample(object):
-# 	"""Material properties of samples in experiment
-
-# 	...
-
-# 	Parameters
-# 	----------
-
-# 	Attributes
-# 	----------
-
-# 	Methods
-# 	-------
-
-# 	"""
-# 	def __init__(self):
-# 		self.name = None
-# 		self.energy = None
-# 		self.flux = None
-# 		self.bins = None
-
-# 	def _set_hist(self, hist):
-# 		self.flux = hist[0]/np.sum(hist[0])
-# 		self.bins = hist[1]
-# 		self.energy = 0.5*(self.bins[1:]+self.bins[:-1])
-# 		self.mu_E = np.sum(self.flux*self.energy)/np.sum(self.flux)
-# 		self.sig_E = np.sqrt(np.sum(self.flux*(self.energy-self.mu_E)**2)/np.sum(self.flux))
-# 		if len(self.energy)<2:
-# 			self._flux_interp = interp1d([0, 1], [0, 0], bounds_error=False, fill_value=0.0)
-# 		else:
-# 			self._flux_interp = interp1d(self.energy, self.flux, bounds_error=False, fill_value=0.0)
-
-# 	# def reaction_integral(self, sig):
-# 	# 	# Trapezoidal Riemann sum
-# 	# 	phisig = self.flux*np.asarray(sig)
-# 	# 	return np.sum(0.5*(self.energy[1:]-self.energy[:-1])*(phisig[:-1]+phisig[1:]))
-
-# 	def interp_flux(self, E=None):
-# 		if E is None:
-# 			return self._flux_interp
-# 		return self._flux_interp(E)
-	
-	# def plot(self, ax=None, **kwargs):
-	# 	x, y = np.array([self.bins[:-1],self.bins[1:]]).T.flatten(), np.array([self.flux,self.flux]).T.flatten()
-	# 	if ax is None:
-	# 		f, ax = _init_plot(**kwargs)
-	# 		ax.plot(x, y, label=self.name)
-	# 		ax.set_xlabel('Energy (MeV)')
-	# 		ax.set_ylabel('Flux (a.u.)')
-	# 		return _close_plot(f, ax, **kwargs)
-	# 	else:
-	# 		ax.plot(x, y, label=self.name)
-		
 
 
 class Ziegler(object):
@@ -143,7 +35,7 @@ class Ziegler(object):
 	-------
 
 	"""
-	def __init__(self, stack, db=None, **kwargs):
+	def __init__(self, stack, beam=None, **kwargs):
 		### stack is list of dicts, which must have 'compound' specified.
 		### Areal density specified by either 'ad' (mg/cm^2), both mass (g) and area (cm^2),
 		### 'thickness' (mm) or both 'density' (g/cm^3) and 'thickness' (mm)
@@ -159,14 +51,18 @@ class Ziegler(object):
 		self.densities = {str(i[0]):float(i[1]) for i in zdb.execute('SELECT * FROM compounds')}
 		self.elements = sorted([[str(i[0]), int(i[2].split(':')[0])] for i in zdb.execute('SELECT * FROM compounds') if len(i[2].split(':'))==2], key=lambda h:len(h[0]), reverse=True)
 
-		# Irradiation.__init__(self)
-		# self.beam = beam
-		self._meta = {'beam_istp':'1H', 'E0':33.0, 'dE0':0.3, 'N':10000, 'dp':1.0,
+		self._meta = {}
+		self.meta = {'beam_istp':'1H', 'E0':33.0, 'dE0':0.3, 'N':10000, 'dp':1.0,
 						'chunk_size':1E5, 'threads':multiprocessing.cpu_count(),
-						'solved':False, 'accuracy':0.01}
+						'solved':False, 'accuracy':0.01, 'min_steps':2, 'max_steps':50}
 		self._stack = []
-		self.check_db(db)
+		if beam is not None:
+			print('Keyword `beam` deprecated: see documentation for proper input.')
+			self.meta = beam
 		self.meta = kwargs
+		if type(stack)==str:
+			stack = pd.read_csv(stack)
+			stack = [{i:r[i] for i in stack.columns if not (np.isnan(r[i]) if type(r[i])==float else False)} for n,r in stack.iterrows()]
 		self.stack = stack
 
 	def check_db(self, db=None):
@@ -193,24 +89,6 @@ class Ziegler(object):
 					self.db = self.db_connection.cursor()
 				except Error as e:
 					print(e)
-		
-
-	# @property
-	# def beam(self):
-	# 	return self._beam
-
-	# @beam.setter
-	# def beam(self, _beam):
-	# 	self._beam = _beam
-	# 	default = {'istp':'1H', 'E0':33.0, 'dE0':0.3, 'N':10000, 'dN':1E5, 'threads':multiprocessing.cpu_count()}
-	# 	for k in default:
-	# 		if k not in _beam:
-	# 			self._beam[k] = default[k]
-	# 	_ITP = Isotope(self._beam['istp'])
-	# 	self._beam['Z'] = _ITP.Z
-	# 	self._beam['amu'] = _ITP.mass
-	# 	if len(self._samples):
-	# 		self._solve()
 
 	@property
 	def meta(self):
@@ -220,19 +98,26 @@ class Ziegler(object):
 	def meta(self, meta_dict):
 		for nm in meta_dict:
 			self._meta[nm] = meta_dict[nm]
-			if nm=='beam_istp':
+			if nm in ['beam_istp', 'istp']:
 				_ITP = Isotope(meta_dict[nm])
 				self._meta['Z'] = _ITP.Z
 				self._meta['amu'] = _ITP.mass
+		if self._meta['min_steps']>self._meta['max_steps']:
+			self._meta['max_steps'] = self._meta['min_steps']+1
+			print('WARNING: min_steps > max_steps, setting max_steps to {}'.format(self._meta['max_steps']))
 
 	@property
 	def stack(self):
+		if not self.meta['solved']:
+			self._solve()
 		return self._stack
 
 	@stack.setter
 	def stack(self, _stack):
 		self._stack = list(_stack)
 		for s in self._stack:
+			if 'name' not in s:
+				s['name'] = None
 			if 'compound' not in s:
 				raise ValueError('compound must be specified')
 
@@ -252,10 +137,12 @@ class Ziegler(object):
 					s['ad'] = 100.0*s['density']*s['thickness']
 				elif s['compound'] in self.densities and 'thickness' in s:
 					s['ad'], s['density'] = 100.0*self.densities[s['compound']]*s['thickness'], self.densities[s['compound']]
+
 			if 'density' not in s:
-				s['density'] = self.densities[s['compound']]
-				if 'thickness' not in s and 'ad' in s:
-					s['thickness'] = s['ad']/(100.0*s['density'])
+				if s['compound'] in self.densities:
+					s['density'] = self.densities[s['compound']]
+					if 'thickness' not in s and 'ad' in s:
+						s['thickness'] = s['ad']/(100.0*s['density'])
 
 			if 'ad' not in s:
 				raise ValueError('Areal density either not specified or not computable: {}'.format(s))
@@ -368,35 +255,35 @@ class Ziegler(object):
 	def _solve_chunk(self, N):
 		E0 = self.meta['E0']+self.meta['dE0']*np.random.normal(size=int(N))
 		bins = self._calc_bins()
-		warn = True
 		hists = []
 		dp = self.meta['dp']
-		for n, sm in enumerate(self.stack):
+		for n, sm in enumerate(self._stack):
 			E_bar = [E0]
-			steps = int((1.0/self.meta['accuracy'])*sm['ad']*dp*self.get_S(np.average(E0), sm['compound'])/np.average(E0))
-			steps = min([max([2, steps]), 50])
-			dr = (1.0/float(steps))
-			for i in range(steps):
-				S1 = self.get_S(E0, sm['compound'])
-				E1 = E0 - dr*dp*sm['ad']*S1
-				E1 = np.where(E1>0, E1, 0.0)
-				E0 = E0 - dr*0.5*dp*sm['ad']*(S1+self.get_S(E1, sm['compound']))
-				E0 = np.where(E0>0, E0, 0.0)
-				if not np.all(E0>0) and warn:
-					print('WARNING: Beam stopped in foil {}'.format((sm['name'] if sm['name'] is not None else sm['compound']+str(n+1))))
-					warn = False
-				E_bar.append(E0)
-			hists.append(np.histogram(np.concatenate(E_bar), bins=bins)[0])
+			if np.average(E0)<=0.0:
+				hists.append(np.concatenate([[N],np.zeros(len(bins)-2)]))
+			else:
+				steps = int((1.0/self.meta['accuracy'])*sm['ad']*dp*self.get_S(np.average(E0), sm['compound'])/np.average(E0))
+				steps = min([max([self.meta['min_steps'], steps]), self.meta['max_steps']])
+				dr = (1.0/float(steps))
+				for i in range(steps):
+					S1 = self.get_S(E0, sm['compound'])
+					E1 = E0 - dr*dp*sm['ad']*S1
+					E1 = np.where(E1>0, E1, 0.0)
+					E0 = E0 - dr*0.5*dp*sm['ad']*(S1+self.get_S(E1, sm['compound']))
+					E0 = np.where(E0>0, E0, 0.0)
+					E_bar.append(E0)
+				hists.append(np.histogram(np.concatenate(E_bar), bins=bins)[0])
 		return hists
 
 	def _solve(self):
 		if self.meta['solved']:
 			return
+		self.meta['solved'] = True
 		if int(self.meta['N']/float(self.meta['chunk_size']))>=self.meta['threads']:
 			N = [int(self.meta['chunk_size']) for n in range(int(self.meta['N']/float(self.meta['chunk_size'])))]
 		else:
 			N = [int(self.meta['N']/float(self.meta['threads'])) for n in range(self.meta['threads'])]
-
+		
 		if self.meta['threads']>1:
 			pool = multiprocessing.Pool(processes=self.meta['threads'])
 			histos = pool.map(self._solve_chunk, N)
@@ -407,33 +294,43 @@ class Ziegler(object):
 
 		bins = self._calc_bins()
 		energy = 0.5*(bins[1:]+bins[:-1])
-		for n,sm in enumerate(self.stack):
+		for n,sm in enumerate(self._stack):
 			sm['flux'] = np.sum([h[n] for h in histos], axis=0)
 			sm['flux'] = sm['flux']/np.sum(sm['flux'])
 			sm['mu_E'] = np.sum(sm['flux']*energy)
 			sm['sig_E'] = np.sqrt(np.sum(sm['flux']*(energy-sm['mu_E'])**2))
 			lh = np.where(sm['flux']>0)[0]
+			if lh[0]==0:
+				nm = sm['name'] if sm['name'] is not None else sm['compound']+str(n+1)
+				print('WARNING: Beam stopped in foil {}'.format(nm))
 			sm['flux'] = sm['flux'][lh[0]:lh[-1]]
 			sm['energy'] = energy[lh[0]:lh[-1]]
 			sm['bins'] = bins[lh[0]:lh[-1]+1]
-		self.meta['solved'] = True
 
+	def saveas(self, *fnms):
+		cols = ['name','compound','thickness','density','ad','mu_E','sig_E']
+		stack = pd.DataFrame([{c:(sm[c] if c in sm else None) for c in cols} for sm in self.stack], columns=cols)
+		cols = ['name','energy','flux']
+		fluxes = pd.concat([pd.DataFrame({c:sm[c] for c in cols}, columns=cols) for sm in self.stack if sm['name'] is not None], ignore_index=True)
+		for fl in fnms:
+			if any([fl.endswith(e) for e in ['.png','.pdf','.eps','.pgf','.ps','.raw','.rgba','.svg','.svgz']]):
+				self.plot(saveas=fl, show=False)
+			if fl.endswith('.csv'):
+				stack.to_csv(fl.replace('.csv','_stack.csv'), index=False)
+				fluxes.to_csv(fl.replace('.csv','_fluxes.csv'), index=False)
+			if fl.endswith('.db'):
+				self.check_db(fl)
+				stack.to_sql('stack', self.db_connection, if_exists='replace', index=False)
+				fluxes.to_sql('fluxes', self.db_connection, if_exists='replace', index=False)
 
-	def summarize(self, samples=None, printout=True, saveas=None, incl_no_names=False):
-		self._solve()
-		names, mu_E, sig_E = [], [], []
-		for sm in self.stack:
+	def summarize(self, samples=None):
+		for n,sm in enumerate(self.stack):
 			if sm['name'] is not None:
-				if samples is not None or incl_no_names:
+				if samples is not None:
 					if not any([re.match(s, sm['name']) for s in samples]):
 						continue
-				print(sm['name']+': '+str(round(sm['mu_E'], 2))+' +/- '+str(round(sm['sig_E'], 2))+' (MeV)')
-				if saveas is not None:
-					names.append(sm['name'])
-					mu_E.append(sm['mu_E'])
-					sig_E.append(sm['sig_E'])
-		if saveas is not None:
-			self.save_csv(saveas, [names, mu_E, sig_E], ['Name', 'mu_E (MeV)', 'sig_E (MeV)'])
+				nm = sm['name'] if sm['name'] is not None else sm['compound']+str(n+1)
+				print(nm+': '+str(round(sm['mu_E'], 2))+' +/- '+str(round(sm['sig_E'], 2))+' (MeV)')
 
 	def plot_S(self, compound, energy=None, **kwargs):
 		if energy is None:
@@ -446,13 +343,12 @@ class Ziegler(object):
 		ax.legend(loc=0)
 		return _close_plot(f, ax, **kwargs)
 
-	def plot(self, samples=None, incl_no_names=False, **kwargs):
-		self._solve()
+	def plot(self, samples=None,  **kwargs):
 		if type(samples)==str:
 			samples = [samples]
 		f,ax = _init_plot(**kwargs)
 		for sm in self.stack:
-			if sm['name'] is not None or incl_no_names:
+			if sm['name'] is not None:
 				if samples is not None:
 					if not any([re.match(s, sm['name']) for s in samples]):
 						continue

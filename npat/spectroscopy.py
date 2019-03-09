@@ -847,6 +847,10 @@ class Spectrum(object):
 		for fl in fnms:
 			if fl.startswith('*'):
 				fl = os.path.join(self._path, '.'.join(self._fnm.split('.')[:-1])+'.'+fl.split('.')[-1])
+
+			if any([fl.endswith(e) for e in ['.png','.pdf','.eps','.pgf','.ps','.raw','.rgba','.svg','.svgz']]):
+				self.plot(saveas=fl, show=False)
+
 			if fl.endswith('.Spe'):
 				### Maestro ASCII .Spe ###
 				self._meta['DATE_MEA'] = [dtm.datetime.strftime(self.meta['start_time'], '%m/%d/%Y %H:%M:%S')]
@@ -920,6 +924,9 @@ class Spectrum(object):
 					ss += np.array(self.hist, dtype=np.float32).tobytes()
 					ss += np.array(4*len(self.hist), dtype=np.uint32).tobytes()
 					f.write(ss)
+
+			if fl.endswith('.csv'):
+				self.peaks.to_csv(fl, index=False)
 
 
 	def _from_Spe(self, filename=None):

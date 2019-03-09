@@ -15,8 +15,7 @@ if __name__=='__main__':
 	# sp.auto_calibrate()
 	# sp.cb.plot()
 	# sp.summarize()
-	# pk = sp.peaks
-	# pk.to_csv('test.csv',index=False)
+	# sp.saveas('test.csv')
 
 
 	# sp.plot()
@@ -34,21 +33,30 @@ if __name__=='__main__':
 
 	########## Decay Chain Tests ##########
 
-	# dc = DecayChain('225RA','d',R={'225RA':9.0,'225AC':1.0},time=10.0/24.0)
-	# dc.append(DecayChain('225RA','d',R={'225RA':2.0,'225AC':1.0},time=33.0/24.0))
-	# dc.append(DecayChain('225RA','d',R={'225RA':5.0,'225AC':1.0},time=113.0/24.0))
-	# dc.append(DecayChain('225RA','d',time=21))
-	# dc.counts = {'225AC':[[5.0, 6.0, 6.0, 0.2],[6.0, 7.0, 6.2, 0.3]],'221FR':[5.5, 6.5, 6.0, 0.2]}
-	# dc.fit_R()
-	# dc.plot(N_plot=10, logscale=False)
+	dc = DecayChain('225RA','d',R={'225RA':9.0,'225AC':1.0},time=10.0/24.0)
+	dc.append(DecayChain('225RA','d',R={'225RA':2.0,'225AC':1.0},time=33.0/24.0))
+	dc.append(DecayChain('225RA','d',R={'225RA':5.0,'225AC':1.0},time=113.0/24.0))
+	dc.append(DecayChain('225RA','d',time=21))
+	dc.counts = {'225AC':[[5.0, 6.0, 6.0, 0.2],[6.0, 7.0, 6.2, 0.3]],'221FR':[5.5, 6.5, 6.0, 0.2]}
+	dc.fit_R()
+	dc.plot(N_plot=10, logscale=False)
 
 	######## Ziegler Tests #############
 
-	zg = Ziegler(stack=[{'compound':'Ni','name':'Ni01','thickness':0.025},{'compound':'Ti','name':'Ti01','thickness':1.025},{'compound':'SrCO3','name':'SrCO3','thickness':0.7,'density':3.5}], beam_istp='2H', N=1E4)
-	print zg.stack
-	zg.summarize()
-	zg.plot(['Sr','Ni','Ti'])
+	# zg = Ziegler(stack=[{'compound':'Ni','name':'Ni01','thickness':0.025},{'compound':'Ti','name':'Ti01','thickness':1.025},{'compound':'SrCO3','name':'SrCO3','thickness':0.7,'density':3.5}], beam_istp='2H', N=1E4, max_steps=100)
+	# print zg.stack
+	# zg.summarize()
+	# zg.plot(['Sr','Ni','Ti'])
 
+	# zg = Ziegler(stack=[{'compound':'Be','name':'Be Breakup','thickness':6.0}])
+	# zg.meta = {'istp':'2H','E0':33.0}
+	# zg.summarize()
+	# zg.plot()
+	# zg.saveas('breakup.csv', 'breakup.db', 'breakup.png')
+
+	zg = Ziegler(stack='test_stack.csv')
+	zg.meta = {'istp':'2H'}
+	zg.plot()
 	
 
 

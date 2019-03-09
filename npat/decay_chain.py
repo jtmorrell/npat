@@ -8,6 +8,7 @@ import datetime as dtm
 from scipy.optimize import curve_fit
 
 from .isotope import Isotope
+from .spectroscopy import Spectrum
 from .plotter import colors
 from .plotter import _init_plot
 from .plotter import _close_plot
@@ -269,6 +270,32 @@ class DecayChain(object):
 		if a_m>0:
 			return R_norm/a_m
 		return 0.0
+
+	def fit_spectra(self, spectra, db=None, max_unc=0.15, EoB=None):
+		if EoB is not None:
+			self.EoB = EoB
+		if self.EoB is None:
+			print('WARNING: EoB must be set.')
+			return
+		counts = {}
+		conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557600.0}
+		for sp in spectra:
+			start_time = (sp.meta['start_time']-self.EoB).total_seconds()/conv[self.units]
+			end_time = start_time+(sp.meta['real_time']/conv[self.units])
+			if type(sp)==str:
+				sp = Spectrum(sp, db)
+			if not sp.meta['istp']:
+				sp.meta['istp'] = self.isotopes
+			for n,p in sp.peaks.iterrows():
+				if not (p['converged'] and p['unc_decays']<max_unc*p['decays']):
+					continue
+				if self.filter_name(p['isotope']) not in self.isotopes:
+					continue
+				if p['isotope'] in counts:
+					counts[p['isotope']].append([start_time, end_time, p['decays'], p['unc_decays']])
+				else:
+					counts[p['isotope']] = [[start_time, end_time, p['decays'], p['unc_decays']]]
+		self.counts = counts
 
 	@property
 	def R_norm(self):
