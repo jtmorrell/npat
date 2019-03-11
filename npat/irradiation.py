@@ -27,6 +27,8 @@ class Ziegler(object):
 
 	Parameters
 	----------
+	x : type
+		Description of parameter `x`.
 
 	Attributes
 	----------
@@ -34,7 +36,17 @@ class Ziegler(object):
 	Methods
 	-------
 
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
+
 	"""
+
 	def __init__(self, stack, beam=None, **kwargs):
 		### stack is list of dicts, which must have 'compound' specified.
 		### Areal density specified by either 'ad' (mg/cm^2), both mass (g) and area (cm^2),
@@ -105,6 +117,16 @@ class Ziegler(object):
 		if self._meta['min_steps']>self._meta['max_steps']:
 			self._meta['max_steps'] = self._meta['min_steps']+1
 			print('WARNING: min_steps > max_steps, setting max_steps to {}'.format(self._meta['max_steps']))
+		self._meta['solved'] = False
+
+	def __getitem__(self, key):
+		if type(key)==str:
+			for s in self.stack:
+				if s['name']==key:
+					return s
+			return None
+		else:
+			return self.stack[int(key)]
 
 	@property
 	def stack(self):
@@ -115,6 +137,7 @@ class Ziegler(object):
 	@stack.setter
 	def stack(self, _stack):
 		self._stack = list(_stack)
+		self._meta['solved'] = False
 		for s in self._stack:
 			if 'name' not in s:
 				s['name'] = None
@@ -177,6 +200,29 @@ class Ziegler(object):
 
 
 	def get_S(self, E, cm):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		# energy E in MeV , stopping power in MeV/(mg/cm2)
 		E, r0 = np.asarray(E), False
 		if not E.shape:
@@ -308,6 +354,29 @@ class Ziegler(object):
 			sm['bins'] = bins[lh[0]:lh[-1]+1]
 
 	def saveas(self, *fnms):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		cols = ['name','compound','thickness','density','ad','mu_E','sig_E']
 		stack = pd.DataFrame([{c:(sm[c] if c in sm else None) for c in cols} for sm in self.stack], columns=cols)
 		cols = ['name','energy','flux']
@@ -324,6 +393,29 @@ class Ziegler(object):
 				fluxes.to_sql('fluxes', self.db_connection, if_exists='replace', index=False)
 
 	def summarize(self, samples=None):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		for n,sm in enumerate(self.stack):
 			if sm['name'] is not None:
 				if samples is not None:
@@ -333,6 +425,29 @@ class Ziegler(object):
 				print(nm+': '+str(round(sm['mu_E'], 2))+' +/- '+str(round(sm['sig_E'], 2))+' (MeV)')
 
 	def plot_S(self, compound, energy=None, **kwargs):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if energy is None:
 			energy = 10.0**np.arange(0.1,2.8,0.1)
 		f,ax = _init_plot(**kwargs)
@@ -344,6 +459,29 @@ class Ziegler(object):
 		return _close_plot(f, ax, **kwargs)
 
 	def plot(self, samples=None,  **kwargs):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if type(samples)==str:
 			samples = [samples]
 		f,ax = _init_plot(**kwargs)

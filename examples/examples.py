@@ -7,18 +7,16 @@ if __name__=='__main__':
 
 	######### Spectroscopy Tests #########
 
-	# sp = Spectrum('eu_calib_7cm.Spe','test.db')
-	# sp.meta = {'istp':['152EU'], 'A0':3.7E4, 'ref_date':'01/01/2009 12:00:00'}
-	# sp.fit_config = {'threads':4}
-
-	# # sp.fit_config = {'xrays':True, 'E_min':20.0}
-	# sp.auto_calibrate()
-	# sp.cb.plot()
-	# sp.summarize()
+	sp = Spectrum('eu_calib_7cm.Spe','test.db')
+	sp.meta = {'istp':['152EU'], 'A0':3.7E4, 'ref_date':'01/01/2009 12:00:00'}
+	# sp.fit_config = {'p0':[{'E':444.1,'istp':'152EU'},{'E':121.0,'istp':'152EU'}]}
+	# sp.fit_config = {'xrays':True, 'E_min':20.0, 'bg_fit':True, 'quad_bg':True}
+	sp.auto_calibrate(data=[[664.5,121.8],[1338.5,244.7],[1882.5,344.3],[2428,444],[7698,1408]])
+	sp.cb.plot()
+	sp.summarize()
 	# sp.saveas('test.csv')
+	sp.plot(xcalib=False)
 
-
-	# sp.plot()
 
 	# sp = Spectrum('AH20190131_Na22_10cm_IDM4.Chn','test.db')
 	# sp = Spectrum('AH20190131_Na22_10cm_IDM4.Spe')
@@ -33,13 +31,13 @@ if __name__=='__main__':
 
 	########## Decay Chain Tests ##########
 
-	dc = DecayChain('225RA','d',R={'225RA':9.0,'225AC':1.0},time=10.0/24.0)
-	dc.append(DecayChain('225RA','d',R={'225RA':2.0,'225AC':1.0},time=33.0/24.0))
-	dc.append(DecayChain('225RA','d',R={'225RA':5.0,'225AC':1.0},time=113.0/24.0))
-	dc.append(DecayChain('225RA','d',time=21))
-	dc.counts = {'225AC':[[5.0, 6.0, 6.0, 0.2],[6.0, 7.0, 6.2, 0.3]],'221FR':[5.5, 6.5, 6.0, 0.2]}
-	dc.fit_R()
-	dc.plot(N_plot=10, logscale=False)
+	# dc = DecayChain('225RA','d',R={'225RA':9.0,'225AC':1.0},time=10.0/24.0)
+	# dc.append(DecayChain('225RA','d',R={'225RA':2.0,'225AC':1.0},time=33.0/24.0))
+	# dc.append(DecayChain('225RA','d',R={'225RA':5.0,'225AC':1.0},time=113.0/24.0))
+	# dc.append(DecayChain('225RA','d',time=21))
+	# dc.counts = {'225AC':[[5.0, 6.0, 6.0, 0.2],[6.0, 7.0, 6.2, 0.3]],'221FR':[5.5, 6.5, 6.0, 0.2]}
+	# dc.fit_R()
+	# dc.plot(N_plot=10, logscale=False)
 
 	######## Ziegler Tests #############
 
@@ -54,9 +52,9 @@ if __name__=='__main__':
 	# zg.plot()
 	# zg.saveas('breakup.csv', 'breakup.db', 'breakup.png')
 
-	zg = Ziegler(stack='test_stack.csv')
-	zg.meta = {'istp':'2H'}
-	zg.plot()
+	# zg = Ziegler(stack='test_stack.csv')
+	# zg.meta = {'istp':'2H'}
+	# zg.plot()
 	
 
 

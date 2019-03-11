@@ -91,6 +91,29 @@ class Calibration(object):
 		return self.calib['rescal']
 	
 	def eng(self, idx, *cal):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		idx = np.asarray(idx)
 		cal = cal if len(cal) else self.calib['engcal']
 		if len(cal)==2:
@@ -99,6 +122,29 @@ class Calibration(object):
 			return cal[0]+cal[1]*idx+cal[2]*idx**2
 
 	def eff(self, energy, *c):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		energy = np.asarray(energy)
 		c = c if len(c) else self.calib['effcal']
 		if len(c)==3:
@@ -107,6 +153,29 @@ class Calibration(object):
 			return c[0]*np.exp(-c[1]*energy**c[2])*(1.0-np.exp(-c[3]*energy**c[4]))
 			
 	def unc_eff(self, energy, c=None, u=None):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		energy = np.asarray(energy)
 		if c is None or u is None:
 			c, u = self.calib['effcal'], self.calib['unc_effcal']
@@ -124,6 +193,29 @@ class Calibration(object):
 		return np.sqrt(var)
 
 	def res(self, idx, *cal):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		idx = np.asarray(idx)
 		cal = cal if len(cal) else self.calib['rescal']
 		if len(cal)==1:
@@ -132,6 +224,29 @@ class Calibration(object):
 			return cal[0]+cal[1]*idx
 
 	def map_idx(self, energy, *cal):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		energy = np.asarray(energy)
 		cal = cal if len(cal) else self.calib['engcal']
 		if len(cal)==3:
@@ -140,6 +255,29 @@ class Calibration(object):
 		return np.array(np.rint((energy-cal[0])/cal[1]), dtype=np.int32)
 
 	def calibrate(self, spectra, saveas=None, db=None, auto_calibrate=False):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		shelves = []
 		sps = []
 		self._calib_data = {'effcal':[]}
@@ -163,6 +301,7 @@ class Calibration(object):
 		rescal = self._calibrate_resolution(cal_spec, np.average([s.cb.rescal for s in cal_spec], axis=0))
 		for sp in sps:
 			sp.meta = {'engcal':engcal, 'rescal':rescal}
+		self.update({'engcal':engcal, 'rescal':rescal})
 
 		shelves = {sh:[s for s in cal_spec if s.meta['shelf']==sh] for sh in set(shelves)}
 		for shelf in shelves:
@@ -172,6 +311,7 @@ class Calibration(object):
 			for sp in sps:
 				if shelf==sp.meta['shelf']:
 					sp.meta = {'effcal':effcal, 'unc_effcal':unc_effcal}
+					self.update({'effcal':effcal, 'unc_effcal':unc_effcal})
 					if saveas is not None:
 						if type(saveas)==str:
 							saveas = [saveas]
@@ -191,7 +331,7 @@ class Calibration(object):
 		E, chn, unc_chn = E[idx], chn[idx], unc_chn[idx]
 
 		p0 = p0 if len(p0)==3 else [p0[0], p0[1], 0.0]
-		fit, unc = curve_fit(self.eng, chn, E, sigma=self.eng(unc_chn), p0=p0)
+		fit, unc = curve_fit(self.eng, chn, E, sigma=self.eng(unc_chn+1E-8), p0=p0)
 
 		self._calib_data['engcal'] = {'fit':fit, 'unc':unc, 'x':E, 'y':chn, 'yerr':unc_chn}
 		return fit
@@ -228,12 +368,12 @@ class Calibration(object):
 			eff += ef.tolist()
 
 		E, eff, unc_eff = np.array(E), np.array(eff), np.array(unc_eff)
-		idx = np.where(eff>unc_eff)
+		idx = np.where((eff>unc_eff)&(unc_eff>0.0)&(np.isfinite(unc_eff)))
 		E, eff, unc_eff = E[idx], eff[idx], unc_eff[idx]
-		p0 = p0 if len(p0)==5 else p0.tolist()+[0.001, 1.476]
-		p0[0] = p0[0]*np.average(np.array(eff)/self.eff(np.array(E), *p0), weights=(self.eff(np.array(E), *p0)/np.array(unc_eff))**2)
+		p0 = p0.tolist() if len(p0)==5 else p0.tolist()+[0.001, 1.476]
+		p0[0] = max([min([p0[0]*np.average(np.array(eff)/self.eff(np.array(E), *p0), weights=(self.eff(np.array(E), *p0)/np.array(unc_eff))**2),99.9]),0.001])
 
-		bounds = ([0.0, 0.0, -1.0, 0.0, -2.0], [10.0, 3.0, 3.0, 0.5, 3.0])
+		bounds = ([0.0, 0.0, -1.0, 0.0, -2.0], [100.0, 3.0, 3.0, 0.5, 3.0])
 		if any([sp.fit_config['xrays'] for sp in spectra]):
 			try:		
 				fit5, unc5 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0, bounds=bounds)
@@ -264,7 +404,7 @@ class Calibration(object):
 				u_mu = [f['unc'][i][i] for i in f['ix']['mu']]
 				unc_sig += [np.sqrt(s+0.25*p0[0]*u_mu[n]/mu[-1*(len(u_mu)-n)]) for n,s in enumerate(u_sig)]
 		mu, sig, unc_sig = np.array(mu), np.array(sig), np.array(unc_sig)
-		idx = np.where(sig>unc_sig)
+		idx = np.where((sig>unc_sig)&(np.isfinite(unc_sig))&(unc_sig>0.0))
 		mu, sig, unc_sig = mu[idx], sig[idx], unc_sig[idx]
 		fit, unc = curve_fit(self.res, mu, sig, sigma=unc_sig, p0=p0, bounds=([-np.inf, 0.0],[np.inf, np.inf]))
 
@@ -272,6 +412,29 @@ class Calibration(object):
 		return fit
 
 	def plot(self, **kwargs):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		cm = colors(aslist=True)
 		cm_light = colors(shade='light', aslist=True)
 		f, ax = plt.subplots(1, 3, figsize=(12.8, 4.8))
@@ -379,6 +542,29 @@ class Spectrum(object):
 		return self
 
 	def rebin(self, N_bins):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		L = len(self.hist)
 		if N_bins>L:
 			raise ValueError('N_bins: {0} must be greater than current value: {1}'.format(N_bins, L))
@@ -421,15 +607,9 @@ class Spectrum(object):
 
 			q = list(self.db.execute('SELECT * FROM spectra WHERE filename LIKE ? AND file_path LIKE ?', ('%'+self._fnm+'%', '%'+self._path+'%')))
 			if len(q):
-				meta = literal_eval(str(q[0][6]))
-				for m in meta:
-					self._meta[m] = meta[m]
-				self.fit_config = literal_eval(str(q[0][7]))
-				meta = {'engcal':literal_eval(str(q[0][8])), 'effcal':literal_eval(str(q[0][9])), 
+				self.meta = {'engcal':literal_eval(str(q[0][8])), 'effcal':literal_eval(str(q[0][9])), 
 							'unc_effcal':np.array(literal_eval(str(q[0][10]).replace('inf',"'inf'")), dtype=np.float64), 
 							'rescal':literal_eval(str(q[0][11]))}
-				for m in meta:
-					self._meta[m] = meta[m]
 				self._meta['spec_id'] = q[0][0]
 			else:
 				ids = [i[0] for i in self.db.execute('SELECT spec_id FROM spectra')]
@@ -587,20 +767,57 @@ class Spectrum(object):
 		except:
 			return p0_A, np.ones((len(p0_A), len(p0_A)))*np.inf
 
-	def auto_calibrate(self, *guess, **param):
+	def auto_calibrate(self, guess=[], data=[], **param):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		from scipy.optimize import differential_evolution
 		guess = guess if len(guess) else self.cb.engcal
-		obj = lambda m: np.average(np.sqrt(np.absolute(self._hist-self._snip-np.dot(*self._guess_forward_activity(*[guess[0], m[0]])))))
-		self.meta = {'engcal': [guess[0], differential_evolution(obj, [(0.995*guess[1], 1.005*guess[1])]).x[0]]}
+		if len(data):
+			data = np.asarray(data, dtype=np.float64)
+			if len(data)==1:
+				guess = [0.0, data[0][1]/data[0][0]]
+			else:
+				N = 2 if len(data)<5 else 3
+				M = np.column_stack([data[:,0]**m for m in range(N)])
+				b = np.array([np.sum(data[:,0]**m*data[:,1]) for m in range(N)])
+				M_inv = np.linalg.inv(np.dot(M.T, M))
+				guess = np.dot(M_inv, b).tolist()
+		guess = guess if len(guess)==3 else list(guess)+[0.0]
+		obj = lambda m: np.average(np.sqrt(np.absolute(self._hist-self._snip-np.dot(*self._guess_forward_activity(*[guess[0], m[0], guess[2]])))))
+		self.meta = {'engcal': [guess[0], differential_evolution(obj, [(0.995*guess[1], 1.005*guess[1])]).x[0], guess[2]]}
 		if ('A0' in self.meta and 'ref_date' in self.meta) and (param['_cb_cal'] if '_cb_cal' in param else True):
+			eff, u_eff, res = self.cb.effcal, self.cb.unc_effcal, self.cb.rescal
 			try:
 				self.cb.calibrate([self])
-			except:
-				self.meta = {'engcal':guess}
+			except Exception as e:
+				print('Error:', e)
+				self.meta = {'engcal':guess, 'effcal':eff, 'unc_effcal':u_eff, 'rescal':res}
 				try:
 					self.cb.calibrate([self])
-				except:
-					self.meta = {'engcal':guess}
+				except Exception as e:
+					print('Error:', e)
+					self.meta = {'engcal':guess, 'effcal':eff, 'unc_effcal':u_eff, 'rescal':res}
 					print('WARNING: auto calibrate failed. Setting engcal to guess.')
 
 
@@ -626,14 +843,15 @@ class Spectrum(object):
 	def _counts(self, fit, cov, lh):
 		cfg = self.fit_config
 		L = 3+2*int(cfg['skew_fit'])+int(cfg['step_fit'])
+		M = int(cfg['bg_fit'])*(2+int(cfg['quad_bg']))
 		N_cts, unc_N = [], []
 
 		skew_fn = lambda A, R, alpha, sig: 2*A*R*alpha*sig*np.exp(-0.5/alpha**2)
 		min_skew_fn = lambda A, sig: 2*A*cfg['R']*cfg['alpha']*sig*np.exp(-0.5/cfg['alpha']**2)
 		pk_fn = lambda A, sig: 2.506628*A*sig
 
-		for m in range(int(len(fit)/L)):
-			i = L*m+2*int(cfg['bg_fit'])+int(cfg['bg_fit'])*int(cfg['quad_bg'])
+		for m in range(int((len(fit)-M)/L)):
+			i = L*m+M
 			p_i = [i, i+2]
 			s_i = [i, i+3, i+4, i+2]
 			if cfg['skew_fit']:
@@ -668,6 +886,29 @@ class Spectrum(object):
 		return A*np.exp(-0.5*((x-mu)/sig)**2)+R*A*np.exp((x-mu)/(alpha*sig))*erfc((x-mu)/(r2*sig)+1.0/(r2*alpha))+step*A*erfc((x-mu)/(r2*sig))
 
 	def multiplet(self, x, *args):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self.fit_config['bg_fit']:
 			if self.fit_config['quad_bg']:
 				BG, peak = 3, args[0]+args[1]*x+args[2]*x**2
@@ -696,14 +937,16 @@ class Spectrum(object):
 
 	def _get_p0(self, lh, px, gm, istp):
 
-		ix, N = {'A':[],'mu':[],'sig':[],'R':[],'alpha':[],'step':[]}, 0
+		ix = {'A':[],'mu':[],'sig':[],'R':[],'alpha':[],'step':[]}
+		N = int(self.fit_config['bg_fit'])*(2+int(self.fit_config['quad_bg']))
 		if self.fit_config['bg_fit']:
-			N = 3 if self.fit_config['quad_bg'] else 2
-			M = np.column_stack([self.x**m for m in range(N)])
-			b = np.array([np.sum(self.x**m*self._snip) for m in range(N)])
+			M = np.column_stack([self.channels[lh[0]:lh[1]]**m for m in range(N)])
+			b = np.array([np.sum(self.channels[lh[0]:lh[1]]**m*self._snip[lh[0]:lh[1]]) for m in range(N)])
 			M_inv = np.linalg.inv(np.dot(M.T, M))
-			p0 = np.dot(M_inv, b)
-			bounds = [[-np.inf for i in p0],[np.inf for i in p0]]
+			p0 = np.dot(M_inv, b).tolist()
+			resid = self._snip[lh[0]:lh[1]]-np.dot(M, p0)
+			unc = np.sqrt(np.abs(M_inv*np.dot(resid.T, resid)/max([float((lh[1]-lh[0])-N),1.0])))
+			bounds = [[i-10*unc[n][n] for n,i in enumerate(p0)],[i+10*unc[n][n] for n,i in enumerate(p0)]]
 		else:
 			p0, bounds = [],[[],[]]
 
@@ -748,16 +991,51 @@ class Spectrum(object):
 				p0['sig'].append(sig)
 				p0['A'].append(A)
 				l, h = np.array(idx-W*sig, dtype=np.int32), np.array(idx+W*sig, dtype=np.int32)
-				pks.append(np.array([l, h, np.repeat(n, len(l)), gm_idx, np.repeat(o, len(l)), np.arange(len(l))], dtype=np.int32).T)
+				pks.append(np.array([l, h, np.repeat(n, len(l)), gm_idx, np.repeat(o, len(l)), np.arange(len(l)), np.repeat(n, len(l))], dtype=np.int32).T)
 			else:
 				o += 1
-		if len(pks)==0:
-			return pks
+		
 
 		if 'p0' in self.fit_config:
-			## TODO:
-			## modify pks and p0 if 'p0' in fit_config
-			pass
+			mp0 = self.fit_config['p0']
+			if type(mp0)==dict:
+				mp0 = [{i:mp0[i][n] for i in mp0} for n in range(len([mp0[i] for i in mp0][0]))]
+
+			for n,p in enumerate(mp0):
+				if 'mu' in p:
+					p['mu'] = int(p['mu'])
+					if 'E' not in p:
+						p['E'] = self.cb.eng(p['mu'])
+				elif 'E' in p:
+					p['mu'] = self.cb.map_idx(p['E'])
+				else:
+					raise ValueError('E or mu must be specified in p0.')
+				if 'I' not in p:
+					p['I'] = -1.0
+				if 'unc_I' not in p:
+					p['unc_I'] = 1.0
+				if 'A' not in p:
+					p['A'] = self._hist[p['mu']]-self._snip[p['mu']]
+				if 'sig' not in p:
+					p['sig'] = self.cb.res(p['mu'])
+				if 'istp' not in p:
+					p['istp'] = None
+
+				if p['istp'] not in self.meta['istp']:
+					self.meta['istp'].append(p['istp'])
+					self.gamma_list.append(np.array([[p['E'],p['I'],p['unc_I']]]))
+					ig = len(self.gamma_list)-1
+				else:
+					ig = self.meta['istp'].index(p['istp'])
+					self.gamma_list[ig] = np.append(self.gamma_list[ig], [[p['E'],p['I'],p['unc_I']]], axis=0)
+				p0['idx'].append([p['mu']])
+				p0['sig'].append([p['sig']])
+				p0['A'].append([p['A']])
+				l, h = p['mu']-W*p['sig'], p['mu']+W*p['sig']
+				pks.append(np.array([[l], [h], [len(p0['A'])-1], [len(self.gamma_list[ig])-1], [o], [0], [ig]], dtype=np.int32).T)
+
+		if len(pks)==0:
+			return pks
 
 		pks = np.concatenate(pks)
 		pks = pks[np.argsort(pks[:,0])]
@@ -776,7 +1054,7 @@ class Spectrum(object):
 		multiplets = []
 		for p in pks:
 			lh = [p[0][0], p[-1][1]]
-			N = [(i[2]-i[4], i[3], i[5], i[2]) for i in p]
+			N = [(i[2]-i[4], i[3], i[5], i[6]) for i in p]
 			px = [[p0['A'][n][j], p0['idx'][n][j], p0['sig'][n][j]] for n,m,j,k in N]
 			gm = np.asarray([self.gamma_list[k][m] for n,m,j,k in N])
 			istp = [self.meta['istp'][k] for n,m,j,k in N]
@@ -802,7 +1080,7 @@ class Spectrum(object):
 				'intensity','unc_intensity','efficiency','unc_efficiency',
 				'decays','unc_decays','decay_rate','unc_decay_rate','chi2','converged']
 
-		return [{'fit':fit,'unc':unc,'l':lh[0],'h':lh[1],'gm':gm,'converged':converged,'ix':multi['ix']}, 
+		return [{'fit':fit,'unc':unc,'l':lh[0],'h':lh[1],'gm':gm,'converged':converged,'ix':multi['ix'],'istp':multi['istp']}, 
 				pd.DataFrame({'spec_id':self.meta['spec_id'], 'filename':self._fnm, 'isotope':multi['istp'],
 								'energy':gm[:,0], 'counts':N, 'unc_counts':unc_N,
 								'intensity':gm[:,1], 'unc_intensity':gm[:,2], 'efficiency':self.cb.eff(gm[:,0]),
@@ -841,9 +1119,53 @@ class Spectrum(object):
 		if self._peaks is None:
 			fits = self.fits
 		return self._peaks
+
+	def _split_fits(self):
+		fits, istp, lh, N_sub = [], [], [], []
+		cfg = self.fit_config
+		for ft in self.fits:			
+			if not ft['converged']:
+				N_sub.append(0)
+				continue
+			f = ft['fit']
+			B = int(cfg['bg_fit'])*(2+int(cfg['quad_bg']))
+			p0 = f[:B].tolist()
+			L = 3+2*int(cfg['skew_fit'])+int(cfg['step_fit'])
+			N_sub.append(int((len(f)-B)/L))
+			for n in range(N_sub[-1]):
+				istp.append(ft['istp'][n])
+				fits.append(p0+f[B+n*L:B+(n+1)*L].tolist())
+				mu, sig = f[B+n*L+1], f[B+n*L+2]
+				lh.append([mu-cfg['pk_width']*sig, mu+cfg['pk_width']*sig])
+		itp_set = sorted(list(set(istp)))
+		return {i:[[fits[n],lh[n]] for n,ip in enumerate(istp) if ip==i] for i in itp_set}, itp_set, N_sub
+
 	
 
 	def saveas(self, *fnms):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		for fl in fnms:
 			if fl.startswith('*'):
 				fl = os.path.join(self._path, '.'.join(self._fnm.split('.')[:-1])+'.'+fl.split('.')[-1])
@@ -984,6 +1306,29 @@ class Spectrum(object):
 				self._meta['SPEC_ID'] = [sample_desc]
 
 	def summarize(self):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		print(self.__str__())
 
 	def __str__(self):
@@ -1007,28 +1352,82 @@ class Spectrum(object):
 		return ss
 
 
-	def plot(self, fit=True, labels=True, square_fig=False, snip=False, **kwargs):
-		
-		erange = self.cb.eng(np.array([self.channels-0.5, self.channels+0.5])).T.flatten()
-		spec = np.array([self.hist, self.hist]).T.flatten()
+	def plot(self, fit=True, labels=True, snip=False, xcalib=True, **kwargs):
+		"""Description
 
-		f, ax = _init_plot(figsize=(None if square_fig else (12.8, 4.8)), **kwargs)
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
+		
+		xgrid = np.array([self.channels-0.5, self.channels+0.5]).T.flatten()
+		spec = np.array([self.hist, self.hist]).T.flatten()
+		erange = self.cb.eng(xgrid) if xcalib else xgrid
+
+		f, ax = _init_plot(figsize=(12.8, 4.8), **kwargs)
 		spec_label = self._fnm if self._fnm is not None else 'Spectrum'
 		ax.plot(erange, spec, lw=1.2, zorder=1, label=(spec_label if labels else None))
 
-		if fit:
-			for p in self.fits:
-				xgrid = np.arange(p['l'], p['h'], 0.1)
-				pk_fit = self.multiplet(xgrid, *p['fit'])
-				ax.plot(self.cb.eng(xgrid), np.where(pk_fit>0.1, pk_fit, 0.1), lw=1.2)
-
 		if snip:
-			ax.plot(self.cb.eng(self.channels), self._snip)
+			erange = self.cb.eng(self.channels) if xcalib else self.channels
+			ax.plot(erange, self._snip)
 
-		ax.set_xlabel('Energy (keV)')
+		if fit:
+			cm, cl = colors(), colors(aslist=True)
+			cl = [c for c in cl if c not in [cm['k'], cm['gy']]]
+			ls = ['-','-.','--']
+			sub, itp, N_sub = self._split_fits()
+			
+			for n,p in enumerate(self.fits):
+				if not p['converged']:
+					xgrid = np.arange(p['l'], p['h'], 0.1)
+					pk_fit = self.multiplet(xgrid, *p['fit'])
+					erange = self.cb.eng(xgrid) if xcalib else xgrid
+					ax.plot(erange, np.where(pk_fit>0.1, pk_fit, 0.1), ls=':', lw=1.2, color=cm['gy'])
+				elif N_sub[n]>1:
+					xgrid = np.arange(p['l'], p['h'], 0.1)
+					pk_fit = self.multiplet(xgrid, *p['fit'])
+					erange = self.cb.eng(xgrid) if xcalib else xgrid
+					ax.plot(erange, np.where(pk_fit>0.1, pk_fit, 0.1), ls='--', lw=1.4, color=cm['gy'])
+
+			lbs = []
+			for n,i in enumerate(itp):
+				c = cl[n%len(cl)]
+				ilbl = Isotope(i).TeX
+				for p,lh in sub[i]:
+					xgrid = np.arange(lh[0], lh[1], 0.1)
+					pk_fit = self.multiplet(xgrid, *p)
+					lb = ilbl if (labels and ilbl not in lbs and len(lbs)<20) else None
+					erange = self.cb.eng(xgrid) if xcalib else xgrid
+					ax.plot(erange, np.where(pk_fit>0.1, pk_fit, 0.1), lw=1.4, color=c, label=lb, ls=ls[int(n/len(cl))%len(ls)])
+					if lb is not None:
+						lbs.append(lb)
+		
+		if xcalib:
+			ax.set_xlabel('Energy (keV)')
+		else:
+			ax.set_xlabel('ADC Channel')
 		ax.set_ylabel('Counts')
 		if labels:
-			ax.legend(loc=0)
+			ncol = min([max([int(len(lbs)/5),1]), 3])
+			ax.legend(loc=0, ncol=ncol)
 
 		return _close_plot(f, ax, **kwargs)
 

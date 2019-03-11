@@ -20,12 +20,23 @@ class DecayChain(object):
 
 	Parameters
 	----------
+	x : type
+		Description of parameter `x`.
 
 	Attributes
 	----------
 
 	Methods
 	-------
+
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
 
 	"""
 	def __init__(self, parent, units='s', R=None, A0=None, time=None):
@@ -86,6 +97,27 @@ class DecayChain(object):
 		return BR, CH
 
 	def activity(self, istp, t=None, units=None, _R=None, _A0=None):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+		
 		t = t if t is not None else self.time
 		if t is None:
 			raise ValueError('Time must be specified.')
@@ -127,6 +159,27 @@ class DecayChain(object):
 
 
 	def decays(self, istp, t_start, t_stop, units=None, _A0=None):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if np.any(self.R > 0):
 			print('WARNING: decays during production not implemented.')
 		t_start, t_stop = np.asarray(t_start), np.asarray(t_stop)
@@ -244,6 +297,27 @@ class DecayChain(object):
 		return A_meas
 	
 	def calc_L(self, i, t_m):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		a_0 = self.activity(i, 0.0)
 		a_m = self.activity(i, t_m)
 		if a_m>0:
@@ -251,6 +325,27 @@ class DecayChain(object):
 		return 0.0
 
 	def calc_M(self, i, j, t_start, t_stop):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		a_n = self.activity(i, t_start)
 		d_m = self.decays(j, t_start, t_stop)
 		if d_m>0:
@@ -258,6 +353,27 @@ class DecayChain(object):
 		return 0.0
 
 	def calc_P(self, i):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		a_0 = self.activity(i, 0.0)
 		R_norm = self.R_norm[self.index(i)]
 		if a_0>0:
@@ -265,6 +381,27 @@ class DecayChain(object):
 		return 0.0
 
 	def calc_Q(self, i, t_m):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		a_m = self.activity(i, t_m)
 		R_norm = self.R_norm[self.index(i)]
 		if a_m>0:
@@ -272,6 +409,29 @@ class DecayChain(object):
 		return 0.0
 
 	def fit_spectra(self, spectra, db=None, max_unc=0.15, EoB=None):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if EoB is not None:
 			self.EoB = EoB
 		if self.EoB is None:
@@ -303,6 +463,29 @@ class DecayChain(object):
 		return np.dot(np.array(R_p).T,np.array(t))/np.sum(t)
 
 	def fit_R(self, istp=None, _update=True):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self._R_fit is not None:
 			if istp is None:
 				return self._R_fit
@@ -358,6 +541,29 @@ class DecayChain(object):
 		return self._R_fit[self.index(istp)]
 
 	def fit_A0(self, istp=None, _update=True):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self._A0_fit is not None:
 			if istp is None:
 				return self._A0_fit
@@ -409,6 +615,29 @@ class DecayChain(object):
 		return self
 
 	def append(self, other, time=None):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if time is not None:
 			self.time = time
 		if self.time is None:
@@ -436,6 +665,29 @@ class DecayChain(object):
 		other._prev = []
 
 	def plot(self, time=None, N_plot=None, N_label=10, **kwargs):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		f, ax = _init_plot(**kwargs)
 		if time is not None:
 			self.time = time

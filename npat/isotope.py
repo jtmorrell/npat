@@ -11,9 +11,11 @@ class Isotope(object):
 	"""Isotopic data
 
 	...
-
+	
 	Parameters
 	----------
+	x : type
+		Description of parameter `x`.
 
 	Attributes
 	----------
@@ -21,7 +23,17 @@ class Isotope(object):
 	Methods
 	-------
 
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
+
 	"""
+
 	def __init__(self, istp):
 		if istp=='1n' or istp=='1ng':
 			self.element, self.A, self.isomer = 'n', 1, 'g'
@@ -107,6 +119,29 @@ class Isotope(object):
 		return self.name
 
 	def half_life(self, units='s', unc=False):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self.stable:
 			return (np.inf,0.0) if unc else np.inf
 		half_conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557.6E3,'ky':31557.6E6}[units]
@@ -115,6 +150,29 @@ class Isotope(object):
 		return self.meta['t_half']/half_conv
 
 	def decay_const(self, units='s', unc=False):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self.stable:
 			return (0.0,0.0) if unc else 0.0
 		if unc:
@@ -123,6 +181,29 @@ class Isotope(object):
 		return np.log(2.0)/self.half_life(units)
 
 	def optimum_units(self):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		opt = ['ns']
 		for units in ['us','ms','s','m','h','d','y']:
 			if self.half_life(units)>1.0:
@@ -130,11 +211,57 @@ class Isotope(object):
 		return opt[-1]
 
 	def abundance(self, unc=False):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if unc:
 			return self.meta['abundance'], self.meta['unc_abundance']
 		return self.meta['abundance']
 
 	def get_SFY(self, unc=False, closest_SFY=False):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self.meta['SFY'] is None:
 			self.meta['SFY'] = [(str(i[1]),i[2],i[3]) for i in self.db.execute('SELECT * FROM SFY WHERE parent=?',(self.name,))]
 		SFY = list(self.meta['SFY'])
@@ -147,6 +274,29 @@ class Isotope(object):
 		return [[i[0], i[1]] for i in SFY]
 
 	def decay_products(self, closest_SFY=False):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		prods = []
 		for (mode, product, br) in self.meta['decay_mode']:
 			if product=='SFY':
@@ -156,6 +306,29 @@ class Isotope(object):
 		return [[i, br] for i,br in prods if br>1E-8]
 
 	def gammas(self,I_lim=[None,None],E_lim=[None,None],xrays=False):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self.meta['gm'] is None:
 			self.meta['gm'] = [[float(i[3]),float(i[4]),float(i[5]),str(i[6])] for i in self.db.execute('SELECT * FROM gammas WHERE isotope=? AND isomer=?',(self.isotope,self.isomer))]
 		gammas = list(self.meta['gm'])
@@ -169,6 +342,29 @@ class Isotope(object):
 		return {l:[g[n] for g in gammas if abs(g[0]-511.0)>1.0] for n,l in enumerate(['E','I','dI','notes'])}
 
 	def electrons(self,I_lim=(None,None),E_lim=(None,None),CE_only=False,Auger_only=False):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self.meta['el'] is None:
 			self.meta['el'] = [[float(i[3]),float(i[4]),float(i[5]),str(i[6])] for i in self.db.execute('SELECT * FROM electrons WHERE isotope=? AND isomer=?',(self.isotope,self.isomer))]
 		electrons = list(self.meta['el'])
@@ -184,6 +380,29 @@ class Isotope(object):
 		return {l:[e[n]for e in electrons] for n,l in enumerate(['E','I','dI','notes'])}
 
 	def beta_minus(self,I_lim=(None,None),Endpoint_lim=(None,None)):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self.meta['bm'] is None:
 			self.meta['bm'] = [[float(i[3]),float(i[4]),float(i[5]),float(i[6])] for i in self.db.execute('SELECT * FROM beta_minus WHERE isotope=? AND isomer=?',(self.isotope,self.isomer))]
 		betas = list(self.meta['bm'])
@@ -195,6 +414,29 @@ class Isotope(object):
 		return {l:[b[n] for b in betas] for n,l in enumerate(['muE','I','dI','endE'])}
 
 	def beta_plus(self,I_lim=(None,None),Endpoint_lim=(None,None)):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self.meta['bp'] is None:
 			self.meta['bp'] = [[float(i[3]),float(i[4]),float(i[5]),float(i[6])] for i in self.db.execute('SELECT * FROM beta_plus WHERE isotope=? AND isomer=?',(self.isotope,self.isomer))]
 		betas = list(self.meta['bp'])
@@ -206,6 +448,29 @@ class Isotope(object):
 		return {l:[b[n] for b in betas] for n,l in enumerate(['muE','I','dI','endE'])}
 
 	def alphas(self,I_lim=(None,None),E_lim=(None,None)):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if self.meta['al'] is None:
 			self.meta['al'] = [[float(i[3]),float(i[4]),float(i[5])] for i in self.db.execute('SELECT * FROM alphas WHERE isotope=? AND isomer=?',(self.isotope,self.isomer))]
 		alphas = list(self.meta['al'])

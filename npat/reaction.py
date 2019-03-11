@@ -20,6 +20,8 @@ class Library(object):
 
 	Parameters
 	----------
+	x : type
+		Description of parameter `x`.
 
 	Attributes
 	----------
@@ -27,7 +29,17 @@ class Library(object):
 	Methods
 	-------
 
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
+
 	"""
+
 	def __init__(self, name='tendl'):
 		name = name.lower()
 		if name in ['endf']:
@@ -53,9 +65,55 @@ class Library(object):
 		return self.name
 
 	def check(self, target=None, incident=None, outgoing=None, product=None):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		return len(self.search(target, incident, outgoing, product))==1
 
 	def search(self, target=None, incident=None, outgoing=None, product=None, _label=False):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		ss = 'SELECT * FROM all_reactions'
 		if incident is not None:
 			incident = incident.lower()
@@ -100,6 +158,29 @@ class Library(object):
 		return [fmt.format(*i) for i in reacs]
 
 	def query(self, target=None, incident=None, outgoing=None, product=None):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		labels = self.search(target, incident, outgoing, product, _label=True)
 		if not len(labels)==1:
 			raise ValueError('{0}({1},{2}){3}'.format(target, incident, outgoing, product)+' is not a unique reaction.')
@@ -131,6 +212,8 @@ class Reaction(object):
 
 	Parameters
 	----------
+	x : type
+		Description of parameter `x`.
 
 	Attributes
 	----------
@@ -138,7 +221,17 @@ class Reaction(object):
 	Methods
 	-------
 
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
+
 	"""
+
 	def __init__(self, reaction_name, library='best'):
 		self.target, p = tuple(reaction_name.split('('))
 		p, self.product = tuple(p.split(')'))
@@ -204,18 +297,87 @@ class Reaction(object):
 		return self._interp
 	
 	def integrate(self, energy, flux):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		# Trapezoidal Riemann sum
 		E = np.asarray(energy)
 		phisig = np.asarray(flux)*self.interp(E)
 		return np.sum(0.5*(E[1:]-E[:-1])*(phisig[:-1]+phisig[1:]))
 
 	def average(self, energy, flux):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		E, phi = np.asarray(energy), np.asarray(flux)
 		phisig = phi*self.interp(E)
 		dE = E[1:]-E[:-1]
 		return np.sum(0.5*dE*(phisig[:-1]+phisig[1:]))/np.sum(0.5*dE*(phi[:-1]+phi[1:]))
 
 	def plot(self, label=None, title=True, **kwargs):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		f, ax = _init_plot(**kwargs)
 
 		if title:
