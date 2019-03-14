@@ -16,8 +16,7 @@ def spectroscopy_examples():
 	sp.cb.plot()
 
 	### Save peak information
-	sp.saveas('test.db')
-	sp.saveas('test.csv')
+	sp.saveas('test.db', 'test.csv')
 
 	### Print out peaks
 	sp.summarize()
@@ -60,46 +59,82 @@ def spectroscopy_examples():
 def ziegler_examples():
 	from npat import Ziegler
 	
-	zg = Ziegler(stack=[{'compound':'Ni','name':'Ni01','thickness':0.025},{'compound':'Ti','name':'Ti01','thickness':1.025},{'compound':'SrCO3','name':'SrCO3','thickness':0.7,'density':3.5}], beam_istp='2H', N=1E4, max_steps=100)
-	print(zg.stack)
-	zg.summarize()
-	zg.plot(['Sr','Ni','Ti'])
+	### Set up a stack with different input options.
+	zg = Ziegler(stack=[{'compound':'Ni', 'name':'Ni01', 'thickness':0.025},  # Thickness only (mm)
+						{'compound':'Kapton', 'thickness':0.05},				# No name - will not be tallied
+						{'compound':'Ti', 'name':'Ti01', 'thickness':1.025},  # Very thick: should see straggle
+						{'compound':'SrCO3', 'name':'SrCO3', 'area':0.785, 'mass':4.8E-3}],  # Mass (g) and area (cm^2)
+						beam_istp='2H', N=1E5, max_steps=100, E0=33.0)  ## 33 MeV deuteron beam
 
-	zg = Ziegler(stack=[{'compound':'Be','name':'Be Breakup','thickness':6.0}])
-	zg.meta = {'istp':'2H','E0':33.0}
+	### zg.stack contains all information, both input and calculated
+	print(zg.stack)
+
+	### Print mean energies on samples
+	zg.summarize()
+
+	### Plot only strontium and titanium fluxes
+	zg.plot(['Sr', 'Ti'])
+
+	### Find out if 6mm of Be will stop a deuteron beem
+	zg = Ziegler(stack=[{'compound':'Be', 'name':'Be Breakup','thickness':6.0}])
+	### Set beam options with zg.meta
+	zg.meta = {'istp':'2H', 'E0':33.0}
+
+	### Summarize, plot and save
 	zg.summarize()
 	zg.plot()
 	zg.saveas('breakup.csv', 'breakup.db', 'breakup.png')
 
+	### Import stack design from .csv file
 	zg = Ziegler(stack='test_stack.csv')
-	zg.meta = {'istp':'2H'}
+	zg.meta = {'istp':'4HE','E0':70.0}
 	zg.plot()
 	
 
 def decay_chain_examples():
 	from npat import DecayChain
 
-	dc = DecayChain('225RA','d',R={'225RA':9.0,'225AC':1.0},time=10.0/24.0)
-	dc.append(DecayChain('225RA','d',R={'225RA':2.0,'225AC':1.0},time=33.0/24.0))
-	dc.append(DecayChain('225RA','d',R={'225RA':5.0,'225AC':1.0},time=113.0/24.0))
-	dc.append(DecayChain('225RA','d',time=21))
-	dc.counts = {'225AC':[[5.0, 6.0, 6.0, 0.2],[6.0, 7.0, 6.2, 0.3]],'221FR':[5.5, 6.5, 6.0, 0.2]}
+	### 225RA decay chain, units of days, 9.0/day production rate, for 0.5 days
+	dc = DecayChain('225RA', 'd', R=9.0, time=0.5)
+	dc.plot()
+
+	### Additional production of 225AC, with production rate of 225RA fluctuating
+	dc.append(DecayChain('225RA', 'd', R={'225RA':2.0, '225AC':1.0}, time=1.5))
+	dc.append(DecayChain('225RA', 'd', R={'225RA':5.0, '225AC':1.0}, time=4.5))
+
+	### 21 day decay time
+	dc.append(DecayChain('225RA', 'd', time=21))
+
+	### Measured counts: [start_time (d), stop_time (d), decays, unc_decays]
+	### Times relative to last appended DecayChain, i.e. EoB time
+	dc.counts = {'225AC':[[5.0, 5.1, 6E5, 2E4],
+						  [6.0, 6.1, 7E5, 3E4]],
+				'221FR':[5.5, 5.6, 6E5, 2E4]}
+
+	### Find the scaled production rate that gives us these counts
 	dc.fit_R()
-	dc.plot(N_plot=10, logscale=False)
+	### Only plot the 5 most active isotopes in the decay chain
+	dc.plot(N_plot=5)
 
 def isotope_examples():
 	from npat import Isotope
 
-	i = Isotope('133BA')
+	i = Isotope('60CO')
+	### Get LaTeX formatted name
 	print(i.TeX)
+	### Get isotope mass in amu
 	print(i.mass)
+	### Get half life in optimum units
 	print(i.half_life(i.optimum_units(),unc=True), i.optimum_units())
-	print(i.gammas())
+	### Print list of the decay gammas
+	print(i.gammas()['E'])
 
 def reaction_examples():
 	from npat import Reaction, Library
 	import matplotlib.pyplot as plt
 
+	### We will plot the same reaction from three different libraries
+	### Passing f,ax to rx.plot allows multiple plots on the same figure
 	f, ax = None, None
 	for lb in ['irdff','endf','tendl']:
 		rx = Reaction('90ZR(n,2n)89ZR', lb)
@@ -107,16 +142,17 @@ def reaction_examples():
 
 	plt.show()
 	
-
+	### Compare (n,2n) and (n,3n) for endf vs tendl
 	f, ax = None, None
 	for lb in ['endf','tendl']:
 		rx = Reaction('226RA(n,2n)225RA', lb)
-		f, ax = rx.plot(f=f, ax=ax, show=False, label='both')
+		f, ax = rx.plot(f=f, ax=ax, show=False, label='both', E_lim=[0,30])
 		rx = Reaction('226RA(n,3n)224RA', lb)
-		f, ax = rx.plot(f=f, ax=ax, show=False, label='both', title=True)
+		f, ax = rx.plot(f=f, ax=ax, show=False, label='both', title=True, E_lim=[0,40])
 
 	plt.show()
 
+	### Search the TENDL-2015 neutron library for reactions producing 225RA from 226RA
 	lb = Library('tendl_n')
 	print(lb.search(target='226RA',product='225RAg'))
 

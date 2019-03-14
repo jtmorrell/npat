@@ -353,7 +353,7 @@ class Reaction(object):
 		dE = E[1:]-E[:-1]
 		return np.sum(0.5*dE*(phisig[:-1]+phisig[1:]))/np.sum(0.5*dE*(phi[:-1]+phi[1:]))
 
-	def plot(self, label=None, title=True, **kwargs):
+	def plot(self, label=None, title=True, E_lim=None, **kwargs):
 		"""Description
 
 		...
@@ -386,9 +386,12 @@ class Reaction(object):
 			if label.lower() in ['both','library','reaction']:
 				label = {'both':'{0}\n({1})'.format(self.TeX, self.library.name),'library':self.library.name,'reaction':self.TeX}[label.lower()]
 
-		line, = ax.plot(self.eng, self.xs, label=label)
-		if np.any(self.unc_xs>0):
-			ax.fill_between(self.eng, self.xs+self.unc_xs, self.xs-self.unc_xs, facecolor=line.get_color(), alpha=0.5)
+		lh = [0, len(self.eng)] if E_lim is None else np.where((self.eng>=E_lim[0])&(self.eng<=E_lim[1]))[0][[0,-1]]
+		l,h = lh[0], lh[1]
+		
+		line, = ax.plot(self.eng[l:h], self.xs[l:h], label=label)
+		if np.any(self.unc_xs[l:h]>0):
+			ax.fill_between(self.eng[l:h], self.xs[l:h]+self.unc_xs[l:h], self.xs[l:h]-self.unc_xs[l:h], facecolor=line.get_color(), alpha=0.5)
 
 		ax.set_xlabel('Incident Energy (MeV)')
 		ax.set_ylabel('Cross Section (mb)')

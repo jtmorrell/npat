@@ -212,14 +212,12 @@ def _close_plot(fig, axis, **kwargs):
 	if 'show' in kwargs:
 		if kwargs['show']:
 			plt.show()
-		else:
-			plt.close()
 	else:
 		plt.show()
 
 	if 'f' in kwargs and 'ax' in kwargs:
 		return f, ax
 
-	# plt.close()
+	plt.close()
 
 set_style()

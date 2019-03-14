@@ -697,7 +697,7 @@ class DecayChain(object):
 		if N_plot is None:
 			N_plot = len(self.isotopes)
 		A_meas = self.A_meas
-		ordr = int(np.floor(np.log10(np.average(self.A0))/3.0))
+		ordr = int(np.floor(np.log10(np.average(self.activity(self.isotopes[0], t)))/3.0))
 		lb_or = {-4:'p',-3:'n',-2:r'$\mu$',-1:'m',0:'',1:'k',2:'M',3:'G',4:'T'}[ordr]
 		mult = 10.0**(-3*ordr)
 		for n,istp in enumerate(self.isotopes):
