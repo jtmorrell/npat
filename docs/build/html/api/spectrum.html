@@ -60,15 +60,15 @@ detectors.</p>
 <dt><strong>filename</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
 <dd><p class="first last">Path to .Spe file.</p>
 </dd>
-<dt><strong>db</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str or sqlite3.cursor, optional</span></dt>
+<dt><strong>db</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
 <dd><p class="first last">Path to sqlite database</p>
 </dd>
 </dl>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">fits</span></code> <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd><p class="first last">List of peak fit objects</p>
+<dt><strong>fits</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd><p class="first last">List of peaks (PeakFit class) found in spectrum fit.</p>
 </dd>
 <dt><strong>meta</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
 <dd><p class="first last">Metadata about spectrum.</p>
@@ -99,6 +99,126 @@ detectors.</p>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="npat.Spectrum.auto_calibrate">
+<code class="descname">auto_calibrate</code><span class="sig-paren">(</span><em>guess=[]</em>, <em>data=[]</em>, <em>**param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/spectroscopy.html#Spectrum.auto_calibrate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Spectrum.auto_calibrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Spectrum.multiplet">
+<code class="descname">multiplet</code><span class="sig-paren">(</span><em>x</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/spectroscopy.html#Spectrum.multiplet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Spectrum.multiplet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Spectrum.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>fit=True</em>, <em>labels=True</em>, <em>snip=False</em>, <em>xcalib=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/spectroscopy.html#Spectrum.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Spectrum.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Spectrum.rebin">
+<code class="descname">rebin</code><span class="sig-paren">(</span><em>N_bins</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/spectroscopy.html#Spectrum.rebin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Spectrum.rebin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Spectrum.saveas">
+<code class="descname">saveas</code><span class="sig-paren">(</span><em>*fnms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/spectroscopy.html#Spectrum.saveas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Spectrum.saveas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Spectrum.summarize">
+<code class="descname">summarize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/spectroscopy.html#Spectrum.summarize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Spectrum.summarize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>

@@ -58,6 +58,8 @@
 
 <span class="sd">	Parameters</span>
 <span class="sd">	----------</span>
+<span class="sd">	x : type</span>
+<span class="sd">		Description of parameter `x`.</span>
 
 <span class="sd">	Attributes</span>
 <span class="sd">	----------</span>
@@ -65,7 +67,17 @@
 <span class="sd">	Methods</span>
 <span class="sd">	-------</span>
 
+<span class="sd">	Notes</span>
+<span class="sd">	-----</span>
+
+<span class="sd">	References</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	Examples</span>
+<span class="sd">	--------</span>
+
 <span class="sd">	&quot;&quot;&quot;</span>
+
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;tendl&#39;</span><span class="p">):</span>
 		<span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 		<span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;endf&#39;</span><span class="p">]:</span>
@@ -90,10 +102,56 @@
 	<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
-	<span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incident</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outgoing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-		<span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">incident</span><span class="p">,</span> <span class="n">outgoing</span><span class="p">,</span> <span class="n">product</span><span class="p">))</span><span class="o">==</span><span class="mi">1</span>
+<div class="viewcode-block" id="Library.check"><a class="viewcode-back" href="../../api/library.html#npat.Library.check">[docs]</a>	<span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incident</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outgoing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
 
-	<span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incident</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outgoing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_label</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">incident</span><span class="p">,</span> <span class="n">outgoing</span><span class="p">,</span> <span class="n">product</span><span class="p">))</span><span class="o">==</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Library.search"><a class="viewcode-back" href="../../api/library.html#npat.Library.search">[docs]</a>	<span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incident</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outgoing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_label</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM all_reactions&#39;</span>
 		<span class="k">if</span> <span class="n">incident</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="n">incident</span> <span class="o">=</span> <span class="n">incident</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -135,9 +193,32 @@
 			<span class="n">reacs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">reacs</span> <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="n">target</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
 		<span class="k">if</span> <span class="n">_label</span><span class="p">:</span>
 			<span class="k">return</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">reacs</span><span class="p">]</span>
-		<span class="k">return</span> <span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">reacs</span><span class="p">]</span>
+		<span class="k">return</span> <span class="p">[</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">reacs</span><span class="p">]</span></div>
 
-	<span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incident</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outgoing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Library.query"><a class="viewcode-back" href="../../api/library.html#npat.Library.query">[docs]</a>	<span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incident</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outgoing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">incident</span><span class="p">,</span> <span class="n">outgoing</span><span class="p">,</span> <span class="n">product</span><span class="p">,</span> <span class="n">_label</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
 			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">(</span><span class="si">{1}</span><span class="s1">,</span><span class="si">{2}</span><span class="s1">)</span><span class="si">{3}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">incident</span><span class="p">,</span> <span class="n">outgoing</span><span class="p">,</span> <span class="n">product</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; is not a unique reaction.&#39;</span><span class="p">)</span>
@@ -154,7 +235,7 @@
 			<span class="k">if</span> <span class="n">incident</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Incident particle must be specified.&#39;</span><span class="p">)</span>
 			<span class="n">table</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n&#39;</span><span class="p">:</span><span class="s1">&#39;neutron&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="s1">&#39;proton&#39;</span><span class="p">,</span><span class="s1">&#39;d&#39;</span><span class="p">:</span><span class="s1">&#39;deuteron&#39;</span><span class="p">,</span><span class="s1">&#39;h&#39;</span><span class="p">:</span><span class="s1">&#39;helion&#39;</span><span class="p">,</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span><span class="s1">&#39;g&#39;</span><span class="p">:</span><span class="s1">&#39;gamma&#39;</span><span class="p">}[</span><span class="n">incident</span><span class="p">]</span>
-			<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT energy,cross_section,unc_cross_section FROM </span><span class="si">{0}</span><span class="s1"> WHERE target LIKE ? AND product=?&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table</span><span class="p">),(</span><span class="s1">&#39;%&#39;</span><span class="o">+</span><span class="n">target</span><span class="o">+</span><span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]))))</span></div>
+			<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT energy,cross_section,unc_cross_section FROM </span><span class="si">{0}</span><span class="s1"> WHERE target LIKE ? AND product=?&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table</span><span class="p">),(</span><span class="s1">&#39;%&#39;</span><span class="o">+</span><span class="n">target</span><span class="o">+</span><span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]))))</span></div></div>
 
 
 
@@ -169,6 +250,8 @@
 
 <span class="sd">	Parameters</span>
 <span class="sd">	----------</span>
+<span class="sd">	x : type</span>
+<span class="sd">		Description of parameter `x`.</span>
 
 <span class="sd">	Attributes</span>
 <span class="sd">	----------</span>
@@ -176,7 +259,17 @@
 <span class="sd">	Methods</span>
 <span class="sd">	-------</span>
 
+<span class="sd">	Notes</span>
+<span class="sd">	-----</span>
+
+<span class="sd">	References</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	Examples</span>
+<span class="sd">	--------</span>
+
 <span class="sd">	&quot;&quot;&quot;</span>
+
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reaction_name</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">reaction_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">))</span>
 		<span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">product</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">))</span>
@@ -241,19 +334,88 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">_interp</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eng</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span>
 	
-	<span class="k">def</span> <span class="nf">integrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+<div class="viewcode-block" id="Reaction.integrate"><a class="viewcode-back" href="../../api/reaction.html#npat.Reaction.integrate">[docs]</a>	<span class="k">def</span> <span class="nf">integrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="c1"># Trapezoidal Riemann sum</span>
 		<span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
 		<span class="n">phisig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
-		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">-</span><span class="n">E</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">phisig</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">phisig</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">-</span><span class="n">E</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">phisig</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">phisig</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span></div>
 
-	<span class="k">def</span> <span class="nf">average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+<div class="viewcode-block" id="Reaction.average"><a class="viewcode-back" href="../../api/reaction.html#npat.Reaction.average">[docs]</a>	<span class="k">def</span> <span class="nf">average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">E</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">energy</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span>
 		<span class="n">phisig</span> <span class="o">=</span> <span class="n">phi</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
 		<span class="n">dE</span> <span class="o">=</span> <span class="n">E</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">-</span><span class="n">E</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dE</span><span class="o">*</span><span class="p">(</span><span class="n">phisig</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">phisig</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dE</span><span class="o">*</span><span class="p">(</span><span class="n">phi</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">phi</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dE</span><span class="o">*</span><span class="p">(</span><span class="n">phisig</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">phisig</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dE</span><span class="o">*</span><span class="p">(</span><span class="n">phi</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">phi</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span></div>
 
-	<span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Reaction.plot"><a class="viewcode-back" href="../../api/reaction.html#npat.Reaction.plot">[docs]</a>	<span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">_init_plot</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="n">title</span><span class="p">:</span>
@@ -273,7 +435,7 @@
 		<span class="k">if</span> <span class="n">label</span><span class="p">:</span>
 			<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-		<span class="k">return</span> <span class="n">_close_plot</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">default_log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+		<span class="k">return</span> <span class="n">_close_plot</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">default_log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
 </pre></div>

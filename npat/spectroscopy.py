@@ -4,12 +4,10 @@ from __future__ import print_function
 
 import sqlite3, os
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 import datetime as dtm
 import multiprocessing
 
-from matplotlib import gridspec
 from scipy.optimize import curve_fit
 from scipy.special import erfc
 from scipy.interpolate import interp1d
@@ -48,6 +46,15 @@ class Calibration(object):
 		Plots the spectrum. Various options for plotting.
 	calibrate(spectra, saveas=None, db=None, auto_calibrate=False)
 		Functionality depends on filetype.
+
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
 
 	"""
 	def __init__(self, meta={}):
@@ -437,7 +444,7 @@ class Calibration(object):
 
 		cm = colors(aslist=True)
 		cm_light = colors(shade='light', aslist=True)
-		f, ax = plt.subplots(1, 3, figsize=(12.8, 4.8))
+		f, ax = _init_plot(N_plots=3, figsize=(12.8, 4.8))
 
 		d = self._calib_data['engcal']
 		ax[0].errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o')
@@ -485,7 +492,7 @@ class Spectrum(object):
 	----------
 	filename : str
 		Path to .Spe file.
-	db : str or sqlite3.cursor, optional
+	db : str, optional
 		Path to sqlite database
 
 	Attributes
@@ -506,6 +513,15 @@ class Spectrum(object):
 		Functionality depends on filetype.
 	summarize(printout=True, saveas=None)
 		Prints and/or saves summary of peaks/isotopes.
+
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
 
 	"""
 
@@ -578,7 +594,7 @@ class Spectrum(object):
 
 	def _default_params(self):
 		self._path, self._fnm = None, None
-		self.db, self.db_connection = None, None
+		self.db, self.db_connection, self.db_fnm = None, None, None
 		self._hist = np.zeros(2, dtype=np.int32)
 		self._meta = {'fit_config':{'snip_adj':1.0, 'R':0.1, 'alpha':0.9, 
 									'step':0.0, 'bg_fit':False, 'skew_fit':False, 
@@ -632,20 +648,20 @@ class Spectrum(object):
 				path = os.getcwd()
 			if fnm in ['',' ']:
 				raise ValueError('Invalid db Filename: {}'.format(db))
-			db_fnm = os.path.join(path, fnm)
+			self.db_fnm = os.path.join(path, fnm)
 
 			global DB_CONNECTIONS_DICT
-			if os.path.exists(db_fnm):
-				if db_fnm not in DB_CONNECTIONS_DICT:
-					DB_CONNECTIONS_DICT[db_fnm] = sqlite3.connect(db_fnm)
-				self.db_connection = DB_CONNECTIONS_DICT[db_fnm]
+			if os.path.exists(self.db_fnm):
+				if self.db_fnm not in DB_CONNECTIONS_DICT:
+					DB_CONNECTIONS_DICT[self.db_fnm] = sqlite3.connect(self.db_fnm)
+				self.db_connection = DB_CONNECTIONS_DICT[self.db_fnm]
 				self.db = self.db_connection.cursor()
 			else:
 				print('WARNING: DB {} does not exist, creating new file.'.format(fnm))
 				from sqlite3 import Error
 				try:
-					self.db_connection = sqlite3.connect(db_fnm)
-					DB_CONNECTIONS_DICT[db_fnm] = self.db_connection
+					self.db_connection = sqlite3.connect(self.db_fnm)
+					DB_CONNECTIONS_DICT[self.db_fnm] = self.db_connection
 					self.db = self.db_connection.cursor()
 				except Error as e:
 					print(e)
@@ -690,6 +706,8 @@ class Spectrum(object):
 			if nm.endswith('cal'):
 				self.cb.calib[nm] = meta_dict[nm]
 			self._meta[nm] = meta_dict[nm]
+			if nm=='istp':
+				self._fits, self._peaks, self._gamma_list = None, None, None
 		self._update_db(True)
 	
 	@property
@@ -698,6 +716,7 @@ class Spectrum(object):
 	
 	@fit_config.setter
 	def fit_config(self, config_dict):
+		self._fits, self._peaks, self._gamma_list = None, None, None
 		for nm in config_dict:
 			self._meta['fit_config'][nm] = config_dict[nm]
 
@@ -750,7 +769,7 @@ class Spectrum(object):
 				sig = self.cb.res(idx)
 				norm = self.cb.eff(gm[:,0])*gm[:,1]/sig
 				idx, sig, norm = idx[idx<L], sig[idx<L], norm[idx<L]
-				p0_A.append(np.average((clip[idx]/norm), weights=np.sqrt(norm)))
+				p0_A.append(np.exp(np.average(np.log((clip[idx]/norm)+1.0), weights=np.sqrt(norm)))-1.0)
 				if p0_A[-1]<0:
 					p0_A[-1] = 0.0
 				l, h = np.array(idx-W*sig, dtype=np.int32), np.array(idx+W*sig, dtype=np.int32)
@@ -936,7 +955,6 @@ class Spectrum(object):
 		return peak
 
 	def _get_p0(self, lh, px, gm, istp):
-
 		ix = {'A':[],'mu':[],'sig':[],'R':[],'alpha':[],'step':[]}
 		N = int(self.fit_config['bg_fit'])*(2+int(self.fit_config['quad_bg']))
 		if self.fit_config['bg_fit']:
@@ -1089,15 +1107,17 @@ class Spectrum(object):
 
 	@property
 	def fits(self):
-		"""List of peak fit objects
-		"""
 		if self._fits is None:
 			p0 = self._get_multiplets()
 			if self.fit_config['threads']>1:
+				self.db, self.db_connection = None, None
 				pool = multiprocessing.Pool(processes=self.fit_config['threads'])
 				multiplets = pool.map(self._multi_fit, p0)
 				pool.close()
 				pool.join()
+				if self.db_fnm is not None:
+					self.db_connection = DB_CONNECTIONS_DICT[self.db_fnm]
+					self.db = self.db_connection.cursor()
 			else:
 				multiplets = list(map(self._multi_fit, p0))
 			if len(p0):
@@ -1113,9 +1133,6 @@ class Spectrum(object):
 
 	@property
 	def peaks(self):
-		"""DataFrame of peaks
-
-		"""
 		if self._peaks is None:
 			fits = self.fits
 		return self._peaks
@@ -1249,6 +1266,13 @@ class Spectrum(object):
 
 			if fl.endswith('.csv'):
 				self.peaks.to_csv(fl, index=False)
+
+			if fl.endswith('.db'):
+				meta = self.meta
+				self._check_db(fl)
+				self.meta = {i:meta[i] for i in meta if i.endswith('cal')}
+				self._update_db(True)
+				self._update_db(False)
 
 
 	def _from_Spe(self, filename=None):

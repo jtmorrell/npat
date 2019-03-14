@@ -5,7 +5,6 @@ from __future__ import print_function
 import re
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 import multiprocessing
 import sqlite3
 import pandas as pd

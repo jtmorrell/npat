@@ -5,3 +5,4 @@ Library
 =======
 
 .. autoclass:: npat.Library
+	:members:

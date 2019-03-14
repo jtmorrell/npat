@@ -58,12 +58,23 @@
 
 <span class="sd">	Parameters</span>
 <span class="sd">	----------</span>
+<span class="sd">	x : type</span>
+<span class="sd">		Description of parameter `x`.</span>
 
 <span class="sd">	Attributes</span>
 <span class="sd">	----------</span>
 
 <span class="sd">	Methods</span>
 <span class="sd">	-------</span>
+
+<span class="sd">	Notes</span>
+<span class="sd">	-----</span>
+
+<span class="sd">	References</span>
+<span class="sd">	----------</span>
+
+<span class="sd">	Examples</span>
+<span class="sd">	--------</span>
 
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">A0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -123,7 +134,28 @@
 		<span class="n">CH</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">c</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">CH</span><span class="p">)]</span>
 		<span class="k">return</span> <span class="n">BR</span><span class="p">,</span> <span class="n">CH</span>
 
-	<span class="k">def</span> <span class="nf">activity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">istp</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_A0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.activity"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.activity">[docs]</a>	<span class="k">def</span> <span class="nf">activity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">istp</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_A0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+		
 		<span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span>
 		<span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Time must be specified.&#39;</span><span class="p">)</span>
@@ -161,10 +193,31 @@
 		<span class="k">for</span> <span class="n">ot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_others</span><span class="p">:</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_name</span><span class="p">(</span><span class="n">istp</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ot</span><span class="o">.</span><span class="n">isotopes</span><span class="p">:</span>
 				<span class="n">A</span> <span class="o">+=</span> <span class="n">ot</span><span class="o">.</span><span class="n">activity</span><span class="p">(</span><span class="n">istp</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">units</span><span class="p">))</span>
-		<span class="k">return</span> <span class="n">A</span>
+		<span class="k">return</span> <span class="n">A</span></div>
 
 
-	<span class="k">def</span> <span class="nf">decays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">istp</span><span class="p">,</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">t_stop</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_A0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.decays"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.decays">[docs]</a>	<span class="k">def</span> <span class="nf">decays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">istp</span><span class="p">,</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">t_stop</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_A0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
 			<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: decays during production not implemented.&#39;</span><span class="p">)</span>
 		<span class="n">t_start</span><span class="p">,</span> <span class="n">t_stop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">t_start</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">t_stop</span><span class="p">)</span>
@@ -199,7 +252,7 @@
 		<span class="k">for</span> <span class="n">ot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_others</span><span class="p">:</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_name</span><span class="p">(</span><span class="n">istp</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ot</span><span class="o">.</span><span class="n">isotopes</span><span class="p">:</span>
 				<span class="n">D</span> <span class="o">+=</span> <span class="n">ot</span><span class="o">.</span><span class="n">decays</span><span class="p">(</span><span class="n">istp</span><span class="p">,</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">t_stop</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">units</span><span class="p">))</span>
-		<span class="k">return</span> <span class="n">D</span>
+		<span class="k">return</span> <span class="n">D</span></div>
 
 	<span class="k">def</span> <span class="nf">set_R</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">R</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isotopes</span><span class="p">))</span>
@@ -281,35 +334,142 @@
 				<span class="n">A_meas</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
 		<span class="k">return</span> <span class="n">A_meas</span>
 	
-	<span class="k">def</span> <span class="nf">calc_L</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t_m</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.calc_L"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.calc_L">[docs]</a>	<span class="k">def</span> <span class="nf">calc_L</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t_m</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">a_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 		<span class="n">a_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t_m</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">a_m</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
 			<span class="k">return</span> <span class="n">a_0</span><span class="o">/</span><span class="n">a_m</span>
-		<span class="k">return</span> <span class="mf">0.0</span>
+		<span class="k">return</span> <span class="mf">0.0</span></div>
 
-	<span class="k">def</span> <span class="nf">calc_M</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">t_stop</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.calc_M"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.calc_M">[docs]</a>	<span class="k">def</span> <span class="nf">calc_M</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">t_stop</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">a_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t_start</span><span class="p">)</span>
 		<span class="n">d_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decays</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">t_stop</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">d_m</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
 			<span class="k">return</span> <span class="n">a_n</span><span class="o">/</span><span class="n">d_m</span>
-		<span class="k">return</span> <span class="mf">0.0</span>
+		<span class="k">return</span> <span class="mf">0.0</span></div>
 
-	<span class="k">def</span> <span class="nf">calc_P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.calc_P"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.calc_P">[docs]</a>	<span class="k">def</span> <span class="nf">calc_P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">a_0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 		<span class="n">R_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_norm</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
 		<span class="k">if</span> <span class="n">a_0</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
 			<span class="k">return</span> <span class="n">R_norm</span><span class="o">/</span><span class="n">a_0</span>
-		<span class="k">return</span> <span class="mf">0.0</span>
+		<span class="k">return</span> <span class="mf">0.0</span></div>
 
-	<span class="k">def</span> <span class="nf">calc_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t_m</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.calc_Q"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.calc_Q">[docs]</a>	<span class="k">def</span> <span class="nf">calc_Q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t_m</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">a_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activity</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t_m</span><span class="p">)</span>
 		<span class="n">R_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_norm</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
 		<span class="k">if</span> <span class="n">a_m</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
 			<span class="k">return</span> <span class="n">R_norm</span><span class="o">/</span><span class="n">a_m</span>
-		<span class="k">return</span> <span class="mf">0.0</span>
+		<span class="k">return</span> <span class="mf">0.0</span></div>
 
-	<span class="k">def</span> <span class="nf">fit_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_unc</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">EoB</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.fit_spectra"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.fit_spectra">[docs]</a>	<span class="k">def</span> <span class="nf">fit_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_unc</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">EoB</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="k">if</span> <span class="n">EoB</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">EoB</span> <span class="o">=</span> <span class="n">EoB</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">EoB</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -333,14 +493,37 @@
 					<span class="n">counts</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;isotope&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;decays&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;unc_decays&#39;</span><span class="p">]])</span>
 				<span class="k">else</span><span class="p">:</span>
 					<span class="n">counts</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;isotope&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[[</span><span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;decays&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;unc_decays&#39;</span><span class="p">]]]</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="n">counts</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="n">counts</span></div>
 
 	<span class="nd">@property</span>
 	<span class="k">def</span> <span class="nf">R_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="n">R_p</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">R</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">any</span><span class="p">()],[</span><span class="n">p</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">any</span><span class="p">()]</span>
 		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">R_p</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
 
-	<span class="k">def</span> <span class="nf">fit_R</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">istp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_update</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.fit_R"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.fit_R">[docs]</a>	<span class="k">def</span> <span class="nf">fit_R</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">istp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_update</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_R_fit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="k">if</span> <span class="n">istp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 				<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_R_fit</span>
@@ -393,9 +576,32 @@
 
 		<span class="k">if</span> <span class="n">istp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_R_fit</span>
-		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_R_fit</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">istp</span><span class="p">)]</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_R_fit</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">istp</span><span class="p">)]</span></div>
 
-	<span class="k">def</span> <span class="nf">fit_A0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">istp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_update</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.fit_A0"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.fit_A0">[docs]</a>	<span class="k">def</span> <span class="nf">fit_A0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">istp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_update</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_A0_fit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="k">if</span> <span class="n">istp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 				<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_A0_fit</span>
@@ -439,14 +645,37 @@
 
 		<span class="k">if</span> <span class="n">istp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_A0_fit</span>
-		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_A0_fit</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">istp</span><span class="p">)]</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_A0_fit</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">istp</span><span class="p">)]</span></div>
 
 
 	<span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_others</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 		<span class="k">return</span> <span class="bp">self</span>
 
-	<span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.append"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.append">[docs]</a>	<span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -471,9 +700,32 @@
 		<span class="n">other</span><span class="o">.</span><span class="n">_counts</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_prev</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">_prev</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-		<span class="n">other</span><span class="o">.</span><span class="n">_prev</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="n">other</span><span class="o">.</span><span class="n">_prev</span> <span class="o">=</span> <span class="p">[]</span></div>
 
-	<span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N_plot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N_label</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayChain.plot"><a class="viewcode-back" href="../../api/decaychain.html#npat.DecayChain.plot">[docs]</a>	<span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N_plot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N_label</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Description</span>
+
+<span class="sd">		...</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		x : type</span>
+<span class="sd">			Description of parameter `x`.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+
+<span class="sd">		Notes</span>
+<span class="sd">		-----</span>
+
+<span class="sd">		References</span>
+<span class="sd">		----------</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">_init_plot</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
@@ -508,7 +760,7 @@
 		<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">))</span>
 		<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Activity (</span><span class="si">{}</span><span class="s1">Bq)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lb_or</span><span class="p">))</span>
 		<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-		<span class="k">return</span> <span class="n">_close_plot</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">default_log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+		<span class="k">return</span> <span class="n">_close_plot</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">default_log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 </pre></div>
 

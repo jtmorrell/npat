@@ -30,8 +30,8 @@ Contents
    :maxdepth: 1
    
    quickinstall
-   methods
    usersguide/index
+   methods
    api/index
    license
 

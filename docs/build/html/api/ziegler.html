@@ -17,8 +17,7 @@
     <script type="text/javascript" src="../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="6. Library" href="library.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -26,9 +25,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="library.html" title="6. Library"
-             accesskey="N">next</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">NPAT 0.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">API</a> &#187;</li> 
       </ul>
@@ -50,7 +46,14 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
 <dt><strong>meta</strong></dt>
 <dd></dd>
 <dt><strong>stack</strong></dt>
@@ -61,6 +64,29 @@
 </tbody>
 </table>
 <p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#npat.Ziegler.get_S" title="npat.Ziegler.get_S"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_S</span></code></a>(E,&nbsp;cm)</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#npat.Ziegler.plot" title="npat.Ziegler.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([samples])</td>
+<td>Description</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.Ziegler.plot_S" title="npat.Ziegler.plot_S"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_S</span></code></a>(compound[,&nbsp;energy])</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#npat.Ziegler.saveas" title="npat.Ziegler.saveas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">saveas</span></code></a>(*fnms)</td>
+<td>Description</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.Ziegler.summarize" title="npat.Ziegler.summarize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">summarize</span></code></a>([samples])</td>
+<td>Description</td>
+</tr>
+</tbody>
+</table>
 <table border="1" class="docutils">
 <colgroup>
 <col width="66%" />
@@ -70,38 +96,123 @@
 <tr class="row-odd"><td><strong>check_db</strong></td>
 <td>&#160;</td>
 </tr>
-<tr class="row-even"><td><strong>get_S</strong></td>
+<tr class="row-even"><td><strong>get_S_He</strong></td>
 <td>&#160;</td>
 </tr>
-<tr class="row-odd"><td><strong>get_S_He</strong></td>
+<tr class="row-odd"><td><strong>get_S_elec</strong></td>
 <td>&#160;</td>
 </tr>
-<tr class="row-even"><td><strong>get_S_elec</strong></td>
+<tr class="row-even"><td><strong>get_S_nucl</strong></td>
 <td>&#160;</td>
 </tr>
-<tr class="row-odd"><td><strong>get_S_nucl</strong></td>
+<tr class="row-odd"><td><strong>get_S_p</strong></td>
 <td>&#160;</td>
 </tr>
-<tr class="row-even"><td><strong>get_S_p</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td><strong>get_eff_Z_ratio</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td><strong>plot</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td><strong>plot_S</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td><strong>saveas</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td><strong>summarize</strong></td>
+<tr class="row-even"><td><strong>get_eff_Z_ratio</strong></td>
 <td>&#160;</td>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="npat.Ziegler.get_S">
+<code class="descname">get_S</code><span class="sig-paren">(</span><em>E</em>, <em>cm</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/irradiation.html#Ziegler.get_S"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Ziegler.get_S" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Ziegler.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>samples=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/irradiation.html#Ziegler.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Ziegler.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Ziegler.plot_S">
+<code class="descname">plot_S</code><span class="sig-paren">(</span><em>compound</em>, <em>energy=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/irradiation.html#Ziegler.plot_S"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Ziegler.plot_S" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Ziegler.saveas">
+<code class="descname">saveas</code><span class="sig-paren">(</span><em>*fnms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/irradiation.html#Ziegler.saveas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Ziegler.saveas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Ziegler.summarize">
+<code class="descname">summarize</code><span class="sig-paren">(</span><em>samples=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/irradiation.html#Ziegler.summarize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Ziegler.summarize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -112,9 +223,6 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h4>Next topic</h4>
-  <p class="topless"><a href="library.html"
-                        title="next chapter">6. Library</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -144,9 +252,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="library.html" title="6. Library"
-             >next</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">NPAT 0.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >API</a> &#187;</li> 
       </ul>

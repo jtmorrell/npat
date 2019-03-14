@@ -17,8 +17,7 @@
     <script type="text/javascript" src="../_static/language_data.js"></script>
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="3. Isotope" href="isotope.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -26,9 +25,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="isotope.html" title="3. Isotope"
-             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">NPAT 0.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">API</a> &#187;</li> 
       </ul>
@@ -50,7 +46,14 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
 <dt><strong>A_meas</strong></dt>
 <dd></dd>
 <dt><strong>EoB</strong></dt>
@@ -67,59 +70,209 @@
 </tbody>
 </table>
 <p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#npat.DecayChain.activity" title="npat.DecayChain.activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">activity</span></code></a>(istp[,&nbsp;t,&nbsp;units,&nbsp;_R,&nbsp;_A0])</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#npat.DecayChain.append" title="npat.DecayChain.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(other[,&nbsp;time])</td>
+<td>Description</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.DecayChain.calc_L" title="npat.DecayChain.calc_L"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_L</span></code></a>(i,&nbsp;t_m)</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#npat.DecayChain.calc_M" title="npat.DecayChain.calc_M"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_M</span></code></a>(i,&nbsp;j,&nbsp;t_start,&nbsp;t_stop)</td>
+<td>Description</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.DecayChain.calc_P" title="npat.DecayChain.calc_P"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_P</span></code></a>(i)</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#npat.DecayChain.calc_Q" title="npat.DecayChain.calc_Q"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_Q</span></code></a>(i,&nbsp;t_m)</td>
+<td>Description</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.DecayChain.decays" title="npat.DecayChain.decays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decays</span></code></a>(istp,&nbsp;t_start,&nbsp;t_stop[,&nbsp;units,&nbsp;_A0])</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#npat.DecayChain.fit_A0" title="npat.DecayChain.fit_A0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_A0</span></code></a>([istp,&nbsp;_update])</td>
+<td>Description</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.DecayChain.fit_R" title="npat.DecayChain.fit_R"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_R</span></code></a>([istp,&nbsp;_update])</td>
+<td>Description</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#npat.DecayChain.fit_spectra" title="npat.DecayChain.fit_spectra"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_spectra</span></code></a>(spectra[,&nbsp;db,&nbsp;max_unc,&nbsp;EoB])</td>
+<td>Description</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.DecayChain.plot" title="npat.DecayChain.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([time,&nbsp;N_plot,&nbsp;N_label])</td>
+<td>Description</td>
+</tr>
+</tbody>
+</table>
 <table border="1" class="docutils">
 <colgroup>
 <col width="60%" />
 <col width="40%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><strong>activity</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td><strong>append</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td><strong>calc_L</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td><strong>calc_M</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td><strong>calc_P</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td><strong>calc_Q</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td><strong>decays</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td><strong>filter_name</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td><strong>fit_A0</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td><strong>fit_R</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td><strong>fit_spectra</strong></td>
+<tr class="row-odd"><td><strong>filter_name</strong></td>
 <td>&#160;</td>
 </tr>
 <tr class="row-even"><td><strong>index</strong></td>
 <td>&#160;</td>
 </tr>
-<tr class="row-odd"><td><strong>plot</strong></td>
+<tr class="row-odd"><td><strong>set_R</strong></td>
 <td>&#160;</td>
 </tr>
-<tr class="row-even"><td><strong>set_R</strong></td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td><strong>update_A0</strong></td>
+<tr class="row-even"><td><strong>update_A0</strong></td>
 <td>&#160;</td>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="npat.DecayChain.activity">
+<code class="descname">activity</code><span class="sig-paren">(</span><em>istp</em>, <em>t=None</em>, <em>units=None</em>, <em>_R=None</em>, <em>_A0=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.activity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.activity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.DecayChain.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>other</em>, <em>time=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.DecayChain.calc_L">
+<code class="descname">calc_L</code><span class="sig-paren">(</span><em>i</em>, <em>t_m</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.calc_L"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.calc_L" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.DecayChain.calc_M">
+<code class="descname">calc_M</code><span class="sig-paren">(</span><em>i</em>, <em>j</em>, <em>t_start</em>, <em>t_stop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.calc_M"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.calc_M" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.DecayChain.calc_P">
+<code class="descname">calc_P</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.calc_P"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.calc_P" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.DecayChain.calc_Q">
+<code class="descname">calc_Q</code><span class="sig-paren">(</span><em>i</em>, <em>t_m</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.calc_Q"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.calc_Q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.DecayChain.decays">
+<code class="descname">decays</code><span class="sig-paren">(</span><em>istp</em>, <em>t_start</em>, <em>t_stop</em>, <em>units=None</em>, <em>_A0=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.decays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.decays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.DecayChain.fit_A0">
+<code class="descname">fit_A0</code><span class="sig-paren">(</span><em>istp=None</em>, <em>_update=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.fit_A0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.fit_A0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.DecayChain.fit_R">
+<code class="descname">fit_R</code><span class="sig-paren">(</span><em>istp=None</em>, <em>_update=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.fit_R"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.fit_R" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.DecayChain.fit_spectra">
+<code class="descname">fit_spectra</code><span class="sig-paren">(</span><em>spectra</em>, <em>db=None</em>, <em>max_unc=0.15</em>, <em>EoB=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.fit_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.fit_spectra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.DecayChain.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>time=None</em>, <em>N_plot=None</em>, <em>N_label=10</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/decay_chain.html#DecayChain.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.DecayChain.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -130,9 +283,6 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="isotope.html"
-                        title="previous chapter">3. Isotope</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -162,9 +312,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="isotope.html" title="3. Isotope"
-             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">NPAT 0.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >API</a> &#187;</li> 
       </ul>

@@ -5,3 +5,4 @@ Decay Chain
 ===========
 
 .. autoclass:: npat.DecayChain
+	:members:

@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import re
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
 from .dbmgr import get_cursor

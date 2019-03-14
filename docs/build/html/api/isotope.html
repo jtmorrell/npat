@@ -18,7 +18,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="4. Decay Chain" href="decaychain.html" /> 
+    <link rel="prev" title="2. Calibration" href="calibration.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -27,8 +27,8 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="decaychain.html" title="4. Decay Chain"
-             accesskey="N">next</a> |</li>
+          <a href="calibration.html" title="2. Calibration"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">NPAT 0.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">API</a> &#187;</li> 
       </ul>
@@ -50,7 +50,14 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
 <dt><strong>Delta</strong></dt>
 <dd></dd>
 <dt><strong>E_level</strong></dt>
@@ -75,47 +82,267 @@
 </tbody>
 </table>
 <p class="rubric">Methods</p>
-<table border="1" class="docutils">
+<table border="1" class="longtable docutils">
 <colgroup>
-<col width="64%" />
-<col width="36%" />
+<col width="10%" />
+<col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><strong>abundance</strong></td>
-<td>&#160;</td>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.Isotope.abundance" title="npat.Isotope.abundance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">abundance</span></code></a>([unc])</td>
+<td>Description</td>
 </tr>
-<tr class="row-even"><td><strong>alphas</strong></td>
-<td>&#160;</td>
+<tr class="row-even"><td><a class="reference internal" href="#npat.Isotope.alphas" title="npat.Isotope.alphas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alphas</span></code></a>([I_lim,&nbsp;E_lim])</td>
+<td>Description</td>
 </tr>
-<tr class="row-odd"><td><strong>beta_minus</strong></td>
-<td>&#160;</td>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.Isotope.beta_minus" title="npat.Isotope.beta_minus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">beta_minus</span></code></a>([I_lim,&nbsp;Endpoint_lim])</td>
+<td>Description</td>
 </tr>
-<tr class="row-even"><td><strong>beta_plus</strong></td>
-<td>&#160;</td>
+<tr class="row-even"><td><a class="reference internal" href="#npat.Isotope.beta_plus" title="npat.Isotope.beta_plus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">beta_plus</span></code></a>([I_lim,&nbsp;Endpoint_lim])</td>
+<td>Description</td>
 </tr>
-<tr class="row-odd"><td><strong>decay_const</strong></td>
-<td>&#160;</td>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.Isotope.decay_const" title="npat.Isotope.decay_const"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decay_const</span></code></a>([units,&nbsp;unc])</td>
+<td>Description</td>
 </tr>
-<tr class="row-even"><td><strong>decay_products</strong></td>
-<td>&#160;</td>
+<tr class="row-even"><td><a class="reference internal" href="#npat.Isotope.decay_products" title="npat.Isotope.decay_products"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decay_products</span></code></a>([closest_SFY])</td>
+<td>Description</td>
 </tr>
-<tr class="row-odd"><td><strong>electrons</strong></td>
-<td>&#160;</td>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.Isotope.electrons" title="npat.Isotope.electrons"><code class="xref py py-obj docutils literal notranslate"><span class="pre">electrons</span></code></a>([I_lim,&nbsp;E_lim,&nbsp;CE_only,&nbsp;Auger_only])</td>
+<td>Description</td>
 </tr>
-<tr class="row-even"><td><strong>gammas</strong></td>
-<td>&#160;</td>
+<tr class="row-even"><td><a class="reference internal" href="#npat.Isotope.gammas" title="npat.Isotope.gammas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gammas</span></code></a>([I_lim,&nbsp;E_lim,&nbsp;xrays])</td>
+<td>Description</td>
 </tr>
-<tr class="row-odd"><td><strong>get_SFY</strong></td>
-<td>&#160;</td>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.Isotope.get_SFY" title="npat.Isotope.get_SFY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_SFY</span></code></a>([unc,&nbsp;closest_SFY])</td>
+<td>Description</td>
 </tr>
-<tr class="row-even"><td><strong>half_life</strong></td>
-<td>&#160;</td>
+<tr class="row-even"><td><a class="reference internal" href="#npat.Isotope.half_life" title="npat.Isotope.half_life"><code class="xref py py-obj docutils literal notranslate"><span class="pre">half_life</span></code></a>([units,&nbsp;unc])</td>
+<td>Description</td>
 </tr>
-<tr class="row-odd"><td><strong>optimum_units</strong></td>
-<td>&#160;</td>
+<tr class="row-odd"><td><a class="reference internal" href="#npat.Isotope.optimum_units" title="npat.Isotope.optimum_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">optimum_units</span></code></a>()</td>
+<td>Description</td>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="npat.Isotope.abundance">
+<code class="descname">abundance</code><span class="sig-paren">(</span><em>unc=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.abundance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.abundance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Isotope.alphas">
+<code class="descname">alphas</code><span class="sig-paren">(</span><em>I_lim=(None</em>, <em>None)</em>, <em>E_lim=(None</em>, <em>None)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.alphas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.alphas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Isotope.beta_minus">
+<code class="descname">beta_minus</code><span class="sig-paren">(</span><em>I_lim=(None</em>, <em>None)</em>, <em>Endpoint_lim=(None</em>, <em>None)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.beta_minus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.beta_minus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Isotope.beta_plus">
+<code class="descname">beta_plus</code><span class="sig-paren">(</span><em>I_lim=(None</em>, <em>None)</em>, <em>Endpoint_lim=(None</em>, <em>None)</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.beta_plus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.beta_plus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Isotope.decay_const">
+<code class="descname">decay_const</code><span class="sig-paren">(</span><em>units='s'</em>, <em>unc=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.decay_const"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.decay_const" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Isotope.decay_products">
+<code class="descname">decay_products</code><span class="sig-paren">(</span><em>closest_SFY=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.decay_products"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.decay_products" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Isotope.electrons">
+<code class="descname">electrons</code><span class="sig-paren">(</span><em>I_lim=(None</em>, <em>None)</em>, <em>E_lim=(None</em>, <em>None)</em>, <em>CE_only=False</em>, <em>Auger_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.electrons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.electrons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Isotope.gammas">
+<code class="descname">gammas</code><span class="sig-paren">(</span><em>I_lim=[None, None], E_lim=[None, None], xrays=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.gammas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.gammas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Isotope.get_SFY">
+<code class="descname">get_SFY</code><span class="sig-paren">(</span><em>unc=False</em>, <em>closest_SFY=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.get_SFY"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.get_SFY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Isotope.half_life">
+<code class="descname">half_life</code><span class="sig-paren">(</span><em>units='s'</em>, <em>unc=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.half_life"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.half_life" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="npat.Isotope.optimum_units">
+<code class="descname">optimum_units</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/npat/isotope.html#Isotope.optimum_units"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#npat.Isotope.optimum_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description</p>
+<p>…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>x</strong> <span class="classifier-delimiter">:</span> <span class="classifier">type</span></dt>
+<dd><p class="first last">Description of parameter <cite>x</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -126,9 +353,9 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h4>Next topic</h4>
-  <p class="topless"><a href="decaychain.html"
-                        title="next chapter">4. Decay Chain</a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="calibration.html"
+                        title="previous chapter">2. Calibration</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -159,8 +386,8 @@
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="decaychain.html" title="4. Decay Chain"
-             >next</a> |</li>
+          <a href="calibration.html" title="2. Calibration"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">NPAT 0.2.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >API</a> &#187;</li> 
       </ul>

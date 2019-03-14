@@ -5,3 +5,4 @@ Isotope
 =======
 
 .. autoclass:: npat.Isotope
+	:members:

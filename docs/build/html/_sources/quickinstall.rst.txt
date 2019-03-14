@@ -1,8 +1,8 @@
 .. _quickinstall:
 
-==================
-Installation Guide
-==================
+============
+Installation
+============
 
 NPAT is available through the `Python Package index`_, which allows installation using Python's standard command line utility `pip`_.  Assuming Python and Pip are installed already, you can install NPAT with the command::
 

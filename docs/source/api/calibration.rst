@@ -5,3 +5,4 @@ Calibration
 ===========
 
 .. autoclass:: npat.Calibration
+	:members:

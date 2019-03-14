@@ -5,3 +5,4 @@ Ziegler
 =======
 
 .. autoclass:: npat.Ziegler
+	:members:

@@ -33,7 +33,7 @@ or:
 python -m pip install --user npat
 ```
 
-Detailed installation instructions and troubleshooting can be found on the NPAT [documentation site](https://jtmorrell.github.io/npat/build/html/quickinstall.html). 
+Detailed installation instructions and troubleshooting can be found in the NPAT [documentation](https://jtmorrell.github.io/npat/build/html/quickinstall.html). 
 
 
 

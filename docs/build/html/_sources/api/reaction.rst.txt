@@ -5,3 +5,4 @@ Reaction
 ========
 
 .. autoclass:: npat.Reaction
+	:members:

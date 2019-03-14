@@ -147,11 +147,14 @@ def _init_plot(**kwargs):
 	f, ax = None, None
 	if 'f' in kwargs and 'ax' in kwargs:
 		f, ax = kwargs['f'], kwargs['ax']
+	
+	N = kwargs['N_plots'] if 'N_plots' in kwargs else 1
+
 	if f is None or ax is None:
 		if 'figsize' in kwargs:
-			f, ax = plt.subplots(figsize=kwargs['figsize'])
+			f, ax = plt.subplots(1, N, figsize=kwargs['figsize'])
 		else:
-			f, ax = plt.subplots()
+			f, ax = plt.subplots(1, N)
 
 	if 'style' in kwargs:
 		set_style(kwargs['style'])
@@ -205,15 +208,18 @@ def _close_plot(fig, axis, **kwargs):
 	if 'saveas' in kwargs:
 		if kwargs['saveas'] is not None:
 			f.savefig(kwargs['saveas'])
+
 	if 'show' in kwargs:
 		if kwargs['show']:
 			plt.show()
+		else:
+			plt.close()
 	else:
 		plt.show()
 
 	if 'f' in kwargs and 'ax' in kwargs:
 		return f, ax
 
-	plt.close()
+	# plt.close()
 
 set_style()

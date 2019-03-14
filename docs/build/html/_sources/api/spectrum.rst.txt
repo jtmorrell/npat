@@ -5,3 +5,4 @@ Spectrum
 ========
 
 .. autoclass:: npat.Spectrum
+	:members:
