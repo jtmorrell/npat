@@ -185,11 +185,14 @@
 	<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 	<span class="k">if</span> <span class="s1">&#39;f&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="s1">&#39;ax&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
 		<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;f&#39;</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;ax&#39;</span><span class="p">]</span>
+	
+	<span class="n">N</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;N_plots&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;N_plots&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="mi">1</span>
+
 	<span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 		<span class="k">if</span> <span class="s1">&#39;figsize&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-			<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;figsize&#39;</span><span class="p">])</span>
+			<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;figsize&#39;</span><span class="p">])</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+			<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
 
 	<span class="k">if</span> <span class="s1">&#39;style&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
 		<span class="n">set_style</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">])</span>
@@ -243,6 +246,7 @@
 	<span class="k">if</span> <span class="s1">&#39;saveas&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
 		<span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;saveas&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 			<span class="n">f</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;saveas&#39;</span><span class="p">])</span>
+
 	<span class="k">if</span> <span class="s1">&#39;show&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
 		<span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;show&#39;</span><span class="p">]:</span>
 			<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>

@@ -55,13 +55,179 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">npat</span> <span class="k">import</span> <span class="n">Spectrum</span><span class="p">,</span> <span class="n">Calibration</span>
 </pre></div>
 </div>
+<p>The following example, using the spectrum located on the NPAT <a class="reference external" href="https://github.com/jtmorrell/npat/blob/master/examples/eu_calib_7cm.Spe">github</a>, demonstrates how to perform various tasks using these classes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">### Load and plot the spectrum</span>
+<span class="n">sp</span> <span class="o">=</span> <span class="n">Spectrum</span><span class="p">(</span><span class="s1">&#39;eu_calib_7cm.Spe&#39;</span><span class="p">)</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="c1">### Fit Europium Spectrum</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;istp&#39;</span><span class="p">:[</span><span class="s1">&#39;152EU&#39;</span><span class="p">]}</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="c1">### Perform efficiency calibration</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A0&#39;</span><span class="p">:</span><span class="mf">3.7E4</span><span class="p">,</span> <span class="s1">&#39;ref_date&#39;</span><span class="p">:</span><span class="s1">&#39;01/01/2009 12:00:00&#39;</span><span class="p">}</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">auto_calibrate</span><span class="p">()</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="c1">### Save peak information</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">saveas</span><span class="p">(</span><span class="s1">&#39;test.db&#39;</span><span class="p">,</span> <span class="s1">&#39;test.csv&#39;</span><span class="p">)</span>
+
+<span class="c1">### Print out peaks</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">summarize</span><span class="p">()</span>
+
+<span class="c1">### Save as .Chn format</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">saveas</span><span class="p">(</span><span class="s1">&#39;eu_calib_7cm.Chn&#39;</span><span class="p">)</span>
+
+<span class="c1">### Load with database</span>
+<span class="n">sp</span> <span class="o">=</span> <span class="n">Spectrum</span><span class="p">(</span><span class="s1">&#39;eu_calib_7cm.Chn&#39;</span><span class="p">,</span> <span class="s1">&#39;test.db&#39;</span><span class="p">)</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;istp&#39;</span><span class="p">:[</span><span class="s1">&#39;152EU&#39;</span><span class="p">],</span> <span class="s1">&#39;A0&#39;</span><span class="p">:</span><span class="mf">3.7E4</span><span class="p">,</span> <span class="s1">&#39;ref_date&#39;</span><span class="p">:</span><span class="s1">&#39;01/01/2009 12:00:00&#39;</span><span class="p">}</span>
+
+<span class="c1">### Plot ADC channels instead of energy</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xcalib</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1">### Pick out a few peaks for manual calibration</span>
+<span class="n">cb_data</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">664.5</span><span class="p">,</span> <span class="mf">121.8</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">1338.5</span><span class="p">,</span> <span class="mf">244.7</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mf">1882.5</span><span class="p">,</span> <span class="mf">344.3</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">2428</span><span class="p">,</span> <span class="mi">444</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">7698</span><span class="p">,</span> <span class="mi">1408</span><span class="p">]]</span>
+
+<span class="n">sp</span><span class="o">.</span><span class="n">auto_calibrate</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">cb_data</span><span class="p">)</span>
+
+<span class="c1">### Efficiency calibration using the Calibration class</span>
+<span class="n">cb</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">()</span>
+<span class="n">cb</span><span class="o">.</span><span class="n">calibrate</span><span class="p">([</span><span class="n">sp</span><span class="p">])</span>
+<span class="n">cb</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="c1">### Custom peaks</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">fit_config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;p0&#39;</span><span class="p">:[{</span><span class="s1">&#39;E&#39;</span><span class="p">:</span><span class="mf">1460.82</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">:</span><span class="mf">0.1066</span><span class="p">,</span> <span class="s1">&#39;dI&#39;</span><span class="p">:</span><span class="mf">0.0017</span><span class="p">,</span> <span class="s1">&#39;istp&#39;</span><span class="p">:</span><span class="s1">&#39;40K&#39;</span><span class="p">}]}</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">summarize</span><span class="p">()</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="c1">### More detailed fits</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">fit_config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;xrays&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;E_min&#39;</span><span class="p">:</span><span class="mf">20.0</span><span class="p">,</span> <span class="s1">&#39;bg_fit&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;quad_bg&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">}</span>
+<span class="c1">### Save and show the plot</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">saveas</span><span class="o">=</span><span class="s1">&#39;europium.png&#39;</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="nuclear-data">
-<h2>1.3. Nuclear Data<a class="headerlink" href="#nuclear-data" title="Permalink to this headline">¶</a></h2>
-<p>NPAT contains an interface to various nuclear libraries.</p>
 </div>
-<div class="section" id="stopping-power">
-<h2>1.4. Stopping Power<a class="headerlink" href="#stopping-power" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="stopping-power-calculations">
+<h2>1.3. Stopping Power Calculations<a class="headerlink" href="#stopping-power-calculations" title="Permalink to this headline">¶</a></h2>
+<p>NPAT uses the Anderson &amp; Ziegler formalism for calculating charged-particle stopping powers in matter.  The <cite>Ziegler</cite> class allows one to calculate these stopping powers for a stack of foils:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">npat</span> <span class="k">import</span> <span class="n">Ziegler</span>
+
+<span class="c1">### Set up a stack with different input options.</span>
+<span class="c1">### Each element of the stack dictionary must contain keyword `compound`, and enough information</span>
+<span class="c1">###    for the code to determine the areal density.  Options are `mass` (g), `thickness` (mm),</span>
+<span class="c1">###    `area` (cm^2), `ad` (mg/cm^2), and `density` (g/cm^3).  If keyword `name` is included, foil</span>
+<span class="c1">###    information will be tallied, and can be filtered in the plot/summarize functions.</span>
+
+<span class="n">zg</span> <span class="o">=</span> <span class="n">Ziegler</span><span class="p">(</span><span class="n">stack</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;compound&#39;</span><span class="p">:</span><span class="s1">&#39;Ni&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Ni01&#39;</span><span class="p">,</span> <span class="s1">&#39;thickness&#39;</span><span class="p">:</span><span class="mf">0.025</span><span class="p">},</span>  <span class="c1"># Thickness only (mm)</span>
+                                        <span class="p">{</span><span class="s1">&#39;compound&#39;</span><span class="p">:</span><span class="s1">&#39;Kapton&#39;</span><span class="p">,</span> <span class="s1">&#39;thickness&#39;</span><span class="p">:</span><span class="mf">0.05</span><span class="p">},</span>                                <span class="c1"># No name - will not be tallied</span>
+                                        <span class="p">{</span><span class="s1">&#39;compound&#39;</span><span class="p">:</span><span class="s1">&#39;Ti&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Ti01&#39;</span><span class="p">,</span> <span class="s1">&#39;thickness&#39;</span><span class="p">:</span><span class="mf">1.025</span><span class="p">},</span>  <span class="c1"># Very thick: should see straggle</span>
+                                        <span class="p">{</span><span class="s1">&#39;compound&#39;</span><span class="p">:</span><span class="s1">&#39;SrCO3&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;SrCO3&#39;</span><span class="p">,</span> <span class="s1">&#39;area&#39;</span><span class="p">:</span><span class="mf">0.785</span><span class="p">,</span> <span class="s1">&#39;mass&#39;</span><span class="p">:</span><span class="mf">4.8E-3</span><span class="p">}],</span>  <span class="c1"># Mass (g) and area (cm^2)</span>
+                                        <span class="n">beam_istp</span><span class="o">=</span><span class="s1">&#39;2H&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mf">1E5</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">E0</span><span class="o">=</span><span class="mf">33.0</span><span class="p">)</span>  <span class="c1">## 33 MeV deuteron beam</span>
+
+<span class="c1">### zg.stack contains all information, both input and calculated</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">zg</span><span class="o">.</span><span class="n">stack</span><span class="p">)</span>
+
+<span class="c1">### Print mean energies on samples</span>
+<span class="n">zg</span><span class="o">.</span><span class="n">summarize</span><span class="p">()</span>
+
+<span class="c1">### Plot only strontium and titanium fluxes</span>
+<span class="n">zg</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="s1">&#39;Sr&#39;</span><span class="p">,</span> <span class="s1">&#39;Ti&#39;</span><span class="p">])</span>
+
+<span class="c1">### Find out if 6mm of Be will stop a deuteron beem</span>
+<span class="n">zg</span> <span class="o">=</span> <span class="n">Ziegler</span><span class="p">(</span><span class="n">stack</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;compound&#39;</span><span class="p">:</span><span class="s1">&#39;Be&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Be Breakup&#39;</span><span class="p">,</span><span class="s1">&#39;thickness&#39;</span><span class="p">:</span><span class="mf">6.0</span><span class="p">}])</span>
+<span class="c1">### Set beam options with zg.meta</span>
+<span class="n">zg</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;istp&#39;</span><span class="p">:</span><span class="s1">&#39;2H&#39;</span><span class="p">,</span> <span class="s1">&#39;E0&#39;</span><span class="p">:</span><span class="mf">33.0</span><span class="p">}</span>
+
+<span class="c1">### Summarize, plot and save</span>
+<span class="n">zg</span><span class="o">.</span><span class="n">summarize</span><span class="p">()</span>
+<span class="n">zg</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">zg</span><span class="o">.</span><span class="n">saveas</span><span class="p">(</span><span class="s1">&#39;breakup.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;breakup.db&#39;</span><span class="p">,</span> <span class="s1">&#39;breakup.png&#39;</span><span class="p">)</span>
+
+<span class="c1">### Import stack design from .csv file</span>
+<span class="n">zg</span> <span class="o">=</span> <span class="n">Ziegler</span><span class="p">(</span><span class="n">stack</span><span class="o">=</span><span class="s1">&#39;test_stack.csv&#39;</span><span class="p">)</span>
+<span class="n">zg</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;istp&#39;</span><span class="p">:</span><span class="s1">&#39;4HE&#39;</span><span class="p">,</span><span class="s1">&#39;E0&#39;</span><span class="p">:</span><span class="mf">70.0</span><span class="p">}</span>
+<span class="n">zg</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The file <cite>test_stack.csv</cite> used in this example can be found on the <a class="reference external" href="https://github.com/jtmorrell/npat/blob/master/examples/test_stack.csv">npat github</a>.</p>
+</div>
+<div class="section" id="decay-chains">
+<h2>1.4. Decay Chains<a class="headerlink" href="#decay-chains" title="Permalink to this headline">¶</a></h2>
+<p>NPAT has the capability of simulating and fitting to any possible decay chain, using the Bateman equations.  The following example demonstrates this for the radium-225 decay chain:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">npat</span> <span class="k">import</span> <span class="n">DecayChain</span>
+
+<span class="c1">### 225RA decay chain, units of days, 9.0/day production rate, for 0.5 days</span>
+<span class="n">dc</span> <span class="o">=</span> <span class="n">DecayChain</span><span class="p">(</span><span class="s1">&#39;225RA&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="mf">9.0</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="c1">### Additional production of 225AC, with production rate of 225RA fluctuating</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DecayChain</span><span class="p">(</span><span class="s1">&#39;225RA&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;225RA&#39;</span><span class="p">:</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;225AC&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">},</span> <span class="n">time</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DecayChain</span><span class="p">(</span><span class="s1">&#39;225RA&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;225RA&#39;</span><span class="p">:</span><span class="mf">5.0</span><span class="p">,</span> <span class="s1">&#39;225AC&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">},</span> <span class="n">time</span><span class="o">=</span><span class="mf">4.5</span><span class="p">))</span>
+
+<span class="c1">### 21 day decay time</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DecayChain</span><span class="p">(</span><span class="s1">&#39;225RA&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">21</span><span class="p">))</span>
+
+<span class="c1">### Measured counts: [start_time (d), stop_time (d), decays, unc_decays]</span>
+<span class="c1">### Times relative to last appended DecayChain, i.e. EoB time</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;225AC&#39;</span><span class="p">:[[</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.1</span><span class="p">,</span> <span class="mf">6E5</span><span class="p">,</span> <span class="mf">2E4</span><span class="p">],</span>
+                                          <span class="p">[</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">6.1</span><span class="p">,</span> <span class="mf">7E5</span><span class="p">,</span> <span class="mf">3E4</span><span class="p">]],</span>
+                        <span class="s1">&#39;221FR&#39;</span><span class="p">:[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">5.6</span><span class="p">,</span> <span class="mf">6E5</span><span class="p">,</span> <span class="mf">2E4</span><span class="p">]}</span>
+
+<span class="c1">### Find the scaled production rate that gives us these counts</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">fit_R</span><span class="p">()</span>
+<span class="c1">### Only plot the 5 most active isotopes in the decay chain</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">N_plot</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="nuclear-data-libraries">
+<h2>1.5. Nuclear Data Libraries<a class="headerlink" href="#nuclear-data-libraries" title="Permalink to this headline">¶</a></h2>
+<p>NPAT contains data from the ENSDF, ENDF, IRDFF, IAEA-charged-particle and TENDL nuclear data libraries.  Information about a specific isotope, for example its half-life, can be retreieved using the <cite>Isotope</cite> class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">npat</span> <span class="k">import</span> <span class="n">Isotope</span>
+
+<span class="n">i</span> <span class="o">=</span> <span class="n">Isotope</span><span class="p">(</span><span class="s1">&#39;60CO&#39;</span><span class="p">)</span>
+<span class="c1">### Get LaTeX formatted name</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">TeX</span><span class="p">)</span>
+<span class="c1">### Get isotope mass in amu</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
+<span class="c1">### Get half life in optimum units</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">half_life</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">optimum_units</span><span class="p">(),</span><span class="n">unc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">i</span><span class="o">.</span><span class="n">optimum_units</span><span class="p">())</span>
+<span class="c1">### Print list of the decay gammas</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">gammas</span><span class="p">()[</span><span class="s1">&#39;E&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Nuclear reaction data can be searched for using the <cite>Library</cite> class, and used with the <cite>Reaction</cite> class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">npat</span> <span class="k">import</span> <span class="n">Reaction</span><span class="p">,</span> <span class="n">Library</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1">### We will plot the same reaction from three different libraries</span>
+<span class="c1">### Passing f,ax to rx.plot allows multiple plots on the same figure</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+<span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;irdff&#39;</span><span class="p">,</span><span class="s1">&#39;endf&#39;</span><span class="p">,</span><span class="s1">&#39;tendl&#39;</span><span class="p">]:</span>
+        <span class="n">rx</span> <span class="o">=</span> <span class="n">Reaction</span><span class="p">(</span><span class="s1">&#39;90ZR(n,2n)89ZR&#39;</span><span class="p">,</span> <span class="n">lb</span><span class="p">)</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">rx</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;library&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1">### Compare (n,2n) and (n,3n) for endf vs tendl</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+<span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;endf&#39;</span><span class="p">,</span><span class="s1">&#39;tendl&#39;</span><span class="p">]:</span>
+        <span class="n">rx</span> <span class="o">=</span> <span class="n">Reaction</span><span class="p">(</span><span class="s1">&#39;226RA(n,2n)225RA&#39;</span><span class="p">,</span> <span class="n">lb</span><span class="p">)</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">rx</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">E_lim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">30</span><span class="p">])</span>
+        <span class="n">rx</span> <span class="o">=</span> <span class="n">Reaction</span><span class="p">(</span><span class="s1">&#39;226RA(n,3n)224RA&#39;</span><span class="p">,</span> <span class="n">lb</span><span class="p">)</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">rx</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">E_lim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">40</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1">### Search the TENDL-2015 neutron library for reactions producing 225RA from 226RA</span>
+<span class="n">lb</span> <span class="o">=</span> <span class="n">Library</span><span class="p">(</span><span class="s1">&#39;tendl_n&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="s1">&#39;226RA&#39;</span><span class="p">,</span><span class="n">product</span><span class="o">=</span><span class="s1">&#39;225RAg&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -76,8 +242,9 @@
 <li><a class="reference internal" href="#">1. Getting Started</a><ul>
 <li><a class="reference internal" href="#installation">1.1. Installation</a></li>
 <li><a class="reference internal" href="#spectroscopy">1.2. Spectroscopy</a></li>
-<li><a class="reference internal" href="#nuclear-data">1.3. Nuclear Data</a></li>
-<li><a class="reference internal" href="#stopping-power">1.4. Stopping Power</a></li>
+<li><a class="reference internal" href="#stopping-power-calculations">1.3. Stopping Power Calculations</a></li>
+<li><a class="reference internal" href="#decay-chains">1.4. Decay Chains</a></li>
+<li><a class="reference internal" href="#nuclear-data-libraries">1.5. Nuclear Data Libraries</a></li>
 </ul>
 </li>
 </ul>
