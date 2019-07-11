@@ -305,7 +305,7 @@ class Isotope(object):
 				prods.append([product, br])
 		return [[i, br] for i,br in prods if br>1E-8]
 
-	def gammas(self,I_lim=[None,None],E_lim=[None,None],xrays=False):
+	def gammas(self, I_lim=[None,None], E_lim=[None,None], xrays=False, dE_511=3.5):
 		"""Description
 
 		...
@@ -339,7 +339,7 @@ class Isotope(object):
 				gammas = [g for g in gammas if g[n]<=L[1]]
 		if not xrays:
 			gammas = [g for g in gammas if g[3]=='']
-		return {l:[g[n] for g in gammas if abs(g[0]-511.0)>1.0] for n,l in enumerate(['E','I','dI','notes'])}
+		return {l:[g[n] for g in gammas if abs(g[0]-511.0)>dE_511] for n,l in enumerate(['E','I','dI','notes'])}
 
 	def electrons(self,I_lim=(None,None),E_lim=(None,None),CE_only=False,Auger_only=False):
 		"""Description
@@ -413,7 +413,7 @@ class Isotope(object):
 				betas = [b for b in betas if b[n]<=L[1]]
 		return {l:[b[n] for b in betas] for n,l in enumerate(['muE','I','dI','endE'])}
 
-	def beta_plus(self,I_lim=(None,None),Endpoint_lim=(None,None)):
+	def beta_plus(self, I_lim=(None,None), Endpoint_lim=(None,None)):
 		"""Description
 
 		...
@@ -447,7 +447,7 @@ class Isotope(object):
 				betas = [b for b in betas if b[n]<=L[1]]
 		return {l:[b[n] for b in betas] for n,l in enumerate(['muE','I','dI','endE'])}
 
-	def alphas(self,I_lim=(None,None),E_lim=(None,None)):
+	def alphas(self, I_lim=(None,None), E_lim=(None,None)):
 		"""Description
 
 		...

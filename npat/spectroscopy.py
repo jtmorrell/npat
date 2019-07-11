@@ -1196,7 +1196,7 @@ class Spectrum(object):
 				self._meta['MEAS_TIM'] = ['{0} {1}'.format(int(self.meta['live_time']), int(self.meta['real_time']))]
 				self._meta['ENER_FIT'] = ['{0} {1}'.format(self.cb.engcal[0], self.cb.engcal[1])]
 				self._meta['MCA_CAL'] = ['3','{0} {1} {2} keV'.format(self.cb.engcal[0], self.cb.engcal[1], (self.cb.engcal[2] if len(self.cb.engcal)>2 else 0.0))]
-				defaults = {'ROI':['0'],'SPEC_REM':['DET# 0','DETDESC# ','AP# Maestro Version 7.01'],'PRESETS':['0'],
+				defaults = {'ROI':['0'],'SPEC_REM':['DET# 0','DETDESC# None','AP# Maestro Version 7.01'],'PRESETS':['0'],
 							'SHAPE_CAL':['3','0E+00 0E+00 0E+00'],'SPEC_ID':['No sample description was entered.']}
 				for d in defaults:
 					if d not in self.meta:

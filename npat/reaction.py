@@ -270,6 +270,7 @@ class Reaction(object):
 		else:
 			self.unc_xs = np.zeros(len(self.xs))
 		self._interp = None
+		self._interp_unc = None
 		self._tex = None
 
 	def _check(self, err=False):
@@ -294,8 +295,14 @@ class Reaction(object):
 		if self._interp is None:
 			self._interp = interp1d(self.eng, self.xs, bounds_error=False, fill_value=0.0)
 		return self._interp
+
+	@property
+	def interp_unc(self):
+		if self._interp_unc is None:
+			self._interp_unc = interp1d(self.eng, self.unc_xs, bounds_error=False, fill_value=0.0)
+		return self._interp_unc
 	
-	def integrate(self, energy, flux):
+	def integrate(self, energy, flux, unc=False):
 		"""Description
 
 		...
@@ -322,9 +329,12 @@ class Reaction(object):
 		# Trapezoidal Riemann sum
 		E = np.asarray(energy)
 		phisig = np.asarray(flux)*self.interp(E)
+		if unc:
+			unc_phisig = np.asarray(flux)*self.interp_unc(E)
+			return np.sum(0.5*(E[1:]-E[:-1])*(phisig[:-1]+phisig[1:])), np.sum(0.5*(E[1:]-E[:-1])*(unc_phisig[:-1]+unc_phisig[1:]))
 		return np.sum(0.5*(E[1:]-E[:-1])*(phisig[:-1]+phisig[1:]))
 
-	def average(self, energy, flux):
+	def average(self, energy, flux, unc=False):
 		"""Description
 
 		...
@@ -351,6 +361,9 @@ class Reaction(object):
 		E, phi = np.asarray(energy), np.asarray(flux)
 		phisig = phi*self.interp(E)
 		dE = E[1:]-E[:-1]
+		if unc:
+			unc_phisig = np.asarray(flux)*self.interp_unc(E)
+			return np.sum(0.5*dE*(phisig[:-1]+phisig[1:]))/np.sum(0.5*dE*(phi[:-1]+phi[1:])), np.sum(0.5*dE*(unc_phisig[:-1]+unc_phisig[1:]))/np.sum(0.5*dE*(phi[:-1]+phi[1:]))
 		return np.sum(0.5*dE*(phisig[:-1]+phisig[1:]))/np.sum(0.5*dE*(phi[:-1]+phi[1:]))
 
 	def plot(self, label=None, title=True, E_lim=None, **kwargs):

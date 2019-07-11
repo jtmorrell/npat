@@ -22,7 +22,7 @@ if sys.version_info[0]<3:
 	copy_reg.pickle(types.MethodType, _pickle_method)
 
 
-__version__ = '0.2.7'
+__version__ = '0.2.8'
 __all__ = ['get_cursor', 'get_connection', 'colors',
 			'set_style', 'Spectrum', 'Calibration', 
 			'Isotope', 'DecayChain', 'Reaction',

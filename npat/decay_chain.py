@@ -439,10 +439,10 @@ class DecayChain(object):
 		counts = {}
 		conv = {'ns':1e-9,'us':1e-6,'ms':1e-3,'s':1.0,'m':60.0,'h':3600.0,'d':86400.0,'y':31557600.0}
 		for sp in spectra:
-			start_time = (sp.meta['start_time']-self.EoB).total_seconds()/conv[self.units]
-			end_time = start_time+(sp.meta['real_time']/conv[self.units])
 			if type(sp)==str:
 				sp = Spectrum(sp, db)
+			start_time = (sp.meta['start_time']-self.EoB).total_seconds()/conv[self.units]
+			end_time = start_time+(sp.meta['real_time']/conv[self.units])
 			if not sp.meta['istp']:
 				sp.meta['istp'] = self.isotopes
 			for n,p in sp.peaks.iterrows():
@@ -461,7 +461,7 @@ class DecayChain(object):
 		R_p,t = [p.R for p in self._prev if p.R.any()],[p.time[-1] for p in self._prev if p.R.any()]
 		return np.dot(np.array(R_p).T,np.array(t))/np.sum(t)
 
-	def fit_R(self, istp=None, _update=True):
+	def fit_R(self, istp=None, _update=True, unc=False):
 		"""Description
 
 		...
@@ -486,6 +486,11 @@ class DecayChain(object):
 		"""
 
 		if self._R_fit is not None:
+			if unc:
+				if istp is None:
+					return self._R_fit, self._unc_R_fit
+				return self._R_fit[self.index(istp)], self._unc_R_fit[self.index(istp)]
+
 			if istp is None:
 				return self._R_fit
 			return self._R_fit[self.index(istp)]
@@ -522,9 +527,11 @@ class DecayChain(object):
 			X[:,m] = np.array([self.decays(self.isotopes[itp[n]], time[n][0], time[n][1], _A0=A0) for n in range(len(X))])
 		
 		func = lambda X_f, *R_f: np.dot(X_f, np.asarray(R_f).T)
-		fit, unc = curve_fit(func, X, Y, sigma=dY, p0=R_norm[nz], bounds=([0.0 for i in nz],[np.inf for i in nz]))
+		fit, cov = curve_fit(func, X, Y, sigma=dY, p0=R_norm[nz], bounds=([0.0 for i in nz],[np.inf for i in nz]))
 		self._R_fit = np.zeros(len(R_norm))
 		self._R_fit[nz] = fit
+		self._unc_R_fit = np.zeros(len(R_norm))
+		self._unc_R_fit[nz] = (np.sqrt(np.diag(cov)) if np.all(np.isfinite(cov)) else np.diag(cov))
 
 		if _update:
 			A0 = np.copy(self._prev[0].A0) if len(self._prev) else np.zeros(len(self.isotopes))
@@ -535,11 +542,16 @@ class DecayChain(object):
 					A0[n] = p.activity(self.isotopes[n], p.time[-1])
 			self.A0 = np.copy(A0)
 
+		if unc:
+			if istp is None:
+				return self._R_fit, self._unc_R_fit
+			return self._R_fit[self.index(istp)], self._unc_R_fit[self.index(istp)]
+
 		if istp is None:
 			return self._R_fit
 		return self._R_fit[self.index(istp)]
 
-	def fit_A0(self, istp=None, _update=True):
+	def fit_A0(self, istp=None, _update=True, unc=False):
 		"""Description
 
 		...
@@ -564,6 +576,11 @@ class DecayChain(object):
 		"""
 
 		if self._A0_fit is not None:
+			if unc:
+				if istp is None:
+					return self._A0_fit, self._unc_A0_fit
+				return self._A0_fit[self.index(istp)], self._unc_A0_fit[self.index(istp)]
+
 			if istp is None:
 				return self._A0_fit
 			return self._A0_fit[self.index(istp)]
@@ -597,12 +614,19 @@ class DecayChain(object):
 			X[:,z] = np.array([self.decays(self.isotopes[itp[n]], time[n][0], time[n][1], _A0=A0) for n in range(len(X))])
 
 		func = lambda X_f, *R_f: np.dot(X_f, np.asarray(R_f).T)
-		fit, unc = curve_fit(func, X, Y, sigma=dY, p0=self.A0[nz], bounds=([0.0 for i in nz],[np.inf for i in nz]))
+		fit, cov = curve_fit(func, X, Y, sigma=dY, p0=self.A0[nz], bounds=([0.0 for i in nz],[np.inf for i in nz]))
 		self._A0_fit = np.copy(self.A0)
 		self._A0_fit[self.A0>0] = fit
+		self._unc_A0_fit = np.zeros(len(self.A0))
+		self._unc_A0_fit[self.A0>0] = (np.sqrt(np.diag(cov)) if np.all(np.isfinite(cov)) else np.diag(cov))
 
 		if _update:
 			self.A0 = np.copy(self._A0_fit)
+
+		if unc:
+			if istp is None:
+				return self._A0_fit, self._unc_A0_fit
+			return self._A0_fit[self.index(istp)], self._unc_A0_fit[self.index(istp)]
 
 		if istp is None:
 			return self._A0_fit
