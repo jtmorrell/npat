@@ -7,6 +7,90 @@ import numpy as np
 
 from .dbmgr import get_cursor
 
+class Element(object):
+	"""Elemental data
+
+	...
+	
+	Parameters
+	----------
+	x : type
+		Description of parameter `x`.
+
+	Attributes
+	----------
+
+	Methods
+	-------
+
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
+
+	"""
+
+	def __init__(self, element):
+		self.element = element.title()
+		self._meta = None
+
+	@property
+	def meta(self):
+		if self._meta is None:
+			from scipy.interpolate import interp1d
+
+			self._meta = {}
+			zg = get_cursor('ziegler')
+			self._meta['Z'] = [str(i[2]).split(':')[0] for i in zg.execute('SELECT * FROM compounds WHERE compound=?',(self.element,))][0]
+			self._meta['mass'], self._meta['density'] = [(i[1],i[2]) for i in zg.execute('SELECT * FROM weights WHERE Z=?',(self._meta['Z'],))][0]
+			coeff = np.array([i[1:] for i in zg.execute('SELECT * FROM mass_coeff WHERE Z=? ORDER BY energy',(self._meta['Z'],))])
+			self._meta['mass_coeff'] = interp1d(coeff[:,0], coeff[:,1], bounds_error=False, fill_value=0.0)
+			self._meta['mass_coeff_en'] = interp1d(coeff[:,0], coeff[:,2], bounds_error=False, fill_value=0.0)
+			db = get_cursor('decay')
+			self._meta['abundances'] = {str(i[1]):i[12] for i in db.execute('SELECT * FROM chart WHERE element=? AND abundance>0.0',(self.element,))}
+			self._meta['isotopes'] = sorted([i for i in self._meta['abundances']])
+
+		return self._meta
+
+	@property
+	def Z(self):
+		return self.meta['Z']
+
+	@property
+	def mass(self):
+		return self.meta['mass']
+
+	@property
+	def isotopes(self):
+		return self.meta['isotopes']
+
+	@property
+	def abundances(self):
+		return self.meta['abundances']
+
+	@property
+	def mass_coeff(self):
+		return self.meta['mass_coeff']
+
+	@property
+	def mass_coeff_en(self):
+		return self.meta['mass_coeff_en']
+
+	def attenuation(self, E, x=1.0):
+		return np.exp(-self.mass_coeff(E)*self.density*x)
+	
+	@property
+	def density(self):
+		return self.meta['density']
+	
+	
+	
+
+
 class Isotope(object):
 	"""Isotopic data
 
@@ -76,6 +160,9 @@ class Isotope(object):
 			self._meta['unc_t_half'] = q[11]
 			self._meta['abundance'] = q[12]
 			self._meta['unc_abundance'] = q[13]
+			if self._meta['stable'] and self._meta['abundance'] is None:
+				self._meta['abundance'] = 100.0
+				self._meta['unc_abundance'] = 0.0
 			self._meta['mass'] = q[14]
 			self._meta['Delta'] = q[15]
 			self._meta['decay_mode'] = list(map(lambda i:[float(p) if n==2 else p for n,p in enumerate(i.split(':'))], str(q[16]).split(',')))

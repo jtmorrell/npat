@@ -26,4 +26,4 @@ __version__ = '0.2.8'
 __all__ = ['get_cursor', 'get_connection', 'colors',
 			'set_style', 'Spectrum', 'Calibration', 
 			'Isotope', 'DecayChain', 'Reaction',
-			'Ziegler', 'Library']
+			'Ziegler', 'Library', 'Element']

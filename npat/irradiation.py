@@ -328,6 +328,7 @@ class Ziegler(object):
 			N = [int(self.meta['chunk_size']) for n in range(int(self.meta['N']/float(self.meta['chunk_size'])))]
 		else:
 			N = [int(self.meta['N']/float(self.meta['threads'])) for n in range(self.meta['threads'])]
+		# N = [int(self.meta['chunk_size']) for n in range(int(self.meta['N']/float(self.meta['chunk_size'])))]
 		
 		if self.meta['threads']>1:
 			pool = multiprocessing.Pool(processes=self.meta['threads'])
