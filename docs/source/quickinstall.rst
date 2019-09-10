@@ -29,3 +29,8 @@ NPAT should download about 1GB of nuclear data during setup, however if this dow
 	python setup.py install --user
 
 .. _setup: https://github.com/jtmorrell/npat/blob/master/setup.py
+
+If this fails, you can alternatively download npat as a .zip file from `dropbox`_ and unzip it into the appropriate site-packages directory.  If you're unsure where that is, the following `StackExchange`_ is a useful reference.
+
+.. _dropbox: https://www.dropbox.com/s/iohu07ing4e1b9r/npat.zip?dl=1
+.. _StackExchange: https://stackoverflow.com/questions/122327/how-do-i-find-the-location-of-my-python-site-packages-directory/12950101

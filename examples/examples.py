@@ -135,19 +135,19 @@ def reaction_examples():
 
 	### We will plot the same reaction from three different libraries
 	### Passing f,ax to rx.plot allows multiple plots on the same figure
-	# f, ax = None, None
-	# for lb in ['irdff','endf','tendl']:
-	# 	rx = Reaction('90ZR(n,2n)89ZR', lb)
-	# 	f, ax = rx.plot(f=f, ax=ax, show=False, label='library', title=True)
+	f, ax = None, None
+	for lb in ['irdff','endf','tendl']:
+		rx = Reaction('90ZR(n,2n)89ZR', lb)
+		f, ax = rx.plot(f=f, ax=ax, show=False, label='library', title=True)
 
-	# plt.show()
+	plt.show()
 	
 	### Compare (n,2n) and (n,3n) for endf vs tendl
 	f, ax = None, None
 	for lb in ['endf','tendl']:
 		rx = Reaction('226RA(n,2n)225RA', lb)
-		f, ax = rx.plot(f=f, ax=ax, show=False, label='both', E_lim=[0,30])
-		rx = Reaction('226RA(n,g)227RA', lb)
+		f, ax = rx.plot(f=f, ax=ax, show=False, label='both', E_lim=[0,30], logscale=True)
+		rx = Reaction('226RA(n,3n)224RA', lb)
 		f, ax = rx.plot(f=f, ax=ax, show=False, label='both', title=True, E_lim=[0,40])
 
 	plt.show()
@@ -159,8 +159,8 @@ def reaction_examples():
 
 if __name__=='__main__':
 
-	# spectroscopy_examples()
-	# decay_chain_examples()
-	# ziegler_examples()
-	# isotope_examples()
+	spectroscopy_examples()
+	decay_chain_examples()
+	ziegler_examples()
+	isotope_examples()
 	reaction_examples()

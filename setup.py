@@ -37,7 +37,7 @@ class install(_install):
 					 msg="Downloading nuclear data files...")
 
 setup(name='npat',
-	  version='0.2.8',
+	  version='0.2.9',
 	  description='Nuclear Physics Analysis Tools (NPAT) is a library written in python to assist in analysis of the physics of nuclear reactions and spectroscopy.',
 	  url='https://github.com/jtmorrell/npat',
 	  author='Jonathan Morrell',
@@ -45,5 +45,5 @@ setup(name='npat',
 	  license='MIT',
 	  packages=find_packages(),
 	  include_package_data=True,
-	  cmdclass={'install': install})
-# , install_requires=['numpy>=1.11', 'matplotlib>=1.3', 'scipy>=0.19.1'])
+	  cmdclass={'install': install}, 
+	  install_requires=['numpy', 'matplotlib', 'scipy', 'pandas'])

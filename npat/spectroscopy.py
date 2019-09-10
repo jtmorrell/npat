@@ -6,7 +6,7 @@ import sqlite3, os
 import numpy as np
 import pandas as pd
 import datetime as dtm
-import multiprocessing
+# import multiprocessing
 
 from scipy.optimize import curve_fit
 from scipy.special import erfc
@@ -601,7 +601,7 @@ class Spectrum(object):
 									'step_fit':False, 'quad_bg':False, 'SNR_cut':4.0, 
 									'A_bound':10.0, 'mu_bound':1.5, 'sig_bound':1.5,
 									'xrays':False, 'pk_width':7.5, 'E_min':75.0, 
-									'I_min':0.05,'threads':multiprocessing.cpu_count()}, 
+									'I_min':0.05,'threads':-1}, #multiprocessing.cpu_count()
 						'istp':[], 'shelf':None, 'spec_id':1}
 		self.cb = Calibration()
 		for nm in self.cb.calib:
@@ -1109,7 +1109,7 @@ class Spectrum(object):
 	def fits(self):
 		if self._fits is None:
 			p0 = self._get_multiplets()
-			if self.fit_config['threads']>1:
+			if False: #self.fit_config['threads']>1
 				self.db, self.db_connection = None, None
 				pool = multiprocessing.Pool(processes=self.fit_config['threads'])
 				multiplets = pool.map(self._multi_fit, p0)

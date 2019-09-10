@@ -188,7 +188,7 @@ Nuclear reaction data can be searched for using the `Library` class, and used wi
 	f, ax = None, None
 	for lb in ['endf','tendl']:
 		rx = Reaction('226RA(n,2n)225RA', lb)
-		f, ax = rx.plot(f=f, ax=ax, show=False, label='both', E_lim=[0,30])
+		f, ax = rx.plot(f=f, ax=ax, show=False, label='both', E_lim=[0,30], logscale=True)
 		rx = Reaction('226RA(n,3n)224RA', lb)
 		f, ax = rx.plot(f=f, ax=ax, show=False, label='both', title=True, E_lim=[0,40])
 
