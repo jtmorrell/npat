@@ -146,8 +146,10 @@ class Ziegler(object):
 			if type(s['compound'])==dict:
 				cs = ''
 				for c in s['compound']:
+					print(c)
 					cs = c
 					self.compounds[c] = s['compound'][c]
+					print(self.compounds[c])
 				s['compound'] = cs
 				if s['compound']=='':
 					raise ValueError('compound must be specified')

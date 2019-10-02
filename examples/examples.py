@@ -63,6 +63,7 @@ def ziegler_examples():
 	zg = Ziegler(stack=[{'compound':'Ni', 'name':'Ni01', 'thickness':0.025},  # Thickness only (mm)
 						{'compound':'Kapton', 'thickness':0.05},				# No name - will not be tallied
 						{'compound':'Ti', 'name':'Ti01', 'thickness':1.025},  # Very thick: should see straggle
+						{'compound':{'inconel':[[26,33.0],[28,55.0]]},'ad':1.0,'name':'test'},
 						{'compound':'SrCO3', 'name':'SrCO3', 'area':0.785, 'mass':4.8E-3}],  # Mass (g) and area (cm^2)
 						beam_istp='2H', N=1E5, max_steps=100, E0=33.0)  ## 33 MeV deuteron beam
 
@@ -159,8 +160,8 @@ def reaction_examples():
 
 if __name__=='__main__':
 
-	spectroscopy_examples()
-	decay_chain_examples()
+	# spectroscopy_examples()
+	# decay_chain_examples()
 	ziegler_examples()
-	isotope_examples()
-	reaction_examples()
+	# isotope_examples()
+	# reaction_examples()
