@@ -14,6 +14,11 @@ def spectroscopy_examples():
 	sp.meta = {'A0':3.7E4, 'ref_date':'01/01/2009 12:00:00'}
 	sp.auto_calibrate()
 	sp.cb.plot()
+	sp.cb.saveas('eu_calib.json')
+	sp.cb.open('eu_calib.json')
+	sp.cb.plot()
+	cb = Calibration('eu_calib.json')
+	cb.plot()
 
 	### Save peak information
 	sp.saveas('test.db', 'test.csv')
@@ -54,6 +59,12 @@ def spectroscopy_examples():
 	sp.fit_config = {'xrays':True, 'E_min':20.0, 'bg_fit':True, 'quad_bg':True}
 	### Save and show the plot
 	sp.plot(saveas='europium.png')
+
+def listfile_examples():
+	from npat import MVME
+	
+	fl = MVME('mvmelst_007.zip')
+	fl.save()
 
 
 def ziegler_examples():
@@ -161,7 +172,8 @@ def reaction_examples():
 if __name__=='__main__':
 
 	# spectroscopy_examples()
+	listfile_examples()
 	# decay_chain_examples()
-	ziegler_examples()
+	# ziegler_examples()
 	# isotope_examples()
 	# reaction_examples()

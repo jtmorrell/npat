@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import sqlite3, os
+import sqlite3, os, json
 import numpy as np
 import pandas as pd
 import datetime as dtm
@@ -57,8 +57,9 @@ class Calibration(object):
 	--------
 
 	"""
-	def __init__(self, meta={}):
+	def __init__(self, filename=None):
 		self.calib = {}
+		self._calib_data = {}
 		self._default = {'engcal': [0.0, 0.3],
 						'effcal': [0.331, 0.158, 0.410, 0.001, 1.476],
 						'unc_effcal': [[ 5.038e-02,  3.266e-02, -2.151e-02, -4.869e-05, -7.748e-03],
@@ -67,7 +68,20 @@ class Calibration(object):
 									 [-4.869e-05, -3.416e-05,  2.294e-05,  5.411e-07, -1.165e-04],
 									 [-7.748e-03, -4.137e-03,  2.569e-03, -1.165e-04,  3.332e-02]],
 						'rescal': [2.0, 4e-4]}
-		self.update(meta)
+		self.update()
+
+		self._path, self._fnm = None, None
+		if filename is not None:
+			self._path, self._fnm = os.path.split(filename)
+			if self._path in ['',' ']:
+				self._path = os.getcwd()
+			if self._fnm in ['',' ']:
+				raise ValueError('Invalid Filename: {}'.format(filename))
+
+			if os.path.exists(os.path.join(self._path, self._fnm)):
+				self.open(os.path.join(self._path, self._fnm))
+			else:
+				raise ValueError('File does not exist: {}'.format(filename))
 
 	def update(self, meta={}):
 		for nm in meta:
@@ -89,13 +103,25 @@ class Calibration(object):
 	def effcal(self):
 		return self.calib['effcal']
 
+	@effcal.setter
+	def effcal(self, cal):
+		self.calib['effcal'] = cal
+
 	@property
 	def unc_effcal(self):
 		return self.calib['unc_effcal']
 
+	@unc_effcal.setter
+	def unc_effcal(self, cal):
+		self.calib['unc_effcal'] = cal
+
 	@property
 	def rescal(self):
 		return self.calib['rescal']
+
+	@rescal.setter
+	def rescal(self, cal):
+		self.calib['rescal'] = cal
 	
 	def eng(self, idx, *cal):
 		"""Description
@@ -287,7 +313,7 @@ class Calibration(object):
 
 		shelves = []
 		sps = []
-		self._calib_data = {'effcal':[]}
+		
 		for sp in spectra:
 			if type(sp)==str:
 				sp = Spectrum(sp, db)
@@ -312,6 +338,9 @@ class Calibration(object):
 
 		shelves = {sh:[s for s in cal_spec if s.meta['shelf']==sh] for sh in set(shelves)}
 		for shelf in shelves:
+			if 'effcal' not in self._calib_data:
+				self._calib_data['effcal'] = []
+
 			shelf_specs = shelves[shelf]
 			p0_effcal = np.average([s.cb.effcal for s in shelf_specs if len(s.cb.effcal)==len(shelf_specs[0].cb.effcal)], axis=0)
 			effcal, unc_effcal = self._calibrate_efficiency(shelf_specs, p0_effcal)
@@ -334,11 +363,11 @@ class Calibration(object):
 				unc_chn += [np.sqrt(f['unc'][i][i]) for i in f['ix']['mu']]
 
 		E, chn, unc_chn = np.array(E), np.array(chn), np.array(unc_chn)
-		idx = np.where(chn>unc_chn)
+		idx = np.where((chn>unc_chn)&(np.isfinite(unc_chn))&(unc_chn>1E-3))
 		E, chn, unc_chn = E[idx], chn[idx], unc_chn[idx]
 
 		p0 = p0 if len(p0)==3 else [p0[0], p0[1], 0.0]
-		fit, unc = curve_fit(self.eng, chn, E, sigma=self.eng(unc_chn+1E-8), p0=p0)
+		fit, unc = curve_fit(self.eng, chn, E, sigma=self.eng(unc_chn), p0=p0)
 
 		self._calib_data['engcal'] = {'fit':fit, 'unc':unc, 'x':E, 'y':chn, 'yerr':unc_chn}
 		return fit
@@ -411,12 +440,50 @@ class Calibration(object):
 				u_mu = [f['unc'][i][i] for i in f['ix']['mu']]
 				unc_sig += [np.sqrt(s+0.25*p0[0]*u_mu[n]/mu[-1*(len(u_mu)-n)]) for n,s in enumerate(u_sig)]
 		mu, sig, unc_sig = np.array(mu), np.array(sig), np.array(unc_sig)
-		idx = np.where((sig>unc_sig)&(np.isfinite(unc_sig))&(unc_sig>0.0))
+		idx = np.where((sig>unc_sig)&(np.isfinite(unc_sig))&(unc_sig>1E-3))
 		mu, sig, unc_sig = mu[idx], sig[idx], unc_sig[idx]
 		fit, unc = curve_fit(self.res, mu, sig, sigma=unc_sig, p0=p0, bounds=([-np.inf, 0.0],[np.inf, np.inf]))
 
 		self._calib_data['rescal'] = {'fit':fit, 'unc':unc, 'x':mu, 'y':sig, 'yerr':unc_sig}
 		return fit
+
+	def open(self, filename):
+		if filename.endswith('.json'):
+			with open(filename) as f:
+				js = json.load(f)
+
+			for c in ['engcal','rescal','effcal','unc_effcal']:
+				if c in js:
+					self.update({c:np.array(js[c])})
+			if '_calib_data' in js:
+				for c in ['engcal','rescal']:
+					if c in js['_calib_data']:
+						self._calib_data[c] = {str(i):np.array(js['_calib_data'][c][i]) for i in js['_calib_data'][c]}
+				if 'effcal' in js['_calib_data']:
+					self._calib_data['effcal'] = []
+					for e in js['_calib_data']['effcal']:
+						self._calib_data['effcal'].append({str(i):(np.array(e[i]) if i!='shelf' else (str(e[i]) if e[i] is not None else None)) for i in e})
+
+
+	def saveas(self, filename):
+		if filename.endswith('.json'):
+			js = {}
+			for c in ['engcal','rescal','effcal','unc_effcal']:
+				if type(self.calib[c])==list:
+					js[c] = self.calib[c]
+				else:
+					js[c] = self.calib[c].tolist()
+			js['_calib_data'] = {}
+			for cl in ['engcal','rescal']:
+				if cl in self._calib_data:
+					js['_calib_data'][cl] = {i:self._calib_data[cl][i].tolist() for i in self._calib_data[cl]}
+			if 'effcal' in self._calib_data:
+				js['_calib_data']['effcal'] = []
+				for e in self._calib_data['effcal']:
+					js['_calib_data']['effcal'].append({i:(e[i].tolist() if i!='shelf' else e[i]) for i in e})
+
+			with open(filename, 'w') as f:
+				json.dump(js, f, indent=4)
 
 	def plot(self, **kwargs):
 		"""Description
@@ -546,51 +613,6 @@ class Spectrum(object):
 		self._check_db(db)
 		self.cb.update(self._meta)
 
-	def __add__(self, other):
-		if not type(other)==Spectrum:
-			raise ValueError('Cannot add spectrum to type {}'.format(type(other)))
-
-		self.hist += other.hist
-		self.meta['live_time'] += other.meta['live_time']
-		self.meta['real_time'] += other.meta['real_time']
-		if abs((other.meta['start_time']-self.meta['start_time']).total_seconds()-self.meta['real_time'])>60:
-			print('WARNING: spectra start and stop times not syncronous.')
-		return self
-
-	def rebin(self, N_bins):
-		"""Description
-
-		...
-
-		Parameters
-		----------
-		x : type
-			Description of parameter `x`.
-
-		Returns
-		-------
-
-		Notes
-		-----
-
-		References
-		----------
-
-		Examples
-		--------
-
-		"""
-
-		L = len(self.hist)
-		if N_bins>L:
-			raise ValueError('N_bins: {0} must be greater than current value: {1}'.format(N_bins, L))
-		r = int(round(L/float(N_bins)))
-		self.hist = np.sum(self.hist.reshape((int(L/r), r)), axis=1)
-		ec = self.cb.engcal
-		self.meta = {'engcal':[ec[0], ec[1]*r]+([ec[2]*r**2] if len(ec)==3 else [])}
-		rc = self.cb.rescal
-		self.meta = {'rescal':([rc[0]*np.sqrt(r)] if len(rc)==1 else [rc[0], rc[1]*r])}
-
 
 	def _default_params(self):
 		self._path, self._fnm = None, None
@@ -603,7 +625,7 @@ class Spectrum(object):
 									'xrays':False, 'pk_width':7.5, 'E_min':75.0, 
 									'I_min':0.05,'threads':-1}, #multiprocessing.cpu_count()
 						'istp':[], 'shelf':None, 'spec_id':1}
-		self.cb = Calibration()
+		self._cb = Calibration()
 		for nm in self.cb.calib:
 			self._meta[nm] = self.cb.calib[nm]
 		self._gamma_list = None
@@ -685,6 +707,20 @@ class Spectrum(object):
 			self.db_connection.commit()
 
 	@property
+	def cb(self):
+		return self._cb
+
+	@cb.setter
+	def cb(self, _cb):
+		import copy
+		self._cb = copy.deepcopy(_cb)
+		if 'effcal' in _cb._calib_data:
+			shelf = self.meta['shelf'] if 'shelf' in self.meta else None
+			for sh in _cb._calib_data['effcal']:
+				if sh['shelf']==shelf:
+					self.meta = {'effcal':sh['fit'], 'unc_effcal':sh['unc']}	
+
+	@property
 	def hist(self):
 		return self._hist
 
@@ -719,6 +755,72 @@ class Spectrum(object):
 		self._fits, self._peaks, self._gamma_list = None, None, None
 		for nm in config_dict:
 			self._meta['fit_config'][nm] = config_dict[nm]
+
+	def __add__(self, other):
+
+		if not type(other)==Spectrum:
+			raise ValueError('Cannot add spectrum to type {}'.format(type(other)))
+
+		if self.meta['start_time']==other.meta['start_time']:
+			alpha = np.sum(self.hist)/float(np.sum(other.hist))
+			dead_time = alpha*(self.meta['real_time']-self.meta['live_time'])+(1.0-alpha)*(other.meta['real_time']-other.meta['live_time'])
+			self.meta['real_time'] = alpha*self.meta['real_time']+(1.0-alpha)*other.meta['real_time']
+			self.meta['live_time'] = self.meta['real_time']-dead_time
+		else:
+			self.meta['live_time'] += other.meta['live_time']
+			self.meta['real_time'] += other.meta['real_time']
+
+		if len(self.hist)==len(other.hist):
+			if len(self.cb.engcal)==len(other.cb.engcal):
+				if len(np.where(self.cb.engcal==other.cb.engcal)[0])==len(self.cb.engcal):
+					self.hist += other.hist
+					return self
+
+		other_bins = other.cb.eng(np.arange(-0.5, len(other.hist)+0.5, 1.0))
+		dNdE = np.array(other.hist, dtype=np.float64)/(other_bins[1:]-other_bins[:-1])
+		f = interp1d(other.cb.eng(np.arange(len(other.hist))), dNdE, bounds_error=False, fill_value=0.0)
+
+		bins = self.cb.eng(np.arange(-0.5, len(self.hist)+0.5, 1.0))
+		edges = np.append(bins, bins).reshape((2,len(bins))).T.flatten()[1:-1].reshape((len(bins)-1, 2)).T
+		e_grid = np.linspace(edges[0], edges[1], num=10).T
+		N = np.asarray(np.trapz(f(e_grid), e_grid, axis=1), dtype=np.int64)
+		self.hist += np.random.poisson(N)
+
+		return self
+
+	def rebin(self, N_bins):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
+		L = len(self.hist)
+		if N_bins>L:
+			raise ValueError('N_bins: {0} must not be greater than current value: {1}'.format(N_bins, L))
+		r = int(round(L/float(N_bins)))
+		self.hist = np.sum(self.hist.reshape((int(L/r), r)), axis=1)
+		ec = self.cb.engcal
+		self.meta = {'engcal':[ec[0], ec[1]*r]+([ec[2]*r**2] if len(ec)==3 else [])}
+		rc = self.cb.rescal
+		self.meta = {'rescal':([rc[0]*np.sqrt(r)] if len(rc)==1 else [rc[0], rc[1]*r])}
 
 	def exp_smooth(self, x, alpha=0.3):
 		N = int(2.0/alpha)-1
@@ -825,6 +927,7 @@ class Spectrum(object):
 		guess = guess if len(guess)==3 else list(guess)+[0.0]
 		obj = lambda m: np.average(np.sqrt(np.absolute(self._hist-self._snip-np.dot(*self._guess_forward_activity(*[guess[0], m[0], guess[2]])))))
 		self.meta = {'engcal': [guess[0], differential_evolution(obj, [(0.995*guess[1], 1.005*guess[1])]).x[0], guess[2]]}
+
 		if ('A0' in self.meta and 'ref_date' in self.meta) and (param['_cb_cal'] if '_cb_cal' in param else True):
 			eff, u_eff, res = self.cb.effcal, self.cb.unc_effcal, self.cb.rescal
 			try:
@@ -838,6 +941,23 @@ class Spectrum(object):
 					print('Error:', e)
 					self.meta = {'engcal':guess, 'effcal':eff, 'unc_effcal':u_eff, 'rescal':res}
 					print('WARNING: auto calibrate failed. Setting engcal to guess.')
+
+		elif len(self.meta['istp']) and (param['_cb_cal'] if '_cb_cal' in param else True):
+			eng, res = self.cb.engcal, self.cb.rescal
+			fit_config = self.fit_config.copy()
+			self.fit_config = {'bg_fit':False, 'skew_fit':False}
+			calib_data = self.cb._calib_data.copy()
+			try:
+				self.cb._calib_data['engcal'] = {}
+				self.cb._calib_data['rescal'] = {}
+				self.meta = {'engcal':self.cb._calibrate_energy([self],eng), 'rescal':self.cb._calibrate_resolution([self],res)}
+			except Exception as e:
+				print('Error:', e)
+				self.meta = {'engcal':guess, 'rescal':res}
+				self.cb._calib_data = calib_data
+				print('WARNING: auto calibrate failed. Setting engcal to guess.')
+			self.fit_config = fit_config
+			self._fits, self._peaks = None, None
 
 
 	def _chi2(self, fit, lh):
