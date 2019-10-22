@@ -35,10 +35,10 @@ def _post_install():
 class install(_install):
 	def run(self):
 		_install.run(self)
-		self.execute(_post_install, msg="Downloading nuclear data files...")
+		self.execute(_post_install, (), msg="Downloading nuclear data files...")
 
 setup(name='npat',
-	  version='0.3.0',
+	  version='0.3.1',
 	  description='Nuclear Physics Analysis Tools (NPAT) is a library written in python to assist in analysis of the physics of nuclear reactions and spectroscopy.',
 	  url='https://github.com/jtmorrell/npat',
 	  author='Jonathan Morrell',

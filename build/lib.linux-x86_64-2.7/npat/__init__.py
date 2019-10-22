@@ -72,7 +72,7 @@ from .irradiation import *
 from .listfiles import *
 
 
-__version__ = '0.3.1'
+__version__ = '0.3.0'
 __all__ = ['get_cursor', 'get_connection', 'colors',
 			'set_style', 'Spectrum', 'Calibration', 
 			'Isotope', 'DecayChain', 'Reaction',
