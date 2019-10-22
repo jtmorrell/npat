@@ -56,7 +56,8 @@
 </pre></div>
 </div>
 <p>The following example, using the spectrum located on the NPAT <a class="reference external" href="https://github.com/jtmorrell/npat/blob/master/examples/eu_calib_7cm.Spe">github</a>, demonstrates how to perform various tasks using these classes:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">### Load and plot the spectrum</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">npat</span> <span class="k">import</span> <span class="n">Spectrum</span><span class="p">,</span> <span class="n">Calibration</span>
+<span class="c1">### Load and plot the spectrum</span>
 <span class="n">sp</span> <span class="o">=</span> <span class="n">Spectrum</span><span class="p">(</span><span class="s1">&#39;eu_calib_7cm.Spe&#39;</span><span class="p">)</span>
 <span class="n">sp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 
@@ -67,6 +68,14 @@
 <span class="c1">### Perform efficiency calibration</span>
 <span class="n">sp</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A0&#39;</span><span class="p">:</span><span class="mf">3.7E4</span><span class="p">,</span> <span class="s1">&#39;ref_date&#39;</span><span class="p">:</span><span class="s1">&#39;01/01/2009 12:00:00&#39;</span><span class="p">}</span>
 <span class="n">sp</span><span class="o">.</span><span class="n">auto_calibrate</span><span class="p">()</span>
+
+<span class="c1">### Save and load calibration</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">saveas</span><span class="p">(</span><span class="s1">&#39;eu_calib.json&#39;</span><span class="p">)</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;eu_calib.json&#39;</span><span class="p">)</span>
+
+<span class="c1">### Or...assign new calibration this way</span>
+<span class="n">cb</span> <span class="o">=</span> <span class="n">Calibration</span><span class="p">(</span><span class="s1">&#39;eu_calib.json&#39;</span><span class="p">)</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">cb</span> <span class="o">=</span> <span class="n">cb</span>
 <span class="n">sp</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 
 <span class="c1">### Save peak information</span>
@@ -108,23 +117,28 @@
 <span class="n">sp</span><span class="o">.</span><span class="n">fit_config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;xrays&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;E_min&#39;</span><span class="p">:</span><span class="mf">20.0</span><span class="p">,</span> <span class="s1">&#39;bg_fit&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;quad_bg&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">}</span>
 <span class="c1">### Save and show the plot</span>
 <span class="n">sp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">saveas</span><span class="o">=</span><span class="s1">&#39;europium.png&#39;</span><span class="p">)</span>
+
+<span class="c1">### MVME listfile conversion utility</span>
+<span class="kn">from</span> <span class="nn">npat</span> <span class="k">import</span> <span class="n">MVME</span>
+
+<span class="n">fl</span> <span class="o">=</span> <span class="n">MVME</span><span class="p">(</span><span class="s1">&#39;mvmelst_007.zip&#39;</span><span class="p">)</span>
+<span class="c1">### Split into 3 equal time bins</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;time_bins&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">}</span>
+<span class="c1">### Save in directory &#39;mvmelst_007&#39;</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="c1">### Save in custom directory</span>
+<span class="n">fl</span><span class="o">.</span><span class="n">save_to_dir</span><span class="p">(</span><span class="s1">&#39;mvme_test&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="stopping-power-calculations">
 <h2>1.3. Stopping Power Calculations<a class="headerlink" href="#stopping-power-calculations" title="Permalink to this headline">¶</a></h2>
 <p>NPAT uses the Anderson &amp; Ziegler formalism for calculating charged-particle stopping powers in matter.  The <cite>Ziegler</cite> class allows one to calculate these stopping powers for a stack of foils:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">npat</span> <span class="k">import</span> <span class="n">Ziegler</span>
-
-<span class="c1">### Set up a stack with different input options.</span>
-<span class="c1">### Each element of the stack dictionary must contain keyword `compound`, and enough information</span>
-<span class="c1">###    for the code to determine the areal density.  Options are `mass` (g), `thickness` (mm),</span>
-<span class="c1">###    `area` (cm^2), `ad` (mg/cm^2), and `density` (g/cm^3).  If keyword `name` is included, foil</span>
-<span class="c1">###    information will be tallied, and can be filtered in the plot/summarize functions.</span>
-
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">### Set up a stack with different input options.</span>
 <span class="n">zg</span> <span class="o">=</span> <span class="n">Ziegler</span><span class="p">(</span><span class="n">stack</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;compound&#39;</span><span class="p">:</span><span class="s1">&#39;Ni&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Ni01&#39;</span><span class="p">,</span> <span class="s1">&#39;thickness&#39;</span><span class="p">:</span><span class="mf">0.025</span><span class="p">},</span>  <span class="c1"># Thickness only (mm)</span>
                                         <span class="p">{</span><span class="s1">&#39;compound&#39;</span><span class="p">:</span><span class="s1">&#39;Kapton&#39;</span><span class="p">,</span> <span class="s1">&#39;thickness&#39;</span><span class="p">:</span><span class="mf">0.05</span><span class="p">},</span>                                <span class="c1"># No name - will not be tallied</span>
                                         <span class="p">{</span><span class="s1">&#39;compound&#39;</span><span class="p">:</span><span class="s1">&#39;Ti&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Ti01&#39;</span><span class="p">,</span> <span class="s1">&#39;thickness&#39;</span><span class="p">:</span><span class="mf">1.025</span><span class="p">},</span>  <span class="c1"># Very thick: should see straggle</span>
+                                        <span class="p">{</span><span class="s1">&#39;compound&#39;</span><span class="p">:{</span><span class="s1">&#39;Inconel&#39;</span><span class="p">:[[</span><span class="mi">26</span><span class="p">,</span><span class="mf">33.0</span><span class="p">],[</span><span class="mi">28</span><span class="p">,</span><span class="mf">55.0</span><span class="p">]]},</span><span class="s1">&#39;ad&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;test&#39;</span><span class="p">},</span>
                                         <span class="p">{</span><span class="s1">&#39;compound&#39;</span><span class="p">:</span><span class="s1">&#39;SrCO3&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;SrCO3&#39;</span><span class="p">,</span> <span class="s1">&#39;area&#39;</span><span class="p">:</span><span class="mf">0.785</span><span class="p">,</span> <span class="s1">&#39;mass&#39;</span><span class="p">:</span><span class="mf">4.8E-3</span><span class="p">}],</span>  <span class="c1"># Mass (g) and area (cm^2)</span>
                                         <span class="n">beam_istp</span><span class="o">=</span><span class="s1">&#39;2H&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mf">1E5</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">E0</span><span class="o">=</span><span class="mf">33.0</span><span class="p">)</span>  <span class="c1">## 33 MeV deuteron beam</span>
 
@@ -149,7 +163,7 @@
 
 <span class="c1">### Import stack design from .csv file</span>
 <span class="n">zg</span> <span class="o">=</span> <span class="n">Ziegler</span><span class="p">(</span><span class="n">stack</span><span class="o">=</span><span class="s1">&#39;test_stack.csv&#39;</span><span class="p">)</span>
-<span class="n">zg</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;istp&#39;</span><span class="p">:</span><span class="s1">&#39;4HE&#39;</span><span class="p">,</span><span class="s1">&#39;E0&#39;</span><span class="p">:</span><span class="mf">70.0</span><span class="p">}</span>
+<span class="n">zg</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;istp&#39;</span><span class="p">:</span><span class="s1">&#39;4HE&#39;</span><span class="p">,</span><span class="s1">&#39;E0&#39;</span><span class="p">:</span><span class="mf">70.0</span><span class="p">,</span> <span class="s1">&#39;min_steps&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span><span class="mf">1E-4</span><span class="p">,</span> <span class="s1">&#39;max_steps&#39;</span><span class="p">:</span><span class="mi">100</span><span class="p">}</span>
 <span class="n">zg</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -198,6 +212,8 @@
 <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">half_life</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">optimum_units</span><span class="p">(),</span><span class="n">unc</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">i</span><span class="o">.</span><span class="n">optimum_units</span><span class="p">())</span>
 <span class="c1">### Print list of the decay gammas</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">gammas</span><span class="p">()[</span><span class="s1">&#39;E&#39;</span><span class="p">])</span>
+<span class="c1">### Print dose rate of 80 mCi at 30 cm</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">dose_rate</span><span class="p">(</span><span class="n">activity</span><span class="o">=</span><span class="mi">80</span><span class="o">*</span><span class="mf">3.7E7</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mf">30.0</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Nuclear reaction data can be searched for using the <cite>Library</cite> class, and used with the <cite>Reaction</cite> class:</p>

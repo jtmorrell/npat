@@ -13,12 +13,15 @@ def spectroscopy_examples():
 	### Perform efficiency calibration
 	sp.meta = {'A0':3.7E4, 'ref_date':'01/01/2009 12:00:00'}
 	sp.auto_calibrate()
-	sp.cb.plot()
+
+	### Save and load calibration
 	sp.cb.saveas('eu_calib.json')
 	sp.cb.open('eu_calib.json')
-	sp.cb.plot()
+
+	### Or...assign new calibration this way
 	cb = Calibration('eu_calib.json')
-	cb.plot()
+	sp.cb = cb
+	sp.cb.plot()
 
 	### Save peak information
 	sp.saveas('test.db', 'test.csv')
@@ -60,11 +63,17 @@ def spectroscopy_examples():
 	### Save and show the plot
 	sp.plot(saveas='europium.png')
 
+
 def listfile_examples():
 	from npat import MVME
-	
+
 	fl = MVME('mvmelst_007.zip')
+	### Split into 3 equal time bins
+	fl.meta = {'time_bins':3}
+	### Save in directory 'mvmelst_007'
 	fl.save()
+	### Save in custom directory
+	fl.save_to_dir('mvme_test')
 
 
 def ziegler_examples():
@@ -74,7 +83,7 @@ def ziegler_examples():
 	zg = Ziegler(stack=[{'compound':'Ni', 'name':'Ni01', 'thickness':0.025},  # Thickness only (mm)
 						{'compound':'Kapton', 'thickness':0.05},				# No name - will not be tallied
 						{'compound':'Ti', 'name':'Ti01', 'thickness':1.025},  # Very thick: should see straggle
-						{'compound':{'inconel':[[26,33.0],[28,55.0]]},'ad':1.0,'name':'test'},
+						{'compound':{'Inconel':[[26,33.0],[28,55.0]]},'ad':1.0,'name':'test'},
 						{'compound':'SrCO3', 'name':'SrCO3', 'area':0.785, 'mass':4.8E-3}],  # Mass (g) and area (cm^2)
 						beam_istp='2H', N=1E5, max_steps=100, E0=33.0)  ## 33 MeV deuteron beam
 
@@ -99,7 +108,7 @@ def ziegler_examples():
 
 	### Import stack design from .csv file
 	zg = Ziegler(stack='test_stack.csv')
-	zg.meta = {'istp':'4HE','E0':70.0}
+	zg.meta = {'istp':'4HE','E0':70.0, 'min_steps':20, 'accuracy':1E-4, 'max_steps':100}
 	zg.plot()
 	
 
@@ -140,6 +149,9 @@ def isotope_examples():
 	print(i.half_life(i.optimum_units(),unc=True), i.optimum_units())
 	### Print list of the decay gammas
 	print(i.gammas()['E'])
+	### Print dose rate of 80 mCi at 30 cm
+	print(i.dose_rate(activity=80*3.7E7, distance=30.0))
+
 
 def reaction_examples():
 	from npat import Reaction, Library
@@ -171,9 +183,9 @@ def reaction_examples():
 
 if __name__=='__main__':
 
-	# spectroscopy_examples()
+	spectroscopy_examples()
 	listfile_examples()
-	# decay_chain_examples()
-	# ziegler_examples()
-	# isotope_examples()
-	# reaction_examples()
+	decay_chain_examples()
+	ziegler_examples()
+	isotope_examples()
+	reaction_examples()

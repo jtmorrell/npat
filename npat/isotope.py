@@ -82,6 +82,9 @@ class Element(object):
 
 	def attenuation(self, E, x=1.0):
 		return np.exp(-self.mass_coeff(E)*self.density*x)
+
+	def transmission(self, E, x=1.0):
+		return 1.0-np.exp(-self.mass_coeff(E)*self.density*x)
 	
 	@property
 	def density(self):
@@ -426,7 +429,7 @@ class Isotope(object):
 				gammas = [g for g in gammas if g[n]<=L[1]]
 		if not xrays:
 			gammas = [g for g in gammas if g[3]=='']
-		return {l:[g[n] for g in gammas if abs(g[0]-511.0)>dE_511] for n,l in enumerate(['E','I','dI','notes'])}
+		return {l:[g[n] for g in gammas if abs(g[0]-511.0)>=dE_511] for n,l in enumerate(['E','I','dI','notes'])}
 
 	def electrons(self,I_lim=(None,None),E_lim=(None,None),CE_only=False,Auger_only=False):
 		"""Description
@@ -567,4 +570,60 @@ class Isotope(object):
 			if L[1] is not None:
 				alphas = [a for a in alphas if a[n]<=L[1]]
 		return {l:[a[n] for a in alphas] for n,l in enumerate(['E','I','dI'])}
+
+	def dose_rate(self, activity=1.0, distance=30.0, units='R/hr'):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
+		def beta2(E_MeV, m_amu):
+			return 1.0-(1.0/(1.0+(E_MeV/m_amu))**2)
+
+		def e_range(E_keV):
+			dEdx = lambda b2, t: 0.17*((np.log(3.61E5*t*np.sqrt(t+2)))+(0.5*(1-b2)*(1+t**2/8-(2*t+1)*np.log(2)))-4.312)/b2
+			E = np.linspace(1E-12, E_keV*1E-3, 100)
+			return np.trapz(1.0/((1.0+(E*7.22/800.0))*dEdx(beta2(E, 0.5109), E/0.5109)), E)
+
+		def pos_range(E_keV):
+			dEdx = lambda b2, t: 0.17*((np.log(3.61E5*t*np.sqrt(t+2)))+(np.log(2)-(b2/24)*(23+14/(t+2)+10/(t+2)**2+4/(t+2)**3))-4.312)/b2
+			E = np.linspace(1E-12, E_keV*1E-3, 100)
+			return np.trapz(1.0/((1.0+(E*7.22/800.0))*dEdx(beta2(E, 0.5109), E/0.5109)), E)
+
+		def alpha_range(E_keV):
+			dEdx = lambda b2: 0.17*4.0*((np.log(1.02E6*b2/(1.0-b2))-b2)-4.312)/b2
+			return np.trapz(1.0/dEdx(beta2(np.linspace(1E-9, E_keV*1E-3, 100), 3.7284E3)), np.linspace(1E-9, E_keV*1E-3, 100))
+
+		dose = {}
+		gm = self.gammas(xrays=True, dE_511=0.0)
+		al = self.alphas()
+		bm = self.beta_minus()
+		bp = self.beta_plus()
+		el = self.electrons()
+
+		dose['gammas'] = 1.4042E-12*np.sum(np.array(gm['E'])*np.array(gm['I']))*activity/distance**2
+		dose['alphas'] = 5.2087E-14*np.sum([al['I'][n]*e/alpha_range(e) for n,e in enumerate(al['E'])])*activity/distance**2
+		dose['beta_minus'] = 5.2087E-14*np.sum([bm['I'][n]*e/e_range(e) for n,e in enumerate(bm['muE'])])*activity/distance**2
+		dose['beta_plus'] = 5.2087E-14*np.sum([bp['I'][n]*e/pos_range(e) for n,e in enumerate(bp['muE'])])*activity/distance**2
+		dose['electrons'] = 5.2087E-14*np.sum([el['I'][n]*e/e_range(e) for n,e in enumerate(el['E'])])*activity/distance**2
+		return dose
+
 

@@ -12,6 +12,8 @@ from .plotter import colors
 from .plotter import _init_plot
 from .plotter import _close_plot
 
+#### FUTURE: Implement Irradiation history class
+
 class DecayChain(object):
 	"""Calculating activities within a decay chain using Bateman equations
 

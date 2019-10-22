@@ -6,7 +6,7 @@ import sqlite3, os, json
 import numpy as np
 import pandas as pd
 import datetime as dtm
-# import multiprocessing
+import multiprocessing
 
 from scipy.optimize import curve_fit
 from scipy.special import erfc
@@ -411,9 +411,10 @@ class Calibration(object):
 
 		bounds = ([0.0, 0.0, -1.0, 0.0, -2.0], [100.0, 3.0, 3.0, 0.5, 3.0])
 		if any([sp.fit_config['xrays'] for sp in spectra]):
-			try:		
-				fit5, unc5 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0, bounds=bounds)
+			try:
 				fit3, unc3 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=p0[:3], bounds=(bounds[0][:3], bounds[1][:3]))
+				fit5, unc5 = curve_fit(self.eff, E, eff, sigma=unc_eff, p0=fit3.tolist()+p0[3:], bounds=bounds)
+				
 				chi5 = np.sum((eff-self.eff(E, *fit5))**2/unc_eff**2)
 				chi3 = np.sum((eff-self.eff(E, *fit3))**2/unc_eff**2)
 				## Invert to find which is closer to one
@@ -513,38 +514,86 @@ class Calibration(object):
 		cm_light = colors(shade='light', aslist=True)
 		f, ax = _init_plot(N_plots=3, figsize=(12.8, 4.8))
 
-		d = self._calib_data['engcal']
-		ax[0].errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o')
-		x = np.arange(min(d['x']), max(d['x']), 0.1)
-		ax[0].plot(x, self.map_idx(x, *d['fit']))
-		ax[0].set_xlabel('Energy (keV)')
-		ax[0].set_ylabel('ADC Channel')
-		ax[0].set_title('Energy Calibration')
-
-		d = self._calib_data['rescal']
-		ax[1].errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o')
-		x = np.arange(min(d['x']), max(d['x']), 0.1)
-		ax[1].plot(x, self.res(x, *d['fit']))
-		ax[1].set_xlabel('ADC Channel')
-		ax[1].set_ylabel('Peak Width')
-		ax[1].set_title('Resolution Calibration')
-		
-		for N,d in enumerate(sorted(self._calib_data['effcal'], key=lambda h: h['shelf'])):
-			ax[2].errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o', color=cm[N%len(cm)])
+		if 'engcal' in self._calib_data:
+			d = self._calib_data['engcal']
+			ax[0].errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o')
 			x = np.arange(min(d['x']), max(d['x']), 0.1)
-			ax[2].plot(x, self.eff(x, *d['fit']), color=cm[N%len(cm)], label=d['shelf'])
-			low = self.eff(x, *d['fit'])-self.unc_eff(x, d['fit'], d['unc'])
-			high = self.eff(x, *d['fit'])+self.unc_eff(x, d['fit'], d['unc'])
-			ax[2].fill_between(x, low, high, facecolor=cm_light[N%len(cm)], alpha=0.5)
-		ax[2].set_xlabel('Energy (keV)')
-		ax[2].set_ylabel('Efficiency')
-		ax[2].set_title('Efficiency Calibration')
-		if any([d['shelf'] for d in self._calib_data['effcal']]):
-			ax[2].legend(loc=0)
+			ax[0].plot(x, self.map_idx(x, *d['fit']))
+			ax[0].set_xlabel('Energy (keV)')
+			ax[0].set_ylabel('ADC Channel')
+			ax[0].set_title('Energy Calibration')
+
+		if 'rescal' in self._calib_data:
+			d = self._calib_data['rescal']
+			ax[1].errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o')
+			x = np.arange(min(d['x']), max(d['x']), 0.1)
+			ax[1].plot(x, self.res(x, *d['fit']))
+			ax[1].set_xlabel('ADC Channel')
+			ax[1].set_ylabel('Peak Width')
+			ax[1].set_title('Resolution Calibration')
+		
+		if 'effcal' in self._calib_data:
+			for N,d in enumerate(sorted(self._calib_data['effcal'], key=lambda h: h['shelf'])):
+				ax[2].errorbar(d['x'], d['y'], yerr=d['yerr'], ls='None', marker='o', color=cm[N%len(cm)])
+				x = np.arange(min(d['x']), max(d['x']), 0.1)
+				ax[2].plot(x, self.eff(x, *d['fit']), color=cm[N%len(cm)], label=d['shelf'])
+				low = self.eff(x, *d['fit'])-self.unc_eff(x, d['fit'], d['unc'])
+				high = self.eff(x, *d['fit'])+self.unc_eff(x, d['fit'], d['unc'])
+				ax[2].fill_between(x, low, high, facecolor=cm_light[N%len(cm)], alpha=0.5)
+			ax[2].set_xlabel('Energy (keV)')
+			ax[2].set_ylabel('Efficiency')
+			ax[2].set_title('Efficiency Calibration')
+			if any([d['shelf'] for d in self._calib_data['effcal']]):
+				ax[2].legend(loc=0)
 
 		return _close_plot(f, None, default_log=False, **kwargs)
 
 
+
+
+
+def _parallel_fit(dat):
+	x, y, fit_config, snip, p0, bounds = dat['x'], dat['y'], dat['fit_config'], dat['snip'], dat['p0'], dat['bounds']
+
+	def _multiplet(x, *args):
+
+		def _peak(x, A, mu, sig, R, alpha, step):
+			r2 = 1.41421356237
+			return A*np.exp(-0.5*((x-mu)/sig)**2)+R*A*np.exp((x-mu)/(alpha*sig))*erfc((x-mu)/(r2*sig)+1.0/(r2*alpha))+step*A*erfc((x-mu)/(r2*sig))
+
+		if fit_config['bg_fit']:
+			if fit_config['quad_bg']:
+				b, peak = 3, args[0]+args[1]*x+args[2]*x**2
+			else:
+				b, peak = 2, args[0]+args[1]*x
+		else:
+			b, peak = 0, snip.copy()
+		R, alpha, step = fit_config['R'], fit_config['alpha'], fit_config['step']
+		if fit_config['skew_fit']:
+			if fit_config['step_fit']:
+				for n in range(int((len(args)-b)/6)):
+					peak += _peak(x,*args[6*n+b:6*n+6+b])
+			else:
+				for n in range(int((len(args)-b)/5)):
+					peak += _peak(x,*(args[5*n+b:5*n+5+b]+(step,)))
+		else:
+			if fit_config['step_fit']:
+				for n in range(int((len(args)-b)/4)):
+					peak += _peak(x,*(args[4*n+b:4*n+b+3]+(R, alpha)+(args[4*n+3+b])))
+			else:
+				for n in range(int((len(args)-b)/3)):
+					peak += _peak(x,*(args[3*n+b:3*n+b+3]+(R,alpha,step)))
+
+		return peak
+
+	try:
+		fit, unc = curve_fit(_multiplet, x, y, p0=p0, bounds=bounds, sigma=np.sqrt(y+0.1))
+		converged = True
+	except:
+		fit, unc = np.array(p0), np.inf*np.ones((len(p0), len(p0)))
+		converged = False
+	dat['fit'], dat['unc'], dat['converged'] = fit, unc, converged
+	return dat
 
 
 class Spectrum(object):
@@ -623,7 +672,7 @@ class Spectrum(object):
 									'step_fit':False, 'quad_bg':False, 'SNR_cut':4.0, 
 									'A_bound':10.0, 'mu_bound':1.5, 'sig_bound':1.5,
 									'xrays':False, 'pk_width':7.5, 'E_min':75.0, 
-									'I_min':0.05,'threads':-1}, #multiprocessing.cpu_count()
+									'I_min':0.05,'threads':multiprocessing.cpu_count()},
 						'istp':[], 'shelf':None, 'spec_id':1}
 		self._cb = Calibration()
 		for nm in self.cb.calib:
@@ -757,7 +806,29 @@ class Spectrum(object):
 			self._meta['fit_config'][nm] = config_dict[nm]
 
 	def __add__(self, other):
+		"""Description
 
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+		
 		if not type(other)==Spectrum:
 			raise ValueError('Cannot add spectrum to type {}'.format(type(other)))
 
@@ -782,7 +853,10 @@ class Spectrum(object):
 
 		bins = self.cb.eng(np.arange(-0.5, len(self.hist)+0.5, 1.0))
 		edges = np.append(bins, bins).reshape((2,len(bins))).T.flatten()[1:-1].reshape((len(bins)-1, 2)).T
-		e_grid = np.linspace(edges[0], edges[1], num=10).T
+		if np.__version__>='1.16.0':
+			e_grid = np.linspace(edges[0], edges[1], num=10).T
+		else:
+			e_grid = np.array([np.linspace(edges[0][n], edges[1][n], num=10) for n in range(len(edges[0]))])
 		N = np.asarray(np.trapz(f(e_grid), e_grid, axis=1), dtype=np.int64)
 		self.hist += np.random.poisson(N)
 
@@ -913,7 +987,7 @@ class Spectrum(object):
 		"""
 
 		from scipy.optimize import differential_evolution
-		guess = guess if len(guess) else self.cb.engcal
+		guess = guess if len(guess) else list(self.cb.engcal)
 		if len(data):
 			data = np.asarray(data, dtype=np.float64)
 			if len(data)==1:
@@ -1050,28 +1124,28 @@ class Spectrum(object):
 
 		if self.fit_config['bg_fit']:
 			if self.fit_config['quad_bg']:
-				BG, peak = 3, args[0]+args[1]*x+args[2]*x**2
+				b, peak = 3, args[0]+args[1]*x+args[2]*x**2
 			else:
-				BG, peak = 2, args[0]+args[1]*x
+				b, peak = 2, args[0]+args[1]*x
 		elif len(x)==len(self._snip):
-			BG, peak = 0, self._snip.copy()
+			b, peak = 0, self._snip.copy()
 		else:
-			BG, peak = 0, self.snip(x)
+			b, peak = 0, self.snip(x)
 		R, alpha, step = self.fit_config['R'], self.fit_config['alpha'], self.fit_config['step']
 		if self.fit_config['skew_fit']:
 			if self.fit_config['step_fit']:
-				for n in range(int((len(args)-BG)/6)):
-					peak += self._peak(x,*args[6*n+BG:6*n+6+BG])
+				for n in range(int((len(args)-b)/6)):
+					peak += self._peak(x,*args[6*n+b:6*n+6+b])
 			else:
-				for n in range(int((len(args)-BG)/5)):
-					peak += self._peak(x,*(args[5*n+BG:5*n+5+BG]+(step,)))
+				for n in range(int((len(args)-b)/5)):
+					peak += self._peak(x,*(args[5*n+b:5*n+5+b]+(step,)))
 		else:
 			if self.fit_config['step_fit']:
-				for n in range(int((len(args)-BG)/4)):
-					peak += self._peak(x,*(args[4*n+BG:4*n+BG+3]+(R, alpha)+(args[4*n+3+BG])))
+				for n in range(int((len(args)-b)/4)):
+					peak += self._peak(x,*(args[4*n+b:4*n+b+3]+(R, alpha)+(args[4*n+3+b])))
 			else:
-				for n in range(int((len(args)-BG)/3)):
-					peak += self._peak(x,*(args[3*n+BG:3*n+BG+3]+(R,alpha,step)))
+				for n in range(int((len(args)-b)/3)):
+					peak += self._peak(x,*(args[3*n+b:3*n+b+3]+(R,alpha,step)))
 		return peak
 
 	def _get_p0(self, lh, px, gm, istp):
@@ -1111,7 +1185,12 @@ class Spectrum(object):
 				bounds[1].append(0.1)
 				ix['step'].append(N)
 				N += 1
-		return {'p0':p0, 'lh':lh, 'bounds':bounds, 'gm':gm, 'istp':istp, 'ix':ix}
+
+		if self.fit_config['threads']>1:
+			return {'p0':p0, 'lh':lh, 'bounds':bounds, 'gm':gm, 'istp':istp, 'ix':ix, 'x':self.channels[lh[0]:lh[1]],
+					 'y':self.hist[lh[0]:lh[1]], 'snip':self.snip(self.channels[lh[0]:lh[1]]), 'fit_config':self.fit_config.copy()}
+		else:
+			return {'p0':p0, 'lh':lh, 'bounds':bounds, 'gm':gm, 'istp':istp, 'ix':ix}
 
 	def _get_multiplets(self):
 		p0_A, cov_p0_A = self._fit_forward_activity()
@@ -1202,13 +1281,16 @@ class Spectrum(object):
 
 	def _multi_fit(self, multi):
 		p0, lh, bounds, gm = multi['p0'], multi['lh'], multi['bounds'], multi['gm']
-		try:
-			fit, unc = curve_fit(self.multiplet, self.channels[lh[0]:lh[1]], 
-				self.hist[lh[0]:lh[1]], p0=p0, bounds=bounds, sigma=np.sqrt(self.hist[lh[0]:lh[1]]+0.1))
-			converged = True
-		except:
-			fit, unc = np.array(p0), np.inf*np.ones((len(p0), len(p0)))
-			converged = False
+		if 'fit' not in multi:
+			try:
+				fit, unc = curve_fit(self.multiplet, self.channels[lh[0]:lh[1]], 
+					self.hist[lh[0]:lh[1]], p0=p0, bounds=bounds, sigma=np.sqrt(self.hist[lh[0]:lh[1]]+0.1))
+				converged = True
+			except:
+				fit, unc = np.array(p0), np.inf*np.ones((len(p0), len(p0)))
+				converged = False
+		else:
+			fit, unc, converged = multi['fit'], multi['unc'], multi['converged']
 		
 		N, unc_N = self._counts(fit, unc, lh)
 		D, unc_D, A, unc_A = self._decays(N, unc_N, gm)
@@ -1229,19 +1311,13 @@ class Spectrum(object):
 	def fits(self):
 		if self._fits is None:
 			p0 = self._get_multiplets()
-			if False: #self.fit_config['threads']>1
-				self.db, self.db_connection = None, None
-				pool = multiprocessing.Pool(processes=self.fit_config['threads'])
-				multiplets = pool.map(self._multi_fit, p0)
-				pool.close()
-				pool.join()
-				if self.db_fnm is not None:
-					self.db_connection = DB_CONNECTIONS_DICT[self.db_fnm]
-					self.db = self.db_connection.cursor()
-			else:
-				multiplets = list(map(self._multi_fit, p0))
 			if len(p0):
-				multiplets = sorted(multiplets, key=lambda h:h[0]['l'])
+				if self.fit_config['threads']>1:
+					pool = multiprocessing.Pool(processes=self.fit_config['threads'])
+					p0 = pool.map(_parallel_fit, p0)
+					pool.close()
+					pool.join()
+				multiplets = sorted(list(map(self._multi_fit, p0)), key=lambda h:h[0]['l'])
 				self._fits = [i[0] for i in multiplets]
 				self._peaks = pd.concat([i[1] for i in multiplets], ignore_index=True)
 			else:
@@ -1574,4 +1650,3 @@ class Spectrum(object):
 			ax.legend(loc=0, ncol=ncol)
 
 		return _close_plot(f, ax, **kwargs)
-

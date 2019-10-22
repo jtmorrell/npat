@@ -19,6 +19,7 @@ NPAT provides two classes for spectroscopic analysis, the `Spectrum` class and t
 
 The following example, using the spectrum located on the NPAT `github`_, demonstrates how to perform various tasks using these classes::
 
+	from npat import Spectrum, Calibration
 	### Load and plot the spectrum
 	sp = Spectrum('eu_calib_7cm.Spe')
 	sp.plot()
@@ -30,6 +31,14 @@ The following example, using the spectrum located on the NPAT `github`_, demonst
 	### Perform efficiency calibration
 	sp.meta = {'A0':3.7E4, 'ref_date':'01/01/2009 12:00:00'}
 	sp.auto_calibrate()
+
+	### Save and load calibration
+	sp.cb.saveas('eu_calib.json')
+	sp.cb.open('eu_calib.json')
+
+	### Or...assign new calibration this way
+	cb = Calibration('eu_calib.json')
+	sp.cb = cb
 	sp.cb.plot()
 
 	### Save peak information
@@ -72,6 +81,17 @@ The following example, using the spectrum located on the NPAT `github`_, demonst
 	### Save and show the plot
 	sp.plot(saveas='europium.png')
 
+	### MVME listfile conversion utility
+	from npat import MVME
+
+	fl = MVME('mvmelst_007.zip')
+	### Split into 3 equal time bins
+	fl.meta = {'time_bins':3}
+	### Save in directory 'mvmelst_007'
+	fl.save()
+	### Save in custom directory
+	fl.save_to_dir('mvme_test')
+
 .. _github: https://github.com/jtmorrell/npat/blob/master/examples/eu_calib_7cm.Spe
 
 
@@ -80,17 +100,11 @@ Stopping Power Calculations
 
 NPAT uses the Anderson & Ziegler formalism for calculating charged-particle stopping powers in matter.  The `Ziegler` class allows one to calculate these stopping powers for a stack of foils::
 
-	from npat import Ziegler
-	
 	### Set up a stack with different input options.
-	### Each element of the stack dictionary must contain keyword `compound`, and enough information
-	###    for the code to determine the areal density.  Options are `mass` (g), `thickness` (mm),
-	###    `area` (cm^2), `ad` (mg/cm^2), and `density` (g/cm^3).  If keyword `name` is included, foil
-	###    information will be tallied, and can be filtered in the plot/summarize functions.
-	
 	zg = Ziegler(stack=[{'compound':'Ni', 'name':'Ni01', 'thickness':0.025},  # Thickness only (mm)
 						{'compound':'Kapton', 'thickness':0.05},				# No name - will not be tallied
 						{'compound':'Ti', 'name':'Ti01', 'thickness':1.025},  # Very thick: should see straggle
+						{'compound':{'Inconel':[[26,33.0],[28,55.0]]},'ad':1.0,'name':'test'},
 						{'compound':'SrCO3', 'name':'SrCO3', 'area':0.785, 'mass':4.8E-3}],  # Mass (g) and area (cm^2)
 						beam_istp='2H', N=1E5, max_steps=100, E0=33.0)  ## 33 MeV deuteron beam
 
@@ -115,8 +129,9 @@ NPAT uses the Anderson & Ziegler formalism for calculating charged-particle stop
 
 	### Import stack design from .csv file
 	zg = Ziegler(stack='test_stack.csv')
-	zg.meta = {'istp':'4HE','E0':70.0}
+	zg.meta = {'istp':'4HE','E0':70.0, 'min_steps':20, 'accuracy':1E-4, 'max_steps':100}
 	zg.plot()
+	
 
 The file `test_stack.csv` used in this example can be found on the `npat github`_.
 
@@ -169,6 +184,8 @@ NPAT contains data from the ENSDF, ENDF, IRDFF, IAEA-charged-particle and TENDL 
 	print(i.half_life(i.optimum_units(),unc=True), i.optimum_units())
 	### Print list of the decay gammas
 	print(i.gammas()['E'])
+	### Print dose rate of 80 mCi at 30 cm
+	print(i.dose_rate(activity=80*3.7E7, distance=30.0))
 
 Nuclear reaction data can be searched for using the `Library` class, and used with the `Reaction` class::
 

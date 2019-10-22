@@ -5,7 +5,6 @@ from __future__ import print_function
 import re
 import os
 import numpy as np
-# import multiprocessing
 import sqlite3
 import pandas as pd
 
@@ -18,6 +17,7 @@ from .isotope import Isotope
 global ZG_CONNECTIONS_DICT
 ZG_CONNECTIONS_DICT = {}
 
+#### TODO: allow new compound definitions as {'El':wt_pct} and accept .json stack
 
 class Ziegler(object):
 	"""Method for solving energy loss within stacked-target foil experiment
@@ -64,7 +64,7 @@ class Ziegler(object):
 
 		self._meta = {}
 		self.meta = {'beam_istp':'1H', 'E0':33.0, 'dE0':0.3, 'N':10000, 'dp':1.0,
-						'chunk_size':1E5, 'threads':1,
+						'chunk_size':1E7, 'threads':1,
 						'solved':False, 'accuracy':0.01, 'min_steps':2, 'max_steps':50}
 		self._stack = []
 		if beam is not None:
@@ -326,19 +326,8 @@ class Ziegler(object):
 		if self.meta['solved']:
 			return
 		self.meta['solved'] = True
-		if int(self.meta['N']/float(self.meta['chunk_size']))>=self.meta['threads']:
-			N = [int(self.meta['chunk_size']) for n in range(int(self.meta['N']/float(self.meta['chunk_size'])))]
-		else:
-			N = [int(self.meta['N']/float(self.meta['threads'])) for n in range(self.meta['threads'])]
-		# N = [int(self.meta['chunk_size']) for n in range(int(self.meta['N']/float(self.meta['chunk_size'])))]
-		
-		if False: #self.meta['threads']>1
-			pool = multiprocessing.Pool(processes=self.meta['threads'])
-			histos = pool.map(self._solve_chunk, N)
-			pool.close()
-			pool.join()
-		else:
-			histos = list(map(self._solve_chunk, N))
+		dN = np.linspace(0, self.meta['N'], int(np.ceil(self.meta['N']/float(self.meta['chunk_size'])))+1, dtype=int)
+		histos = list(map(self._solve_chunk, dN[1:]-dN[:-1]))
 
 		bins = self._calc_bins()
 		energy = 0.5*(bins[1:]+bins[:-1])

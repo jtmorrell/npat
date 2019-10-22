@@ -18,7 +18,99 @@ TENDL_rpd_connection = None
 IRDFF_connection = None
 CPR_connection = None
 
+def download(db='decay',f=False):
+	"""Some nice color maps.
+
+	...
+
+	Parameters
+	----------
+
+	Returns
+	-------
+
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
+
+	"""
+
+	db = db.lower()
+	if db in ['all','*']:
+		d = ['decay','ziegler','endf','tendl','tendl_n_rp','tendl_p_rp','tendl_d_rp','IRDFF','iaea_monitors']
+	elif db in ['decay']:
+		d = ['decay']
+	elif db in ['ziegler']:
+		d = ['ziegler']
+	elif db in ['endf']:
+		d = ['endf']
+	elif db in ['tendl_n_rp','tendl_nrp','tendl_n','nrp','rpn']:
+		d = ['tendl_n_rp']
+	elif db in ['tendl_p_rp','tendl_prp','tendl_p','prp','rpp']:
+		d = ['tendl_p_rp']
+	elif db in ['tendl_d_rp','tendl_drp','tendl_d','drp','rpd']:
+		d = ['tendl_d_rp']
+	elif db in ['irdff']:
+		d = ['IRDFF']
+	elif db in ['iaea','iaea-cpr','iaea-monitor','cpr','iaea_cpr','iaea_monitor','medical','iaea-medical','iaea_medical']:
+		d = ['iaea_monitors']
+	else:
+		print('db={} not recognized.'.format(db))
+		return
+
+	addr = {'decay':'wwd6b1gk2ge5tgt', 'endf':'tkndjqs036piojm', 'tendl':'zkoi6t2jicc9yqs', 'tendl_d_rp':'x2vfjr7uv7ffex5', 'tendl_n_rp':'n0jjc0dv61j9of9',
+				'tendl_p_rp':'ib2a5lrhiwkcro5', 'ziegler':'kq07684wtp890v5','iaea_monitors':'lzn8zs6y8zu3v0s','IRDFF':'34sgcvt8n57b0aw'}
+	
+	if not os.path.isdir(path('')):
+		os.mkdir(path(''))
+
+	try:
+		import urllib2
+	except:
+		import urllib.request as urllib2
+
+	for i in d:
+		fnm = i+'.db'
+		if (not os.path.isfile(path(fnm))) or f:
+			
+			try:
+				print('Downloading {}'.format(fnm))
+				with open(path(fnm),'wb') as f:
+					f.write(urllib2.urlopen('https://www.dropbox.com/s/{0}/{1}?dl=1'.format(addr[i],fnm)).read())
+			except Exception as e:
+					print(e)
+		else:
+			print("{0}.db already installed. Run npat.download(db='{0}',f=True) to override.".format(i))
+
+
+
 def get_connection(db='decay'):
+	"""Some nice color maps.
+
+	...
+
+	Parameters
+	----------
+
+	Returns
+	-------
+
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
+
+	"""
+
 	db = db.lower().replace('.db','')
 
 	if db in ['decay']:
@@ -86,5 +178,26 @@ def get_connection(db='decay'):
 
 
 def get_cursor(db='decay'):
+	"""Some nice color maps.
+
+	...
+
+	Parameters
+	----------
+
+	Returns
+	-------
+
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
+
+	"""
+	
 	conn = get_connection(db)
 	return conn.cursor()

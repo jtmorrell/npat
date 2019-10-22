@@ -10,6 +10,50 @@ from npat import Spectrum
 
 
 class MVME(object):
+	"""Spectrum is a class for fitting and plotting
+	gamma ray data from High-Purity Germanium (HPGe)
+	detectors.
+
+	...
+
+
+	Parameters
+	----------
+	filename : str
+		Path to .Spe file.
+	db : str, optional
+		Path to sqlite database
+
+	Attributes
+	----------
+	fits : list
+		List of peaks (PeakFit class) found in spectrum fit.
+	meta : dict
+		Metadata about spectrum. 
+	hist : np.ndarray
+		1D histogram of pulse amplitudes (energy).
+
+	Methods
+	-------
+	plot(show=True, fit=True, saveas=None, zoom=None, logscale=True, 
+			grayscale=False, labels=False, square_fig=False)
+		Plots the spectrum. Various options for plotting.
+	save(*saveas)
+		Functionality depends on filetype.
+	summarize(printout=True, saveas=None)
+		Prints and/or saves summary of peaks/isotopes.
+
+	Notes
+	-----
+
+	References
+	----------
+
+	Examples
+	--------
+
+	"""
+
 	def __init__(self, filename):
 		self.zipfilename = filename
 		self.zp = zipfile.ZipFile(filename, 'r')
@@ -115,6 +159,30 @@ class MVME(object):
 
 
 	def parse(self, fmap=None):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
+
 		#### 1.8 GiB/min on 10/2/19
 		for fdat in self.zp.infolist():
 			if fdat.filename.endswith('.mvmelst'):
@@ -228,9 +296,55 @@ class MVME(object):
 				self._default_fmap(adc, millis, mod_num, ch, overflow, pileup)
 
 	def save(self, resolution=2**13):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		self.save_to_dir(self.zipfilename.replace('.zip',''))
 
 	def save_to_dir(self, directory='', resolution=2**13):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		self.parse()
 		directory = os.path.abspath(directory)
 		if not os.path.exists(directory):
@@ -248,17 +362,3 @@ class MVME(object):
 					else:
 						sp.saveas(os.path.join(directory, '{0}_b{1}_ch{2}_t{3}.Spe'.format(fnm.replace('.zip',''), n, ch, tm)))
 
-
-
-
-# if __name__=="__main__":
-# 	fl = MVME('/home/jmorrell/Documents/mvme_testing/listfiles/mvmelst_024.zip')
-# 	# fl.meta = {'time_bin_length':80}
-# 	fl.meta = {'time_bins':20}
-# 	# fl.meta = {'time_bins':[0,15,35,75,185]}
-# 	fl.save()
-# 	print(fl._time_bins)
-
-# 	# for fnm in list(os.walk('/home/jmorrell/Documents/mvme_testing/listfiles'))[0][2]:
-# 	# 	fl = MVME('/home/jmorrell/Documents/mvme_testing/listfiles/'+fnm)
-# 	# 	fl.save()
