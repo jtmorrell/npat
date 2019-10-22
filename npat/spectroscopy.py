@@ -552,6 +552,8 @@ class Calibration(object):
 
 
 
+
+
 def _parallel_fit(dat):
 	x, y, fit_config, snip, p0, bounds = dat['x'], dat['y'], dat['fit_config'], dat['snip'], dat['p0'], dat['bounds']
 
@@ -594,6 +596,8 @@ def _parallel_fit(dat):
 		converged = False
 	dat['fit'], dat['unc'], dat['converged'] = fit, unc, converged
 	return dat
+
+
 
 
 class Spectrum(object):
@@ -652,6 +656,7 @@ class Spectrum(object):
 				raise ValueError('Invalid Spectrum Filename: {}'.format(filename))
 
 			if os.path.exists(os.path.join(self._path, self._fnm)):
+				print('Reading Spectrum {}'.format(self._fnm))
 				if self._fnm.endswith('.Spe'):
 					self._from_Spe()
 				elif self._fnm.endswith('.Chn'):

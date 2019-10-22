@@ -62,13 +62,7 @@ class MVME(object):
 		self._meta = {}
 		self.meta = {'tdc_resolution':24E-12, 'time_bins':1, 'time_bin_length':None}
 
-		self.spectra = None
-
-		self._cb = None
-		self._N_boards = 1
-		self._start_time = None
-		self._real_time = None
-		self._time_bins = None
+		self._parsed = False
 
 	@property
 	def meta(self):
@@ -184,6 +178,14 @@ class MVME(object):
 
 
 		#### 1.8 GiB/min on 10/2/19
+
+		self.spectra = None
+		self._cb = None
+		self._N_boards = 1
+		self._start_time = None
+		self._real_time = None
+		self._time_bins = None
+
 		for fdat in self.zp.infolist():
 			if fdat.filename.endswith('.mvmelst'):
 				fnm = fdat.filename
@@ -295,6 +297,8 @@ class MVME(object):
 			else:
 				self._default_fmap(adc, millis, mod_num, ch, overflow, pileup)
 
+		self._parsed = True
+
 	def save(self, resolution=2**13):
 		"""Description
 
@@ -345,7 +349,9 @@ class MVME(object):
 
 		"""
 
-		self.parse()
+		if not self._parsed:
+			self.parse()
+
 		directory = os.path.abspath(directory)
 		if not os.path.exists(directory):
 			os.mkdir(directory)
@@ -361,4 +367,6 @@ class MVME(object):
 						sp.saveas(os.path.join(directory, '{0}_b{1}_ch{2}.Spe'.format(fnm.replace('.zip',''), n, ch)))
 					else:
 						sp.saveas(os.path.join(directory, '{0}_b{1}_ch{2}_t{3}.Spe'.format(fnm.replace('.zip',''), n, ch, tm)))
+						
+		print('Listfile saved to {}'.format(directory))
 

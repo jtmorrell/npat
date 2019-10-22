@@ -71,8 +71,7 @@ from .reaction import *
 from .irradiation import *
 from .listfiles import *
 
-
-__version__ = '0.3.3'
+__version__ = '0.3.8'
 __all__ = ['get_cursor', 'get_connection', 'colors',
 			'set_style', 'Spectrum', 'Calibration', 
 			'Isotope', 'DecayChain', 'Reaction',
