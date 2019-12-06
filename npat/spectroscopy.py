@@ -1146,8 +1146,7 @@ class Spectrum(object):
 			s_i = [i, i+3, i+4, i+2]
 			if cfg['skew_fit']:
 				N_cts.append(pk_fn(*fit[p_i])+skew_fn(*fit[s_i]))
-			else:			raise ValueError('Need real-time/live-time to compute decay-rate.')
-
+			else:
 				N_cts.append(pk_fn(*fit[p_i])+min_skew_fn(*fit[p_i]))
 			if cov is not None:
 				if not np.isinf(cov[i][i]):

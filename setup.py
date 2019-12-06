@@ -39,7 +39,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='npat',
-	  version='0.3.8',
+	  version='0.3.10',
 	  description='Nuclear Physics Analysis Tools (NPAT) is a library written in python to assist in analysis of the physics of nuclear reactions and spectroscopy.',
 	  long_description=long_description,
 	  long_description_content_type="text/markdown",
