@@ -3,61 +3,29 @@ npat
 =====
 
 Provides
-  1. An array object of arbitrary homogeneous items
-  2. Fast mathematical operations over arrays
-  3. Linear Algebra, Fourier Transforms, Random Number Generation
+  1. Classes for plotting and fitting gamma ray spectra
+  2. Access to data from evaluated nuclear reaction libraries
+  3. Parsing capabilities for MVME listfiles
+  4. Charged particle stopping power calculations
+  5. Generalized Bateman equation solver
+  6. Atomic and nuclear structure/decay data
 
 How to use the documentation
 ----------------------------
 Documentation is available in two forms: docstrings provided
-with the code, and a loose standing reference guide, available from
-`the NumPy homepage <https://www.scipy.org>`_.
+with the code, and a users guide located on
+`the npat homepage <https://jtmorrell.github.io/npat/build/html/index.html>`_.
 
 Code snippets are indicated by three greater-than signs::
 
-  >>> x = 42
-  >>> x = x + 1
+  >>> sp = npat.Spectrum('spectrum.Spe')
+  >>> sp.plot()
 
-Use the built-in ``help`` function to view a function's docstring::
+Use the built-in ``help`` function to view a function or class's docstring::
 
-  >>> help(np.sort)
-  ... # doctest: +SKIP
+  >>> help(npat.Spectrum)
 
 
-Available subpackages
----------------------
-doc
-    Topical documentation on broadcasting, indexing, etc.
-lib
-    Basic functions used by several sub-packages.
-random
-    Core Random Tools
-linalg
-    Core Linear Algebra Tools
-fft
-    Core FFT routines
-polynomial
-    Polynomial tools
-testing
-    NumPy testing tools
-f2py
-    Fortran to Python Interface Generator.
-distutils
-    Enhancements to distutils with support for
-    Fortran compilers support and more.
-
-Utilities
----------
-test
-    Run numpy unittests
-show_config
-    Show numpy build configuration
-dual
-    Overwrite certain functions with high-performance Scipy tools
-matlib
-    Make everything matrices.
-__version__
-    NumPy version string
 
 
 """

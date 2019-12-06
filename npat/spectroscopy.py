@@ -21,7 +21,7 @@ global DB_CONNECTIONS_DICT
 DB_CONNECTIONS_DICT = {}
 
 class Calibration(object):
-	"""Calibration is an object for calibrating
+	"""Calibration is a class for calibrating
 	gamma ray data from High-Purity Germanium (HPGe)
 	detectors.
 
@@ -29,15 +29,19 @@ class Calibration(object):
 
 	Parameters
 	----------
-	meta : dict, optional
-		Meta attributes for calibration.
+	filename : str (optional)
+		Path to .json file with stored calibration data.
 
 	Attributes
 	----------
-	meta : dict
-		Metadata about spectrum. 
-	engcal : list
+	engcal : np.ndarray
 		2 or 3 parameter energy calibration.
+	effcal : np.ndarray
+		3 or 5 parameter efficiency calibration.
+	unc_effcal : np.ndarray
+		3x3 or 5x5 dimensional covariance matrix on the efficiency calibration.
+	rescal : np.ndarray
+		1 or 2 parameter resolution (shape) calibration.
 
 	Methods
 	-------
@@ -46,6 +50,13 @@ class Calibration(object):
 		Plots the spectrum. Various options for plotting.
 	calibrate(spectra, saveas=None, db=None, auto_calibrate=False)
 		Functionality depends on filetype.
+	saveas(filename)
+	open(filename)
+	eng(idx, *cal)
+	eff(energy, *c)
+	unc_eff(energy, c=None, u=None)
+	res(idx, *cal)
+	map_idx(energy, *cal)
 
 	Notes
 	-----
@@ -130,7 +141,9 @@ class Calibration(object):
 
 		Parameters
 		----------
-		x : type
+		idx : array_like
+			Description of parameter `x`.
+		cal : array_like (len 2 or 3)
 			Description of parameter `x`.
 
 		Returns
@@ -161,7 +174,9 @@ class Calibration(object):
 
 		Parameters
 		----------
-		x : type
+		energy : array_like
+			Description of parameter `x`.
+		c : array_like (len 3 or 5)
 			Description of parameter `x`.
 
 		Returns
@@ -192,7 +207,11 @@ class Calibration(object):
 
 		Parameters
 		----------
-		x : type
+		energy : array_like
+			Description of parameter `x`.
+		c : array_like (len 3 or 5)
+			Description of parameter `x`.
+		u : array_like (3x3 or 5x5)
 			Description of parameter `x`.
 
 		Returns
@@ -232,7 +251,9 @@ class Calibration(object):
 
 		Parameters
 		----------
-		x : type
+		idx : array_like
+			Description of parameter `x`.
+		cal : array_like (len 1 or 2)
 			Description of parameter `x`.
 
 		Returns
@@ -263,7 +284,9 @@ class Calibration(object):
 
 		Parameters
 		----------
-		x : type
+		energy : array_like
+			Description of parameter `x`.
+		cal : array_like (len 2 or 3)
 			Description of parameter `x`.
 
 		Returns
@@ -294,8 +317,10 @@ class Calibration(object):
 
 		Parameters
 		----------
-		x : type
+		spectra: list
 			Description of parameter `x`.
+		saveas: 
+
 
 		Returns
 		-------
@@ -449,6 +474,29 @@ class Calibration(object):
 		return fit
 
 	def open(self, filename):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if filename.endswith('.json'):
 			with open(filename) as f:
 				js = json.load(f)
@@ -467,6 +515,29 @@ class Calibration(object):
 
 
 	def saveas(self, filename):
+		"""Description
+
+		...
+
+		Parameters
+		----------
+		x : type
+			Description of parameter `x`.
+
+		Returns
+		-------
+
+		Notes
+		-----
+
+		References
+		----------
+
+		Examples
+		--------
+
+		"""
+
 		if filename.endswith('.json'):
 			js = {}
 			for c in ['engcal','rescal','effcal','unc_effcal']:
@@ -784,6 +855,7 @@ class Spectrum(object):
 		self.channels = np.arange(len(self._hist))
 		self._snip = self.snip_bg()
 		self.snip = interp1d(self.channels, self._snip)
+		self._fits, self._peaks = None, None
 
 
 	@property
@@ -1074,7 +1146,8 @@ class Spectrum(object):
 			s_i = [i, i+3, i+4, i+2]
 			if cfg['skew_fit']:
 				N_cts.append(pk_fn(*fit[p_i])+skew_fn(*fit[s_i]))
-			else:
+			else:			raise ValueError('Need real-time/live-time to compute decay-rate.')
+
 				N_cts.append(pk_fn(*fit[p_i])+min_skew_fn(*fit[p_i]))
 			if cov is not None:
 				if not np.isinf(cov[i][i]):
@@ -1494,7 +1567,7 @@ class Spectrum(object):
 				ln = f.readline()
 
 		self._meta['start_time'] = dtm.datetime.strptime(self._meta['DATE_MEA'][0], '%m/%d/%Y %H:%M:%S')
-		self._meta['real_time'], self._meta['live_time'] = tuple(map(float, self._meta['MEAS_TIM'][0].split(' ')))
+		self._meta['live_time'], self._meta['real_time'] = tuple(map(float, self._meta['MEAS_TIM'][0].split(' ')))
 		self._meta['engcal'] = list(map(float, self._meta['MCA_CAL'][-1].split(' ')[:-1]))
 
 
@@ -1614,6 +1687,7 @@ class Spectrum(object):
 			erange = self.cb.eng(self.channels) if xcalib else self.channels
 			ax.plot(erange, self._snip)
 
+		lbs = []
 		if fit:
 			cm, cl = colors(), colors(aslist=True)
 			cl = [c for c in cl if c not in [cm['k'], cm['gy']]]
@@ -1632,7 +1706,7 @@ class Spectrum(object):
 					erange = self.cb.eng(xgrid) if xcalib else xgrid
 					ax.plot(erange, np.where(pk_fit>0.1, pk_fit, 0.1), ls='--', lw=1.4, color=cm['gy'])
 
-			lbs = []
+			
 			for n,i in enumerate(itp):
 				c = cl[n%len(cl)]
 				ilbl = Isotope(i).TeX

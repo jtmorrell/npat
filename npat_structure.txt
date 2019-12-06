@@ -1,0 +1,205 @@
+npat
+====
+########
+Primary Uses:
+	1. Planning stacked target experiments
+	2. Evaluating data from stacked target measurements
+	3. Neutron activation analysis
+
+Secondary Uses:
+	1. Dose and activity calculations
+	2. Radionuclide inventory logging
+	3. Accessing nuclear data (e.g. elast type stuff)
+
+Boilerplate:
+	1. calibrate
+	2. fit spectra --> .db or .csv
+	3. calculate R (or A0) values
+	4. create stack
+	5. calculate beam current from monitor reactions
+	6. calculate cross sections (or quantity of interest)
+########
+
+#dbmgr
+-download(db='decay',f=False) #change f to overwrite
+-get_connection(db='decay')
+-get_cursor(db='decay')
+
+
+#isotope
+### add compound -- stopping power or attenuation from elements
+
+-Element(el)
+### get data using pandas
+	.element
+	.meta
+	.Z
+	.mass
+	.isotopes
+	.abundances
+	.mass_coeff
+	.mass_coeff_en
+	.attenuation(E, x=1.0)
+	.transmission(E, x=1.0)
+	.density
+
+-Isotope(istp)
+### get data using pandas
+### include other formats
+	.element
+	.A
+	.isomer
+	.name
+	.meta
+	.E_level
+	.J_pi
+	.Z
+	.N
+	.stable
+	.mass
+	.Delta
+	.TeX
+	.__str__()
+	.half_life(units='s', unc=False)
+	.decay_const(units='s', unc=False)
+	.optimum_units()
+	.abundance(unc=False)
+	.get_SFY(unc=False, closest_SFY=False)
+	.decay_products(closest_SFY=False)
+	.gammas(I_lim=[None,None], E_lim=[None,None], xrays=False, dE_511=3.5)
+	.electrons(I_lim=(None,None),E_lim=(None,None),CE_only=False,Auger_only=False)
+	.beta_minus(I_lim=(None,None),Endpoint_lim=(None,None))
+	.beta_plus(I_lim=(None,None), Endpoint_lim=(None,None))
+	.alphas(I_lim=(None,None), E_lim=(None,None))
+	.dose_rate(activity=1.0, distance=30.0, units='R/hr')
+
+
+#plotter
+-colors(style='default', shade='dark', aslist=False)
+## naming convention here is confusing
+## should be able to set default color scheme
+-set_style(sty='show')
+
+
+#decay_chain
+-DecayChain(parent, units='s', R=None, A0=None, time=None)
+### read in counts from peaks.db
+	.units
+	.isotopes
+	.chain
+	.A0
+	.time
+	.filter_name(istp)
+	.index(istp)
+	.activity(istp, t=None, units=None, _R=None, _A0=None)
+	.decays(istp, t_start, t_stop, units=None, _A0=None)
+	.set_R(R)
+	.update_A0(A0)
+	.EoB
+	.counts
+	.time
+	.A_meas
+	.calc_L(i, t_m)
+	.calc_M(i, j, t_start, t_stop)
+	.calc_P(i)
+	.calc_Q(i, t_m)
+	.fit_spectra(spectra, db=None, max_unc=0.15, EoB=None)
+	.R_norm
+	.fit_R(istp=None, _update=True, unc=False)
+	.fit_A0(istp=None, _update=True, unc=False)
+	.__add__(other)
+	.append(other, time=None)
+	.plot(time=None, N_plot=None, N_label=10, **kwargs)
+
+
+#irradiation
+-Ziegler(stack, beam=None, **kwargs)
+## Need to seriously change scope of properties/funcs here
+### should add .range function
+### move stopping powers to compound/element
+	.meta
+	.stack
+	.__getitem__(key)
+	.get_S(E, cm)
+	.saveas(*fnms)
+	.summarize(samples=None)
+	.plot_S(compound, energy=None, **kwargs)
+	.plot(samples=None, **kwargs)
+
+
+#listfiles
+-MVME(filename)
+	## change scope of properties
+	## again, remove .meta
+	.meta
+	.parse(fmap=None)
+	.save(resolution=2**13)
+	.save_to_dir(directory='', resolution=2**13)
+
+
+#reaction
+-Library(name='tendl')
+	.check(target=None, incident=None, outgoing=None, product=None)
+	.search(target=None, incident=None, outgoing=None, product=None, _label=False)
+	.query(target=None, incident=None, outgoing=None, product=None)
+
+-Reaction(reaction_name, library='best')
+	.target
+	.incident
+	.outgoing
+	.product
+	.name
+	.library
+	.eng
+	.xs
+	.unc_xs
+	.__str__()
+	.TeX
+	.interp  #this is weird
+	.interp_unc
+	.integrate(energy, flux, unc=False)
+	.average(energy, flux, unc=False)
+	.plot(label=None, title=True, E_lim=None, **kwargs)
+
+
+#spectroscopy
+-Calibration(filename=None)
+	.update(meta={})
+	.engcal
+	.effcal
+	.unc_effcal
+	.rescal
+	.eng(idx, *cal)
+	.eff(energy, *c)
+	.unc_eff(energy, c=None, u=None)
+	.res(idx, *cal)
+	.map_idx(energy, *cal)
+	.calibrate(spectra, saveas=None, db=None, auto_calibrate=False)
+	.open(filename)
+	.saveas(filename)
+	.plot(**kwargs)
+
+-Spectrum(filename=None, db=None)
+### add .sample to attributes
+### peaks.db only needs peaks, not spectra
+### also, spec_id irrelevant, filename should include path (or have path in separate col)
+	.db
+	.db_connection
+	.db_fnm  ## do these need to be public?
+	.hist
+	.meta ## make separate attributes
+	.cb
+	.fit_config
+	.__add__(other)
+	.rebin(N_bins)
+	.exp_smooth(x, alpha=0.3)  #should be private
+	.snip_bg() ## should be private
+	.gamma_list  # do we need this public?, also make pd.dataframe
+	.auto_calibrate()
+	.multiplet(x, *args)
+	.fits
+	.peaks
+	.saveas(*fnms)  ## make singular "filename"
+	.summarize()
+	.__str__()  ## do we need this?
+	.plot(fit=True, labels=True, snip=False, xcalib=True, **kwargs)
