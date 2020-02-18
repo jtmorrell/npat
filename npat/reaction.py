@@ -58,7 +58,7 @@ class Library(object):
 		else:
 			raise ValueError('Library {} not recognized.'.format(name))
 		self.db = get_cursor(self.db_name)
-		self.name = {'endf':'ENDF/B-VII.1','tendl':'TENDL-2015','irdff':'IRDFF-v1.05','iaea':'IAEA CP-Reference (2017)'}[self.db_name.split('_')[0]]
+		self.name = {'endf':'ENDF/B-VII.1','tendl':'TENDL-2015','irdff':'IRDFF-II','iaea':'IAEA CP-Reference (2017)'}[self.db_name.split('_')[0]]
 	
 	def __str__(self):
 		return self.name
@@ -285,7 +285,10 @@ class Reaction(object):
 	@property
 	def TeX(self):
 		if self._tex is None:
-			target = Isotope(self.target).TeX
+			if 'nat' not in self.target:
+				target = Isotope(self.target).TeX
+			else:
+				target = r'$^{nat}$'+self.target[3:].title()
 			product = Isotope(self.product).TeX if self.product else ''
 			self._tex = '{0}({1},{2}){3}'.format(target, self.incident, self.outgoing, product)
 		return self._tex
