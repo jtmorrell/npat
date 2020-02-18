@@ -18,7 +18,7 @@ TENDL_rpd_connection = None
 IRDFF_connection = None
 CPR_connection = None
 
-def download(db='decay',f=False):
+def download(db='decay',force=False):
 	"""Some nice color maps.
 
 	...
@@ -76,7 +76,7 @@ def download(db='decay',f=False):
 
 	for i in d:
 		fnm = i+'.db'
-		if (not os.path.isfile(path(fnm))) or f:
+		if (not os.path.isfile(path(fnm))) or force:
 			
 			try:
 				print('Downloading {}'.format(fnm))
@@ -85,7 +85,7 @@ def download(db='decay',f=False):
 			except Exception as e:
 					print(e)
 		else:
-			print("{0}.db already installed. Run npat.download(db='{0}',f=True) to override.".format(i))
+			print("{0}.db already installed. Run npat.download(db='{0}',force=True) to override.".format(i))
 
 
 
